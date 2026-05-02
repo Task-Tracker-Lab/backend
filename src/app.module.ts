@@ -24,6 +24,7 @@ import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { DatabaseHealthService } from '@libs/database';
 import { ZodValidationInterceptor } from '@shared/interceptors/zod-validation.interceptor';
+import { BoardsModule } from '@core/boards';
 
 @Module({
     imports: [
@@ -65,6 +66,7 @@ import { ZodValidationInterceptor } from '@shared/interceptors/zod-validation.in
         UserModule,
         TeamsModule,
         ProjectsModule,
+        BoardsModule,
         BullBoardModule.forRoot({
             route: '/queues',
             boardOptions: {
