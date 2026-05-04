@@ -4,10 +4,8 @@ import {
     GetActivityQuery,
     UpdateNotificationsUseCase,
     UpdateProfileUseCase,
-    UploadAvatarUseCase,
 } from './use-cases';
 import { UpdateProfileDto, UpdateNotificationsDto } from './dtos';
-import { FileUploadDto } from '@shared/media';
 
 @Injectable()
 export class UserFacade {
@@ -16,7 +14,6 @@ export class UserFacade {
         private readonly getActivityQuery: GetActivityQuery,
         private readonly updateNotificationsUC: UpdateNotificationsUseCase,
         private readonly updateProfileUC: UpdateProfileUseCase,
-        private readonly uploadAvatarUC: UploadAvatarUseCase,
     ) {}
 
     public async getProfile(userId: string) {
@@ -33,9 +30,5 @@ export class UserFacade {
 
     public async updateNotifications(userId: string, dto: UpdateNotificationsDto) {
         return this.updateNotificationsUC.execute(userId, dto);
-    }
-
-    public async uploadAvatar(userId: string, file: FileUploadDto) {
-        return this.uploadAvatarUC.execute(userId, file);
     }
 }

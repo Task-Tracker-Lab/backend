@@ -1,10 +1,11 @@
-import { Inject, Injectable, StreamableFile } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { MODULE_OPTIONS_TOKEN } from './imagor.module-definition';
 import type { ImagorModuleOptions, Filters } from './interfaces';
 import { createHmac } from 'crypto';
 import { HttpService } from '@nestjs/axios';
 import { ImagorPathBuilder } from './utils';
-import { firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom, throwError } from 'rxjs';
+import { AxiosError } from 'axios';
 
 @Injectable()
 export class ImagorService {
@@ -14,62 +15,66 @@ export class ImagorService {
         private readonly http: HttpService,
     ) {}
 
-    prepare(path: string): ImagorPathBuilder {
+    /**
+     * Выполняет GET запрос к Imagor с применением фильтров и пресетов
+     * @param path Путь к исходному файлу в хранилище
+     * @param presetOrFilters Название пресета или объект с фильтрами (width, height, smart и т.д.)
+     */
+    async get(path: string, presetOrFilters?: string | Filters): Promise<any> {
+        const host = this.options.url.replace(/\/+$/, '');
+        const transformPath = this.buildTransformPath(path, presetOrFilters);
+        const signature = this.getFullSignedPath(transformPath);
+        const url = `${host}/${signature}`;
+
+        try {
+            const response = await firstValueFrom(
+                this.http.get(url).pipe(
+                    catchError((error: AxiosError) => {
+                        console.error('Imagor Get Error:', error.response?.data || error.message);
+                        return throwError(() => error);
+                    }),
+                ),
+            );
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    private buildTransformPath(path: string, presetOrFilters?: string | Filters): string {
         const builder = new ImagorPathBuilder(path, this.options.storageRoot);
-        if (this.options.filters) builder.applyFilters(this.options.filters);
-        return builder;
-    }
 
-    async buffer(path: string, preset?: string): Promise<Buffer> {
-        const url = this.buildUrl(path, preset);
-        const { data } = await firstValueFrom(this.http.get(url, { responseType: 'arraybuffer' }));
-        return Buffer.from(data);
-    }
-
-    async response(path: string, preset?: string): Promise<StreamableFile> {
-        const url = this.buildUrl(path, preset);
-        const { data, headers } = await firstValueFrom(
-            this.http.get(url, { responseType: 'stream' }),
-        );
-
-        return new StreamableFile(data, {
-            type: headers['content-type'] as string,
-            length: headers['content-length'] ? Number(headers['content-length']) : undefined,
-        });
-    }
-
-    private buildUrl(path: string, presetOrFilters?: string | any): string {
-        const builder = new ImagorPathBuilder(path, this.options.storageRoot);
-
-        if (this.options.filters) builder.applyFilters(this.options.filters);
+        const globalFilters = this.options.filters || {};
+        let localFilters: Filters = {};
 
         if (typeof presetOrFilters === 'string') {
-            builder.applyFilters(this.options.presets?.[presetOrFilters] || {});
+            localFilters = this.options.presets?.[presetOrFilters] || {};
         } else if (presetOrFilters) {
-            builder.applyFilters(presetOrFilters);
+            localFilters = presetOrFilters;
         }
 
-        const transformPath = builder.build();
-        const signature = this.sign(transformPath);
-        const host = this.options.url.replace(/\/+$/, '');
+        const merged = { ...globalFilters, ...localFilters };
 
-        return `${host}/${signature}/${transformPath}`;
+        if (merged.width || merged.height) builder.resize(merged.width ?? 0, merged.height ?? 0);
+        if (merged.smart) builder.smart(true);
+        if (merged.fit) builder.fit(merged.fit);
+
+        builder.applyFilters(merged);
+
+        return builder.build();
     }
 
-    private sign(path: string): string {
-        if (!this.options.secret) return 'unsafe';
+    private getFullSignedPath(path: string): string {
+        if (!this.options.secret) {
+            return `unsafe/${path}`;
+        }
 
-        return createHmac('sha1', this.options.secret)
+        const hash = createHmac('sha1', this.options.secret)
             .update(path)
             .digest('base64')
             .replace(/\+/g, '-')
             .replace(/\//g, '_');
-    }
 
-    private resolveFilters(localFilters?: Filters): Filters {
-        return {
-            ...this.options.filters,
-            ...localFilters,
-        };
+        return `${hash}/${path}`;
     }
 }

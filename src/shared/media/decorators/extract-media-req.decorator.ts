@@ -1,14 +1,13 @@
 import { createParamDecorator, type ExecutionContext, HttpStatus } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
-import { IMAGE_MIME_TYPES } from '../constants';
-import type { FileUploadDto } from '@shared/media';
+import { IMAGE_MIME_TYPES } from '../../constants';
 import { BaseException } from '@shared/error';
 
-export const ExtractFastifyFile = createParamDecorator(
+export const ExtractMediaReq = createParamDecorator(
     async (
         data: { allowedMimetypes?: string[] } = { allowedMimetypes: IMAGE_MIME_TYPES },
         ctx: ExecutionContext,
-    ): Promise<FileUploadDto> => {
+    ) => {
         const req = ctx.switchToHttp().getRequest<FastifyRequest>();
 
         if (!req.isMultipart()) {
@@ -20,11 +19,12 @@ export const ExtractFastifyFile = createParamDecorator(
                         { target: 'header', message: 'Content-Type must be multipart/form-data' },
                     ],
                 },
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.UNPROCESSABLE_ENTITY,
             );
         }
 
         const file = await req.file();
+
         if (!file) {
             throw new BaseException(
                 {
@@ -48,16 +48,24 @@ export const ExtractFastifyFile = createParamDecorator(
                         },
                     ],
                 },
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.UNSUPPORTED_MEDIA_TYPE,
             );
         }
 
-        const buffer = await file.toBuffer();
+        const fields = Object.fromEntries(
+            Object.entries(file.fields)
+                .filter(([key, part]) => key !== 'file' && part && 'value' in part)
+                // TODO: FIX
+                .map(([key, part]) => [key, (part as any).value]),
+        );
 
         return {
-            buffer,
-            filename: file.filename,
-            mimetype: file.mimetype,
+            ...fields,
+            file: {
+                buffer: await file.toBuffer(),
+                filename: file.filename,
+                mimetype: file.mimetype,
+            },
         };
     },
 );

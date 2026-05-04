@@ -56,6 +56,8 @@ export class SignUpVerifyUseCase {
             afterTimeStep: 1,
         });
 
+        console.log(verifyResult);
+
         if (!verifyResult.valid) {
             throw new BaseException(
                 {

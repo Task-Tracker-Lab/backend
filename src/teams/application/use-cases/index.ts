@@ -15,8 +15,6 @@ import { RemoveTeamMemberUseCase } from './members/remove-team-member.use-case';
 import { SendInvitationUseCase } from './invitions/send-invitation.use-case';
 import { SyncTeamTagsUseCase } from './base/sync-team-tags.use-case';
 import { UpdateTeamUseCase } from './base/update-team.use-case';
-import { UpdateTeamAvatarUseCase } from './base/update-team-avatar.use-case';
-import { UpdateTeamBannerUseCase } from './base/update-team-banner.use-case';
 import { UpdateTeamMemberUseCase } from './members/update-team-member.use-case';
 import { UpdateInvitationUseCase } from './invitions/update-invitation.use-case';
 import { DeclineInvitationUseCase } from './invitions/decline-invitation.use-case';
@@ -38,8 +36,6 @@ export {
     SendInvitationUseCase,
     SyncTeamTagsUseCase,
     UpdateTeamUseCase,
-    UpdateTeamAvatarUseCase,
-    UpdateTeamBannerUseCase,
     UpdateTeamMemberUseCase,
     UpdateInvitationUseCase,
     DeclineInvitationUseCase,
@@ -65,8 +61,6 @@ export const TeamUseCases = [
     SendInvitationUseCase,
     SyncTeamTagsUseCase,
     UpdateTeamUseCase,
-    UpdateTeamAvatarUseCase,
-    UpdateTeamBannerUseCase,
     UpdateTeamMemberUseCase,
     UpdateInvitationUseCase,
     DeclineInvitationUseCase,

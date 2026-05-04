@@ -21,6 +21,7 @@ export default defineConfig({
             '@libs/config': path.join(process.cwd(), 'libs/config/src'),
             '@libs/database': path.join(process.cwd(), 'libs/database/src'),
             '@libs/health': path.join(process.cwd(), 'libs/health/src'),
+            '@libs/imagor': path.join(process.cwd(), 'libs/s3/imagor'),
             '@libs/s3': path.join(process.cwd(), 'libs/s3/src'),
         },
         typecheck: {

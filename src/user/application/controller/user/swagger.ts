@@ -1,14 +1,7 @@
-import {
-    ApiBody,
-    ApiConsumes,
-    ApiExtraModels,
-    ApiOperation,
-    ApiQuery,
-    ApiResponse,
-} from '@nestjs/swagger';
+import { ApiBody, ApiExtraModels, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { UpdateProfileDto, UserResponse } from '../../dtos';
 import { applyDecorators } from '@nestjs/common';
-import { ApiBadRequest, ApiUnauthorized, ApiValidationError } from '@shared/error';
+import { ApiUnauthorized, ApiValidationError } from '@shared/error';
 import { ActionResponse } from '@shared/dtos';
 
 export const GetMeSwagger = () =>
@@ -85,32 +78,5 @@ export const GetMeActivitySwagger = () =>
                 },
             },
         }),
-        ApiUnauthorized(),
-    );
-
-export const PostMeAvatarSwagger = () =>
-    applyDecorators(
-        ApiOperation({
-            summary: 'Загрузить новую аватарку',
-            description: 'Загрузка файла изображения для профиля пользователя.',
-        }),
-        ApiConsumes('multipart/form-data'),
-        ApiBody({
-            schema: {
-                type: 'object',
-                properties: {
-                    file: {
-                        type: 'string',
-                        format: 'binary',
-                    },
-                },
-            },
-        }),
-        ApiResponse({
-            status: 201,
-            description: 'Аватар успешно загружен.',
-            type: ActionResponse.Output,
-        }),
-        ApiBadRequest('Файл не передан или имеет неверный формат'),
         ApiUnauthorized(),
     );

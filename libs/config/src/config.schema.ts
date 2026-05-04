@@ -14,6 +14,8 @@ export const ConfigSchema = z.object({
     REDIS_HOST: z.string().default('redis'),
     REDIS_PORT: z.coerce.number().optional().default(6379),
     REDIS_PASSWORD: z.string().optional(),
+    IMAGOR_SECRET: z.string().optional(),
+    IMAGOR_URL: z.string().nonempty('Укажите адрес сервера Imagor'),
     DOMAIN: z
         .string()
         .toLowerCase()

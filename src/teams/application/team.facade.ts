@@ -7,7 +7,6 @@ import type {
     UpdateMemberDto,
     UpdateTeamDto,
 } from './dtos';
-import { FileUploadDto } from '@shared/media';
 
 @Injectable()
 export class TeamsFacade {
@@ -22,8 +21,6 @@ export class TeamsFacade {
         private readonly deleteTeamUc: UC.DeleteTeamUseCase,
         private readonly updateTeamUc: UC.UpdateTeamUseCase,
         private readonly syncTagsUc: UC.SyncTeamTagsUseCase,
-        private readonly updateAvatarUc: UC.UpdateTeamAvatarUseCase,
-        private readonly updateBannerUc: UC.UpdateTeamBannerUseCase,
 
         private readonly updateMemberUc: UC.UpdateTeamMemberUseCase,
         private readonly removeMemberUc: UC.RemoveTeamMemberUseCase,
@@ -77,12 +74,6 @@ export class TeamsFacade {
         userId: string,
         dto: UpdateInvitationDto,
     ) => this.updateInvitationUc.execute(slug, code, userId, dto);
-
-    public updateAvatar = (slug: string, file: FileUploadDto) =>
-        this.updateAvatarUc.execute(slug, file);
-
-    public updateBanner = (slug: string, file: FileUploadDto) =>
-        this.updateBannerUc.execute(slug, file);
 
     public syncTags = (slug: string, tags: string[]) => this.syncTagsUc.execute(slug, tags);
 

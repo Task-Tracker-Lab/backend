@@ -51,6 +51,15 @@
             "compilerOptions": {
                 "tsConfigPath": "libs/s3/tsconfig.lib.json"
             }
+        },
+        "imagor": {
+            "type": "library",
+            "root": "libs/imagor",
+            "entryFile": "index",
+            "sourceRoot": "libs/imagor/src",
+            "compilerOptions": {
+                "tsConfigPath": "libs/imagor/tsconfig.lib.json"
+            }
         }
     }
 }
