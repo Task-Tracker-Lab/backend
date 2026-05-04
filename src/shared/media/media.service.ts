@@ -2,57 +2,97 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { S3Service } from '@libs/s3';
 import type { UploadMediaDto } from './dtos';
 import { BaseException } from '@shared/error';
-import { ImagorService } from '@libs/imagor';
-import { Queue } from 'bullmq';
-import { InjectQueue } from '@nestjs/bullmq';
+import { FlowProducer } from 'bullmq';
+import { InjectFlowProducer } from '@nestjs/bullmq';
 import * as path from 'path';
 import { MEDIA_STRATEGIES } from './strategies';
-import { MEDIA_QUEUE } from './media.constant';
+import { MEDIA_FLOW, MEDIA_JOBS, MEDIA_QUEUES } from './media.constant';
+import { MediaDispatchStrategy } from './strategies/media.strategy';
 
 @Injectable()
 export class MediaService {
     constructor(
-        @InjectQueue(MEDIA_QUEUE)
-        private readonly queue: Queue,
+        @InjectFlowProducer(MEDIA_FLOW)
+        private readonly flow: FlowProducer,
         private readonly s3: S3Service,
-        private readonly imagor: ImagorService,
     ) {}
 
     public upload = async (dto: UploadMediaDto, userId: string) => {
         const { context, file } = dto;
 
-        const folder = context.replace(/\./g, '/');
-        const key = `${Date.now()}-${userId}${path.extname(file.filename)}`;
+        const strategy = this.getStrategy(context);
+        const { folder, fileName } = this.generateStoragePath(context, userId, file.filename);
 
         try {
-            const url = await this.s3.uploadFile(file.buffer, {
+            const originalUrl = await this.s3.uploadFile(file.buffer, {
                 mimetype: file.mimetype,
                 original: file.filename,
-                path: { folder, key },
+                path: { folder, key: fileName },
             });
 
-            await this.dispatch(dto, userId, url);
+            await this.enqueueMediaFlow(strategy, dto, userId, originalUrl);
 
-            return { success: true, url };
+            return {
+                success: true,
+                message: 'Изменения вступят в силу после завершения фоновой обработки',
+            };
         } catch (error) {
             this.handleError(error);
         }
     };
 
-    private async dispatch(dto: UploadMediaDto, userId: string, url: string) {
-        const strategy = MEDIA_STRATEGIES[dto.context];
+    private generateStoragePath(context: string, userId: string, originalName: string) {
+        const contextPath = context.replace(/\./g, '/');
+        const extension = path.extname(originalName);
 
-        if (!strategy) {
-            return;
-        }
+        return {
+            folder: `${contextPath}/${Date.now()}-${userId}`,
+            fileName: `original${extension}`,
+        };
+    }
 
-        const payload = strategy.createPayload(dto, userId, url);
+    private async enqueueMediaFlow(
+        strategy: MediaDispatchStrategy,
+        dto: UploadMediaDto,
+        userId: string,
+        url: string,
+    ) {
+        const payload = strategy.createPayload(dto, userId, path.dirname(url));
 
-        await this.queue.add(strategy.jobName, payload, {
-            attempts: 3,
-            backoff: { type: 'exponential', delay: 1000 },
-            removeOnComplete: true,
+        return this.flow.add({
+            name: MEDIA_JOBS.RESIZE_IMAGES,
+            queueName: MEDIA_QUEUES.RESIZE,
+            data: { userId, original: url, context: dto.context },
+            opts: this.getJobOptions(5, 'fixed'),
+            children: [
+                {
+                    name: strategy.jobName,
+                    queueName: MEDIA_QUEUES.SAVE_ENTITY,
+                    data: payload,
+                    opts: { ...this.getJobOptions(3, 'exponential'), failParentOnFailure: true },
+                },
+            ],
         });
+    }
+
+    private getJobOptions(attempts: number, backoffType: 'fixed' | 'exponential') {
+        return {
+            attempts,
+            backoff: { type: backoffType, delay: backoffType === 'fixed' ? 2000 : 1000 },
+            removeOnComplete: true,
+            removeOnFail: false,
+        };
+    }
+
+    private getStrategy(context: string) {
+        const strategy = MEDIA_STRATEGIES[context];
+        if (!strategy) {
+            throw new BaseException(
+                { code: 'STRATEGY_NOT_FOUND', message: `No strategy for ${context}` },
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+        return strategy;
     }
 
     private handleError(error: unknown): never {

@@ -1,11 +1,10 @@
 import { IUserRepository } from '@core/user/domain/repository';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { HttpStatus, Inject, Logger } from '@nestjs/common';
-import { BaseException } from '@shared/error';
-import { MEDIA_QUEUE, type UpdateMediaUser } from '@shared/media';
+import { Inject, Logger } from '@nestjs/common';
+import { MEDIA_JOBS, MEDIA_QUEUES, type UpdateMediaUser } from '@shared/media';
 import type { Job } from 'bullmq';
 
-@Processor(MEDIA_QUEUE)
+@Processor(MEDIA_QUEUES.SAVE_ENTITY)
 export class UpdateAvatarListener extends WorkerHost {
     private readonly logger = new Logger(UpdateAvatarListener.name);
 
@@ -17,23 +16,53 @@ export class UpdateAvatarListener extends WorkerHost {
     }
 
     async process(job: Job<UpdateMediaUser>) {
-        if (job.data.entity.type !== 'user') return;
+        if (job.name !== MEDIA_JOBS.UPDATE_USER_AVATAR) return;
 
-        const { entity, url } = job.data;
+        const { entity } = job.data;
+        const jobId = job.id;
 
-        const entityDb = await this.repository.findById(entity.id);
+        try {
+            await job.updateProgress(10);
 
-        if (!entityDb) {
-            throw new BaseException(
-                {
-                    code: 'TEAM_NOT_FOUND',
-                    message: 'Команда не найдена',
-                    details: [{ target: 'slug', value: entity.id }],
-                },
-                HttpStatus.NOT_FOUND,
+            const childrenResults = await job.getChildrenValues<{ folder: string }>();
+            const [processedMedia] = Object.values(childrenResults ?? {});
+            const avatarStoragePath = processedMedia?.folder;
+
+            if (!avatarStoragePath) {
+                throw new Error(
+                    `Media processing failed: no storage path returned for entity ${entity.id}`,
+                );
+            }
+
+            await job.updateProgress(40);
+
+            const userAccount = await this.repository.findById(entity.id);
+
+            if (!userAccount) {
+                this.logger.warn(`[Job:${jobId}] User ${entity.id} not found. Skipping update.`);
+                await job.log(`User ${entity.id} missing in database.`);
+                return { status: 'aborted', reason: 'USER_NOT_FOUND' };
+            }
+
+            await job.updateProgress(70);
+
+            await this.repository.updateAvatar(userAccount.user.id, avatarStoragePath);
+
+            await job.updateProgress(100);
+
+            this.logger.log(
+                `[Job:${jobId}] Successfully updated avatar for user ${userAccount.user.id}`,
             );
-        }
 
-        await this.repository.updateAvatar(entityDb.user.id, url);
+            return {
+                userId: userAccount.user.id,
+                newPath: avatarStoragePath,
+            };
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            this.logger.error(`[Job:${jobId}] Critical failure: ${errorMessage}`);
+
+            throw error;
+        }
     }
 }

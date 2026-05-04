@@ -86,4 +86,20 @@ export class TeamMemberPolicy {
 
         return true;
     }
+
+    /**
+     * Проверяет, имеет ли участник право на обновление медиа-ресурсов (аватар, баннер) команды.
+     *
+     * @remarks
+     * Логика базируется на приоритете ролей. Минимально допустимая роль — Модератор.
+     *
+     * @param issuerRole - Роль участника, инициирующего обновление.
+     * @returns `true`, если приоритет роли равен или выше приоритета модератора, иначе `false`.
+     *
+     * @example
+     * const canUpdate = policy.canUpdateMedia('admin'); // true
+     */
+    public canUpdateMedia(issuerRole: TeamRole): boolean {
+        return this.getPriority(issuerRole) >= ROLE_PRIORITY.moderator;
+    }
 }

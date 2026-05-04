@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { MODULE_OPTIONS_TOKEN } from './imagor.module-definition';
 import type { ImagorModuleOptions, Filters } from './interfaces';
 import { createHmac } from 'crypto';
@@ -9,6 +9,8 @@ import { AxiosError } from 'axios';
 
 @Injectable()
 export class ImagorService {
+    private logger = new Logger(ImagorService.name);
+
     constructor(
         @Inject(MODULE_OPTIONS_TOKEN)
         private options: ImagorModuleOptions,
@@ -20,22 +22,24 @@ export class ImagorService {
      * @param path Путь к исходному файлу в хранилище
      * @param presetOrFilters Название пресета или объект с фильтрами (width, height, smart и т.д.)
      */
-    async get(path: string, presetOrFilters?: string | Filters): Promise<any> {
+    async get(path: string, presetOrFilters?: string | Filters): Promise<Buffer> {
         const host = this.options.url.replace(/\/+$/, '');
         const transformPath = this.buildTransformPath(path, presetOrFilters);
         const signature = this.getFullSignedPath(transformPath);
         const url = `${host}/${signature}`;
 
         try {
+            this.logger.debug(url);
             const response = await firstValueFrom(
-                this.http.get(url).pipe(
+                this.http.get(url, { responseType: 'arraybuffer' }).pipe(
                     catchError((error: AxiosError) => {
                         console.error('Imagor Get Error:', error.response?.data || error.message);
                         return throwError(() => error);
                     }),
                 ),
             );
-            return response.data;
+
+            return Buffer.from(response.data);
         } catch (error) {
             throw error;
         }

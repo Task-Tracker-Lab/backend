@@ -1,8 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod/v4';
-import { ActionResponseSchema } from '@shared/dtos';
-
-// const FileSchema = z.file().describe('Объект загруженного файла');
 
 const FileSchema = z
     .object({
@@ -31,9 +28,4 @@ export const UploadMediaSchema = z.object({
         .describe('Уникальный идентификатор (slug) команды. Обязателен для контекстов team.*'),
 });
 
-export const UploadMediaResponseSchema = ActionResponseSchema.extend({
-    url: z.string().describe('URL загруженного файла'),
-});
-
 export class UploadMediaDto extends createZodDto(UploadMediaSchema) {}
-export class UploadMediaResponse extends createZodDto(UploadMediaResponseSchema) {}

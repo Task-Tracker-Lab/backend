@@ -1,7 +1,8 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { UploadMediaDto, UploadMediaResponse } from '../dtos';
+import { UploadMediaDto } from '../dtos';
 import { ApiUnauthorized, ApiValidationError } from '@shared/error';
+import { ActionResponse } from '@shared/dtos';
 
 export const UploadMediaSwagger = () =>
     applyDecorators(
@@ -18,7 +19,7 @@ export const UploadMediaSwagger = () =>
         ApiResponse({
             status: 201,
             description: 'Файл успешно загружен и принят в обработку',
-            type: UploadMediaResponse.Output,
+            type: ActionResponse.Output,
         }),
         ApiValidationError('Неверный формат файла или отсутствуют обязательные поля'),
         ApiUnauthorized(),

@@ -3,11 +3,12 @@ import { MediaService } from './media.service';
 import { S3Module } from '@libs/s3';
 import { ConfigService } from '@nestjs/config';
 import { MediaController } from './controller';
-import { MEDIA_QUEUE } from './media.constant';
+import { MEDIA_FLOW, MEDIA_QUEUES } from './media.constant';
 import { BullModule } from '@nestjs/bullmq';
 import { ImagorModule } from '@libs/imagor';
 import { BullBoardModule } from '@bull-board/nestjs';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
+import { MediaProcessor } from './workers/media.worker';
 
 @Module({
     imports: [
@@ -33,28 +34,25 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
                 url: cfg.getOrThrow('IMAGOR_URL'),
                 secret: cfg.getOrThrow('IMAGOR_SECRET'),
                 debug: true,
-                filters: { format: 'webp', smart: true },
-                presets: {
-                    small: { width: 64, height: 64, blur: 20, quality: 80 },
-                    medium: {
-                        width: 256,
-                        height: 256,
-                        quality: 85,
-                        sharpen: { amount: 0.5, radius: 1.0, threshold: 1 },
-                    },
-                    large: {
-                        width: 512,
-                        height: 512,
-                        quality: 90,
-                        sharpen: { amount: 0.5, radius: 1.0, threshold: 1 },
-                    },
-                },
+                filters: { format: 'webp', smart: true, strip_icc: true },
             }),
         }),
-        BullBoardModule.forFeature({ adapter: BullMQAdapter, name: MEDIA_QUEUE }),
-        BullModule.registerQueue({ name: MEDIA_QUEUE }),
+        BullModule.registerQueue({ name: MEDIA_QUEUES.RESIZE }, { name: MEDIA_QUEUES.SAVE_ENTITY }),
+        BullModule.registerFlowProducer({
+            name: MEDIA_FLOW,
+        }),
+        BullBoardModule.forFeature(
+            {
+                name: MEDIA_QUEUES.RESIZE,
+                adapter: BullMQAdapter,
+            },
+            {
+                name: MEDIA_QUEUES.SAVE_ENTITY,
+                adapter: BullMQAdapter,
+            },
+        ),
     ],
     controllers: [MediaController],
-    providers: [MediaService],
+    providers: [MediaProcessor, MediaService],
 })
 export class MediaModule {}

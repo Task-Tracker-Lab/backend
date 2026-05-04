@@ -6,10 +6,10 @@ import { MediaDispatchStrategy } from './media.strategy';
 export class UserAvatarStrategy implements MediaDispatchStrategy {
     jobName: string = MEDIA_JOBS.UPDATE_USER_AVATAR;
 
-    createPayload(_d: UploadMediaDto, userId: string, url: string): UpdateMediaUser {
+    createPayload(_d: UploadMediaDto, userId: string, path: string): UpdateMediaUser {
         return {
             entity: { type: 'user', id: userId },
-            url,
+            path,
         };
     }
 }

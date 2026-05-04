@@ -50,25 +50,33 @@ export class S3Service {
         options: {
             original: string;
             mimetype: string;
-            path?: {
-                folder: string;
-                key?: string;
-            };
+            cacheControl?: string;
+            path?:
+                | {
+                      folder: string;
+                      key?: string;
+                  }
+                | string;
         },
     ): Promise<string> {
-        const { mimetype, original, path } = options;
+        const { mimetype, original, path, cacheControl } = options;
 
-        const fileName = `${path?.folder}/${path.key ? path.key : randomUUID() + extname(original)}`;
+        const folder = typeof path === 'object' ? path.folder : '';
+        const key =
+            (typeof path === 'object' ? path.key : path) || `${randomUUID()}${extname(original)}`;
+
+        const fileName = [folder, key].filter(Boolean).join('/').replace(/\/+/g, '/');
 
         const command = new PutObjectCommand({
             Bucket: this.bucket,
             Key: fileName,
             Body: file,
+            CacheControl: cacheControl || 'public, max-age=31536000, immutable',
             ContentType: mimetype,
         });
 
         await this.s3Client.send(command);
 
-        return `${this.endpoint}/${this.bucket}/${fileName}`;
+        return fileName;
     }
 }

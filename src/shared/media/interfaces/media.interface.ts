@@ -5,7 +5,7 @@ export interface UpdateMediaUser {
         type: 'user';
         id: string;
     };
-    url: string;
+    path: string;
 }
 
 export interface UpdateMediaTeam {
@@ -13,7 +13,7 @@ export interface UpdateMediaTeam {
         type: 'team';
         slug: string;
     };
-    url: string;
+    path: string;
     type: 'avatar' | 'banner';
     initiatorId: string;
 }
