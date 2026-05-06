@@ -1,9 +1,14 @@
 import { Module } from '@nestjs/common';
 import { MediaService } from './media.service';
 import { S3Module } from '@libs/s3';
-import { USER_MEDIA_TOKEN } from './interfaces/user-media.interface';
-import { TEAM_MEDIA_TOKEN } from './interfaces/team-media.interface';
 import { ConfigService } from '@nestjs/config';
+import { MediaController } from './controller';
+import { MEDIA_FLOW, MEDIA_QUEUES } from './media.constant';
+import { BullModule } from '@nestjs/bullmq';
+import { ImagorModule } from '@libs/imagor';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
+import { MediaProcessor } from './workers/media.worker';
 
 @Module({
     imports: [
@@ -23,18 +28,31 @@ import { ConfigService } from '@nestjs/config';
                 config: { forcePathStyle: true },
             }),
         }),
+        ImagorModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: (cfg: ConfigService) => ({
+                url: cfg.getOrThrow('IMAGOR_URL'),
+                secret: cfg.getOrThrow('IMAGOR_SECRET'),
+                debug: true,
+                filters: { format: 'webp', smart: true, strip_icc: true },
+            }),
+        }),
+        BullModule.registerQueue({ name: MEDIA_QUEUES.RESIZE }, { name: MEDIA_QUEUES.SAVE_ENTITY }),
+        BullModule.registerFlowProducer({
+            name: MEDIA_FLOW,
+        }),
+        BullBoardModule.forFeature(
+            {
+                name: MEDIA_QUEUES.RESIZE,
+                adapter: BullMQAdapter,
+            },
+            {
+                name: MEDIA_QUEUES.SAVE_ENTITY,
+                adapter: BullMQAdapter,
+            },
+        ),
     ],
-    providers: [
-        MediaService,
-        {
-            provide: USER_MEDIA_TOKEN,
-            useExisting: MediaService,
-        },
-        {
-            provide: TEAM_MEDIA_TOKEN,
-            useExisting: MediaService,
-        },
-    ],
-    exports: [USER_MEDIA_TOKEN, TEAM_MEDIA_TOKEN],
+    controllers: [MediaController],
+    providers: [MediaProcessor, MediaService],
 })
 export class MediaModule {}

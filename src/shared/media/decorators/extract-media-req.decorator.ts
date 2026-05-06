@@ -1,14 +1,13 @@
 import { createParamDecorator, type ExecutionContext, HttpStatus } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
-import { IMAGE_MIME_TYPES } from '../constants';
-import type { FileUploadDto } from '@shared/media';
+import { IMAGE_MIME_TYPES } from '../../constants';
 import { BaseException } from '@shared/error';
 
-export const ExtractFastifyFile = createParamDecorator(
+export const ExtractMediaReq = createParamDecorator(
     async (
-        data: { allowedMimetypes?: string[] } = { allowedMimetypes: IMAGE_MIME_TYPES },
+        { allowedMimetypes = IMAGE_MIME_TYPES }: { allowedMimetypes?: string[] } = {},
         ctx: ExecutionContext,
-    ): Promise<FileUploadDto> => {
+    ) => {
         const req = ctx.switchToHttp().getRequest<FastifyRequest>();
 
         if (!req.isMultipart()) {
@@ -20,7 +19,7 @@ export const ExtractFastifyFile = createParamDecorator(
                         { target: 'header', message: 'Content-Type must be multipart/form-data' },
                     ],
                 },
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.UNPROCESSABLE_ENTITY,
             );
         }
 
@@ -35,29 +34,33 @@ export const ExtractFastifyFile = createParamDecorator(
             );
         }
 
-        if (data?.allowedMimetypes && !data.allowedMimetypes.includes(file.mimetype)) {
+        const buffer = await file.toBuffer();
+
+        if (allowedMimetypes?.length && !allowedMimetypes.includes(file.mimetype)) {
             throw new BaseException(
-                {
-                    code: 'INVALID_FILE_TYPE',
-                    message: 'Недопустимый формат файла',
-                    details: [
-                        {
-                            target: 'mimetype',
-                            received: file.mimetype,
-                            expected: data.allowedMimetypes,
-                        },
-                    ],
-                },
-                HttpStatus.BAD_REQUEST,
+                { code: 'INVALID_FILE_TYPE', message: 'Недопустимый формат файла' },
+                HttpStatus.UNSUPPORTED_MEDIA_TYPE,
             );
         }
 
-        const buffer = await file.toBuffer();
+        const fields: Record<string, string> = {};
+
+        for (const key in file.fields) {
+            if (key === 'file') continue;
+
+            const field = file.fields[key];
+            if (field && !Array.isArray(field) && 'value' in field) {
+                fields[key] = String(field.value);
+            }
+        }
 
         return {
-            buffer,
-            filename: file.filename,
-            mimetype: file.mimetype,
+            file: {
+                filename: file.filename,
+                mimetype: file.mimetype,
+                buffer,
+            },
+            ...fields,
         };
     },
 );

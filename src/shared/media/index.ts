@@ -1,4 +1,3 @@
 export { MediaModule } from './media.module';
-export * from './interfaces/team-media.interface';
-export * from './interfaces/user-media.interface';
-export * from './dtos';
+export * from './interfaces/media.interface';
+export * from './media.constant';

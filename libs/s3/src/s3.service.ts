@@ -14,7 +14,7 @@ export class S3Service {
 
     constructor(
         @Inject(S3_OPTIONS)
-        private readonly options: S3ModuleOptions,
+        private options: S3ModuleOptions,
     ) {
         const { bucket, credentials, endpoint, region } = options.connection;
         this.bucket = bucket;
@@ -46,23 +46,37 @@ export class S3Service {
     }
 
     async uploadFile(
-        fileBuffer: Buffer,
-        originalName: string,
-        mimetype: string,
-        folder: string,
+        file: Buffer,
+        options: {
+            original: string;
+            mimetype: string;
+            cacheControl?: string;
+            path?:
+                | {
+                      folder: string;
+                      key?: string;
+                  }
+                | string;
+        },
     ): Promise<string> {
-        const extension = extname(originalName);
-        const fileName = `${folder}/${randomUUID()}${extension}`;
+        const { mimetype, original, path, cacheControl } = options;
+
+        const folder = typeof path === 'object' ? path.folder : '';
+        const key =
+            (typeof path === 'object' ? path.key : path) || `${randomUUID()}${extname(original)}`;
+
+        const fileName = [folder, key].filter(Boolean).join('/').replace(/\/+/g, '/');
 
         const command = new PutObjectCommand({
             Bucket: this.bucket,
             Key: fileName,
-            Body: fileBuffer,
+            Body: file,
+            CacheControl: cacheControl || 'public, max-age=31536000, immutable',
             ContentType: mimetype,
         });
 
         await this.s3Client.send(command);
 
-        return `${this.endpoint}/${this.bucket}/${fileName}`;
+        return fileName;
     }
 }

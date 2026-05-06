@@ -15,15 +15,14 @@ import { TeamsRepository } from './infrastructure/persistence/repositories';
 import { TeamQueues } from './domain/enums';
 import { TeamsFacade } from './application/team.facade';
 import { TeamQueries, TeamUseCases, TEAM_EXTERNAL_QUERIES } from './application/use-cases';
-import { MediaModule } from '@shared/media';
 import { TeamMemberPolicy } from './domain/policy';
 import { MailProcessor } from '@core/teams/infrastructure/workers';
+import { LISTENERS } from './infrastructure/listeners';
 
 const REPOSITORY = { provide: 'ITeamsRepository', useClass: TeamsRepository };
 
 @Module({
     imports: [
-        MediaModule,
         RedisModule.forRootAsync({
             inject: [ConfigService],
             useFactory: async (cfg: ConfigService) => {
@@ -63,6 +62,7 @@ const REPOSITORY = { provide: 'ITeamsRepository', useClass: TeamsRepository };
     providers: [
         TeamMemberPolicy,
         REPOSITORY,
+        ...LISTENERS,
         ...TeamUseCases,
         ...TeamQueries,
         TeamsFacade,

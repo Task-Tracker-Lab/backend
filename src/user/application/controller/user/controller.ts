@@ -1,10 +1,9 @@
-import { Body, Get, Patch, Post, Query } from '@nestjs/common';
-import { GetMeActivitySwagger, GetMeSwagger, PatchMeSwagger, PostMeAvatarSwagger } from './swagger';
+import { Body, Get, Patch, Query } from '@nestjs/common';
+import { GetMeActivitySwagger, GetMeSwagger, PatchMeSwagger } from './swagger';
 import { UpdateProfileDto } from '../../dtos';
-import { ApiBaseController, ExtractFastifyFile, GetUserId } from '@shared/decorators';
+import { ApiBaseController, GetUserId } from '@shared/decorators';
 import { UserFacade } from '../../user.facade';
 import { PaginationDto } from '@shared/dtos';
-import { FileUploadDto } from '@shared/media';
 
 @ApiBaseController('users/me', 'Account Profile', true)
 export class UserController {
@@ -26,15 +25,5 @@ export class UserController {
     @GetMeActivitySwagger()
     async getActivity(@Query() query: PaginationDto, @GetUserId() id: string) {
         return this.facade.getActivity(id, query.page, query.limit);
-    }
-
-    @Post('avatar')
-    @PostMeAvatarSwagger()
-    async uploadAvatar(
-        @ExtractFastifyFile() fileDto: FileUploadDto,
-        @GetUserId()
-        userId: string,
-    ) {
-        return this.facade.uploadAvatar(userId, fileDto);
     }
 }

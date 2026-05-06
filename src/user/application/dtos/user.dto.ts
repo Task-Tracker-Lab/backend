@@ -31,12 +31,24 @@ const SecuritySchema = z
     })
     .describe('Данные безопасности аккаунта');
 
+const ProfileAvatarSchema = z
+    .object({
+        small: z.string().url(),
+        medium: z.string().url(),
+        large: z.string().url(),
+        original: z.string().url(),
+    })
+    .nullable()
+    .describe(
+        'Аватар пользователя: объект с размерами (sm, md, lg, original) или null, если аватар отсутствует',
+    );
+
 const ProfileSchema = z.object({
     firstName: z.string().describe('Имя пользователя'),
     lastName: z.string().describe('Фамилия'),
     middleName: z.string().nullable().describe('Отчество'),
     bio: z.string().nullable().describe('О себе'),
-    avatarUrl: z.string().url().nullable().describe('Ссылка на аватар в S3'),
+    avatar: ProfileAvatarSchema,
     timezone: z.string().describe('Временная зона'),
     language: z.string().describe('Язык интерфейса'),
     createdAt: z.string().datetime().describe('Дата регистрации'),

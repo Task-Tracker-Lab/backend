@@ -16,6 +16,8 @@ import { BullModule } from '@nestjs/bullmq';
 import { MailModule } from '@shared/adapters/mail';
 import { TeamsModule } from './teams';
 import { ProjectsModule } from './projects';
+import { HttpModule } from '@nestjs/axios';
+import { MediaModule } from '@shared/media';
 
 @Module({
     imports: [
@@ -49,6 +51,8 @@ import { ProjectsModule } from './projects';
                 },
             }),
         }),
+        MediaModule,
+        HttpModule.register({ global: true }),
         MailModule,
         AuthModule,
         UserModule,
@@ -56,6 +60,13 @@ import { ProjectsModule } from './projects';
         ProjectsModule,
         BullBoardModule.forRoot({
             route: '/queues',
+            boardOptions: {
+                uiConfig: {
+                    sortQueues: true,
+                    pollingInterval: { forceInterval: 10, showSetting: false },
+                    hideRedisDetails: true,
+                },
+            },
             adapter: FastifyAdapter,
         }),
         HealthModule.register('gateway'),

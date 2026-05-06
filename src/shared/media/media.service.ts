@@ -1,85 +1,110 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { S3Service } from '@libs/s3';
-import type { FileUploadDto, FileUploadResponseDto } from './dtos';
-import { IUserMedia } from './interfaces/user-media.interface';
-import { ITeamMedia } from './interfaces/team-media.interface';
+import type { UploadMediaDto } from './dtos';
 import { BaseException } from '@shared/error';
+import { FlowProducer } from 'bullmq';
+import { InjectFlowProducer } from '@nestjs/bullmq';
+import { MEDIA_STRATEGIES } from './strategies';
+import { MEDIA_FLOW, MEDIA_JOBS, MEDIA_QUEUES } from './media.constant';
+import { MediaDispatchStrategy } from './strategies/media.strategy';
+import { extname } from 'path';
 
 @Injectable()
-export class MediaService implements IUserMedia, ITeamMedia {
-    constructor(private readonly s3: S3Service) {}
+export class MediaService {
+    constructor(
+        @InjectFlowProducer(MEDIA_FLOW)
+        private readonly flow: FlowProducer,
+        private readonly s3: S3Service,
+    ) {}
 
-    private async uploadAndLink(
-        file: FileUploadDto,
-        folder: string,
-        updateDbFn: (url: string) => Promise<boolean>,
-    ): Promise<FileUploadResponseDto> {
-        const url = await this.s3.uploadFile(file.buffer, file.filename, file.mimetype, folder);
+    public upload = async (dto: UploadMediaDto, userId: string) => {
+        const { context, file } = dto;
+
+        const strategy = this.getStrategy(context);
+        const { folder, fileName } = this.generateStoragePath(context, userId, file.filename);
 
         try {
-            const isUpdated = await updateDbFn(url);
+            const originalUrl = await this.s3.uploadFile(file.buffer, {
+                mimetype: file.mimetype,
+                original: file.filename,
+                path: { folder, key: fileName },
+            });
 
-            if (!isUpdated) {
-                throw new BaseException(
-                    {
-                        code: 'ENTITY_NOT_FOUND',
-                        message: 'Сущность не найдена, обновление отменено',
-                        details: [
-                            {
-                                target: 'id',
-                                message: 'Record with provided ID does not exist in database',
-                            },
-                        ],
-                    },
-                    HttpStatus.NOT_FOUND,
-                );
-            }
+            await this.enqueueMediaFlow(strategy, dto, userId, originalUrl);
 
-            return { success: true, url };
+            return {
+                success: true,
+                message: 'Изменения вступят в силу после завершения фоновой обработки',
+            };
         } catch (error) {
-            await this.s3.deleteFile(url);
+            this.handleError(error);
+        }
+    };
 
-            if (error instanceof BaseException) {
-                throw error;
-            }
+    private generateStoragePath(context: string, userId: string, originalName: string) {
+        const contextPath = context.replace(/\./g, '/');
+        const extension = extname(originalName);
 
-            throw new BaseException(
+        return {
+            folder: `${contextPath}/${Date.now()}-${userId}`,
+            fileName: `original${extension}`,
+        };
+    }
+
+    private async enqueueMediaFlow(
+        strategy: MediaDispatchStrategy,
+        dto: UploadMediaDto,
+        userId: string,
+        url: string,
+    ) {
+        const payload = strategy.createPayload(dto, userId, url);
+
+        return this.flow.add({
+            name: MEDIA_JOBS.RESIZE_IMAGES,
+            queueName: MEDIA_QUEUES.RESIZE,
+            data: { userId, original: url, context: dto.context },
+            opts: this.getJobOptions(5, 'fixed'),
+            children: [
                 {
-                    code: 'MEDIA_SAVE_FAILED',
-                    message: 'Ошибка при сохранении медиа-данных',
-                    details: [
-                        {
-                            reason:
-                                error instanceof Error ? error.message : 'Unknown database error',
-                        },
-                    ],
+                    name: strategy.jobName,
+                    queueName: MEDIA_QUEUES.SAVE_ENTITY,
+                    data: payload,
+                    opts: { ...this.getJobOptions(3, 'exponential'), failParentOnFailure: true },
                 },
+            ],
+        });
+    }
+
+    private getJobOptions(attempts: number, backoffType: 'fixed' | 'exponential') {
+        return {
+            attempts,
+            backoff: { type: backoffType, delay: backoffType === 'fixed' ? 2000 : 1000 },
+            // removeOnComplete: true,
+            removeOnFail: false,
+        };
+    }
+
+    private getStrategy(context: string) {
+        const strategy = MEDIA_STRATEGIES[context];
+        if (!strategy) {
+            throw new BaseException(
+                { code: 'STRATEGY_NOT_FOUND', message: `No strategy for ${context}` },
                 HttpStatus.BAD_REQUEST,
             );
         }
+        return strategy;
     }
 
-    public async uploadUserAvatar(
-        userId: string,
-        file: FileUploadDto,
-        updateFn: (url: string) => Promise<boolean>,
-    ) {
-        return this.uploadAndLink(file, `users/${userId}/avatars`, updateFn);
-    }
+    private handleError(error: unknown): never {
+        if (error instanceof BaseException) throw error;
 
-    public async uploadTeamAvatar(
-        teamId: string,
-        file: FileUploadDto,
-        updateFn: (url: string) => Promise<boolean>,
-    ) {
-        return this.uploadAndLink(file, `teams/${teamId}/avatars`, updateFn);
-    }
-
-    public async uploadTeamBanner(
-        teamId: string,
-        file: FileUploadDto,
-        updateFn: (url: string) => Promise<boolean>,
-    ) {
-        return this.uploadAndLink(file, `teams/${teamId}/banners`, updateFn);
+        throw new BaseException(
+            {
+                code: 'MEDIA_SAVE_FAILED',
+                message: 'Ошибка при сохранении медиа-данных',
+                details: [{ reason: error instanceof Error ? error.message : 'Unknown error' }],
+            },
+            HttpStatus.BAD_REQUEST,
+        );
     }
 }
