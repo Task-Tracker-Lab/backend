@@ -194,6 +194,48 @@ export class BoardsRepository implements IBoardsRepository {
         return result.length > 0;
     }
 
+    async findViews(boardId: string): Promise<BoardView[]> {
+        return this.db
+            .select()
+            .from(schema.boardViews)
+            .where(eq(schema.boardViews.boardId, boardId))
+            .orderBy(asc(schema.boardViews.position));
+    }
+
+    async findViewById(id: string): Promise<BoardView | null> {
+        const [view] = await this.db
+            .select()
+            .from(schema.boardViews)
+            .where(eq(schema.boardViews.id, id));
+
+        return view ?? null;
+    }
+
+    async createView(view: NewBoardView): Promise<BoardView> {
+        const [created] = await this.db.insert(schema.boardViews).values(view).returning();
+
+        return created;
+    }
+
+    async updateView(id: string, data: Partial<BoardView>): Promise<BoardView | null> {
+        const [updated] = await this.db
+            .update(schema.boardViews)
+            .set({ ...data, updatedAt: new Date() })
+            .where(eq(schema.boardViews.id, id))
+            .returning();
+
+        return updated ?? null;
+    }
+
+    async removeView(id: string): Promise<boolean> {
+        const result = await this.db
+            .delete(schema.boardViews)
+            .where(eq(schema.boardViews.id, id))
+            .returning({ id: schema.boardViews.id });
+
+        return result.length > 0;
+    }
+
     private groupByBoardId<T extends { boardId: string }>(items: T[]): Map<string, T[]> {
         const grouped = new Map<string, T[]>();
 

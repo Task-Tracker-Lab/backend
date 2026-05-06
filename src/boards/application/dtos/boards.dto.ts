@@ -47,6 +47,28 @@ export const UpdateBoardColumnSchema = CreateBoardColumnSchema.partial().refine(
 
 export class UpdateBoardColumnDto extends createZodDto(UpdateBoardColumnSchema) {}
 
+export const CreateBoardViewSchema = z.object({
+    type: z.enum(boardTypeEnum.enumValues),
+    name: z
+        .string()
+        .min(1, 'Название представления не может быть пустым')
+        .max(100, 'Название представления не должно превышать 100 символов'),
+    settings: z.record(z.string(), z.unknown()).optional(),
+    position: z.number().finite(),
+});
+
+export class CreateBoardViewDto extends createZodDto(CreateBoardViewSchema) {}
+
+export const UpdateBoardViewSchema = CreateBoardViewSchema.partial().refine(
+    (data) => Object.keys(data).length > 0,
+    {
+        error: 'Необходимо передать хотя бы одно поле для обновления',
+        abort: true,
+    },
+);
+
+export class UpdateBoardViewDto extends createZodDto(UpdateBoardViewSchema) {}
+
 export const BoardColumnResponseSchema = z.object({
     id: z.string().describe('ID колонки'),
     boardId: z.string().describe('ID доски'),

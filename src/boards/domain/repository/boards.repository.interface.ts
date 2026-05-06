@@ -1,6 +1,7 @@
 import {
     Board,
     BoardColumn,
+    BoardView,
     BoardWithRelations,
     NewBoard,
     NewBoardColumn,
@@ -22,4 +23,9 @@ export interface IBoardsRepository {
     createColumn(column: NewBoardColumn): Promise<BoardColumn>;
     updateColumn(id: string, data: Partial<BoardColumn>): Promise<BoardColumn | null>;
     removeColumn(id: string): Promise<boolean>;
+    findViews(boardId: string): Promise<BoardView[]>;
+    findViewById(id: string): Promise<BoardView | null>;
+    createView(view: NewBoardView): Promise<BoardView>;
+    updateView(id: string, data: Partial<BoardView>): Promise<BoardView | null>;
+    removeView(id: string): Promise<boolean>;
 }

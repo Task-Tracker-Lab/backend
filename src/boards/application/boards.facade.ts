@@ -10,9 +10,21 @@ import {
     DeleteBoardColumnUseCase,
     GetBoardColumnsQuery,
     GetBoardColumnQuery,
+    CreateBoardViewUseCase,
+    UpdateBoardViewUseCase,
+    DeleteBoardViewUseCase,
+    GetBoardViewsQuery,
+    GetBoardViewQuery,
 } from './use-cases';
-import { CreateBoardDto, CreateBoardColumnDto, UpdateBoardColumnDto, UpdateBoardDto } from './dtos';
-import type { BoardColumn, BoardWithRelations } from '@core/boards/domain/entities';
+import {
+    CreateBoardDto,
+    CreateBoardColumnDto,
+    CreateBoardViewDto,
+    UpdateBoardColumnDto,
+    UpdateBoardDto,
+    UpdateBoardViewDto,
+} from './dtos';
+import type { BoardColumn, BoardView, BoardWithRelations } from '@core/boards/domain/entities';
 
 @Injectable()
 export class BoardsFacade {
@@ -28,6 +40,12 @@ export class BoardsFacade {
         private readonly deleteBoardColumnUC: DeleteBoardColumnUseCase,
         private readonly getBoardColumnsQ: GetBoardColumnsQuery,
         private readonly getBoardColumnQ: GetBoardColumnQuery,
+
+        private readonly createBoardViewUC: CreateBoardViewUseCase,
+        private readonly updateBoardViewUC: UpdateBoardViewUseCase,
+        private readonly deleteBoardViewUC: DeleteBoardViewUseCase,
+        private readonly getBoardViewsQ: GetBoardViewsQuery,
+        private readonly getBoardViewQ: GetBoardViewQuery,
     ) {}
 
     public async create(
@@ -94,5 +112,34 @@ export class BoardsFacade {
 
     public async getColumns(boardId: string, userId: string): Promise<BoardColumn[]> {
         return this.getBoardColumnsQ.execute(boardId, userId);
+    }
+
+    public async createView(
+        boardId: string,
+        userId: string,
+        dto: CreateBoardViewDto,
+    ): Promise<BoardView> {
+        return this.createBoardViewUC.execute(boardId, userId, dto);
+    }
+
+    public async updateView(
+        id: string,
+        boardId: string,
+        userId: string,
+        dto: UpdateBoardViewDto,
+    ): Promise<BoardView | null> {
+        return this.updateBoardViewUC.execute(id, boardId, userId, dto);
+    }
+
+    public async deleteView(id: string, boardId: string, userId: string): Promise<boolean> {
+        return this.deleteBoardViewUC.execute(id, boardId, userId);
+    }
+
+    public async getView(id: string, boardId: string, userId: string): Promise<BoardView | null> {
+        return this.getBoardViewQ.execute(id, boardId, userId);
+    }
+
+    public async getViews(boardId: string, userId: string): Promise<BoardView[]> {
+        return this.getBoardViewsQ.execute(boardId, userId);
     }
 }
