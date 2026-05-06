@@ -1,13 +1,18 @@
 import { ApiBaseController, GetUserId } from '@shared/decorators';
 import { BoardsFacade } from '@core/boards/application/boards.facade';
 import { Body, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { CreateBoardDto, UpdateBoardDto } from '@core/boards/application/dtos';
+import type { BoardWithRelations } from '@core/boards/domain/entities';
 
 @ApiBaseController('projects/:projectId/boards', 'Boards', true)
 export class BoardsController {
     constructor(private readonly facade: BoardsFacade) {}
 
     @Get()
-    async findAll(@Param('projectId') projectId: string, @GetUserId() userId: string) {
+    async findAll(
+        @Param('projectId') projectId: string,
+        @GetUserId() userId: string,
+    ): Promise<BoardWithRelations[]> {
         return this.facade.getAll(projectId, userId);
     }
 
@@ -16,7 +21,7 @@ export class BoardsController {
         @Param('id') id: string,
         @Param('projectId') projectId: string,
         @GetUserId() userId: string,
-    ) {
+    ): Promise<BoardWithRelations | null> {
         return this.facade.getOne(id, projectId, userId);
     }
 
@@ -24,8 +29,8 @@ export class BoardsController {
     async create(
         @Param('projectId') projectId: string,
         @GetUserId() userId: string,
-        @Body() dto: any,
-    ) {
+        @Body() dto: CreateBoardDto,
+    ): Promise<BoardWithRelations> {
         return this.facade.create(projectId, userId, dto);
     }
 
@@ -34,8 +39,8 @@ export class BoardsController {
         @Param('id') id: string,
         @Param('projectId') projectId: string,
         @GetUserId() userId: string,
-        @Body() dto: any,
-    ) {
+        @Body() dto: UpdateBoardDto,
+    ): Promise<BoardWithRelations | null> {
         return this.facade.update(id, projectId, userId, dto);
     }
 
@@ -44,7 +49,7 @@ export class BoardsController {
         @Param('id') id: string,
         @Param('projectId') projectId: string,
         @GetUserId() userId: string,
-    ) {
+    ): Promise<boolean> {
         return this.facade.delete(id, projectId, userId);
     }
 }

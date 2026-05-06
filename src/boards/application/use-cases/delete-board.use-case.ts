@@ -8,7 +8,7 @@ export class DeleteBoardUseCase {
         private readonly boardsRepo: IBoardsRepository,
     ) {}
 
-    public async execute(id: string, _projectId: string, _userId: string) {
+    public async execute(id: string, _projectId: string, _userId: string): Promise<boolean> {
         return this.boardsRepo.remove(id);
     }
 }
