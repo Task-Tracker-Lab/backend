@@ -59,6 +59,8 @@ export async function bootstrapApp(options: BootstrapOptions) {
     await app.register(fastifyMultipart, {
         limits: {
             fileSize: 5 * 1024 * 1024,
+            fieldNameSize: 100,
+            files: 5,
         },
     });
 

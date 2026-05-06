@@ -5,7 +5,7 @@ import { BaseException } from '@shared/error';
 
 export const ExtractMediaReq = createParamDecorator(
     async (
-        data: { allowedMimetypes?: string[] } = { allowedMimetypes: IMAGE_MIME_TYPES },
+        { allowedMimetypes = IMAGE_MIME_TYPES }: { allowedMimetypes?: string[] } = {},
         ctx: ExecutionContext,
     ) => {
         const req = ctx.switchToHttp().getRequest<FastifyRequest>();
@@ -24,7 +24,6 @@ export const ExtractMediaReq = createParamDecorator(
         }
 
         const file = await req.file();
-
         if (!file) {
             throw new BaseException(
                 {
@@ -35,37 +34,33 @@ export const ExtractMediaReq = createParamDecorator(
             );
         }
 
-        if (data?.allowedMimetypes && !data.allowedMimetypes.includes(file.mimetype)) {
+        const buffer = await file.toBuffer();
+
+        if (allowedMimetypes?.length && !allowedMimetypes.includes(file.mimetype)) {
             throw new BaseException(
-                {
-                    code: 'INVALID_FILE_TYPE',
-                    message: 'Недопустимый формат файла',
-                    details: [
-                        {
-                            target: 'mimetype',
-                            received: file.mimetype,
-                            expected: data.allowedMimetypes,
-                        },
-                    ],
-                },
+                { code: 'INVALID_FILE_TYPE', message: 'Недопустимый формат файла' },
                 HttpStatus.UNSUPPORTED_MEDIA_TYPE,
             );
         }
 
-        const fields = Object.fromEntries(
-            Object.entries(file.fields)
-                .filter(([key, part]) => key !== 'file' && part && 'value' in part)
-                // TODO: FIX
-                .map(([key, part]) => [key, (part as any).value]),
-        );
+        const fields: Record<string, string> = {};
+
+        for (const key in file.fields) {
+            if (key === 'file') continue;
+
+            const field = file.fields[key];
+            if (field && !Array.isArray(field) && 'value' in field) {
+                fields[key] = String(field.value);
+            }
+        }
 
         return {
-            ...fields,
             file: {
-                buffer: await file.toBuffer(),
                 filename: file.filename,
                 mimetype: file.mimetype,
+                buffer,
             },
+            ...fields,
         };
     },
 );

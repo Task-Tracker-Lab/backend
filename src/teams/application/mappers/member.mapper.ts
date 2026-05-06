@@ -1,11 +1,14 @@
 import type { RawMemberRow, RawMemberTeams } from '../../domain/repository';
+import { ImageHelper } from '@shared/utils';
 
 export class TeamMemberMapper {
-    public static toDetail(row: RawMemberRow) {
+    public static toDetail(row: RawMemberRow, cdn: string) {
         const { firstName, lastName, middleName, avatarUrl, userId, ...rest } = row;
 
         const fullName =
             [lastName, firstName, middleName].filter(Boolean).join(' ') || 'Unknown User';
+
+        const avatar = ImageHelper.buildResponsiveUrls(cdn, avatarUrl);
 
         return {
             id: userId,
@@ -14,24 +17,26 @@ export class TeamMemberMapper {
             lastName,
             middleName,
             fullName,
-            avatarUrl,
+            avatar,
             initials: this.getInitials(firstName, lastName),
         };
     }
 
-    public static toList(rows: RawMemberRow[]) {
-        return rows.map((row) => this.toDetail(row));
+    public static toList(rows: RawMemberRow[], cdn: string) {
+        return rows.map((row) => this.toDetail(row, cdn));
     }
 
-    public static toUserTeam(row: RawMemberTeams) {
-        const role = row.role;
+    public static toUserTeam(data: RawMemberTeams, cdn: string) {
+        const { role, avatarUrl, ...row } = data;
+
+        const avatar = ImageHelper.buildResponsiveUrls(cdn, avatarUrl);
 
         return {
             id: row.id,
             name: row.name,
             slug: row.slug,
             description: row.description,
-            avatarUrl: row.avatarUrl,
+            avatar,
             role: role,
             joinedAt: row.joinedAt,
             permissions: {

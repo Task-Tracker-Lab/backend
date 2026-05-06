@@ -2,7 +2,7 @@ import { IUserRepository } from '@core/user/domain/repository';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import { MEDIA_JOBS, MEDIA_QUEUES, type UpdateMediaUser } from '@shared/media';
-import type { Job } from 'bullmq';
+import { UnrecoverableError, type Job } from 'bullmq';
 
 @Processor(MEDIA_QUEUES.SAVE_ENTITY)
 export class UpdateAvatarListener extends WorkerHost {
@@ -18,18 +18,14 @@ export class UpdateAvatarListener extends WorkerHost {
     async process(job: Job<UpdateMediaUser>) {
         if (job.name !== MEDIA_JOBS.UPDATE_USER_AVATAR) return;
 
-        const { entity } = job.data;
+        const { entity, path } = job.data;
         const jobId = job.id;
 
         try {
             await job.updateProgress(10);
-
-            const childrenResults = await job.getChildrenValues<{ folder: string }>();
-            const [processedMedia] = Object.values(childrenResults ?? {});
-            const avatarStoragePath = processedMedia?.folder;
-
-            if (!avatarStoragePath) {
-                throw new Error(
+            await job.log(path);
+            if (!path) {
+                throw new UnrecoverableError(
                     `Media processing failed: no storage path returned for entity ${entity.id}`,
                 );
             }
@@ -46,18 +42,13 @@ export class UpdateAvatarListener extends WorkerHost {
 
             await job.updateProgress(70);
 
-            await this.repository.updateAvatar(userAccount.user.id, avatarStoragePath);
+            await this.repository.updateAvatar(userAccount.user.id, path);
 
             await job.updateProgress(100);
 
             this.logger.log(
                 `[Job:${jobId}] Successfully updated avatar for user ${userAccount.user.id}`,
             );
-
-            return {
-                userId: userAccount.user.id,
-                newPath: avatarStoragePath,
-            };
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             this.logger.error(`[Job:${jobId}] Critical failure: ${errorMessage}`);

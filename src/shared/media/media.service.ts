@@ -4,10 +4,10 @@ import type { UploadMediaDto } from './dtos';
 import { BaseException } from '@shared/error';
 import { FlowProducer } from 'bullmq';
 import { InjectFlowProducer } from '@nestjs/bullmq';
-import * as path from 'path';
 import { MEDIA_STRATEGIES } from './strategies';
 import { MEDIA_FLOW, MEDIA_JOBS, MEDIA_QUEUES } from './media.constant';
 import { MediaDispatchStrategy } from './strategies/media.strategy';
+import { extname } from 'path';
 
 @Injectable()
 export class MediaService {
@@ -43,7 +43,7 @@ export class MediaService {
 
     private generateStoragePath(context: string, userId: string, originalName: string) {
         const contextPath = context.replace(/\./g, '/');
-        const extension = path.extname(originalName);
+        const extension = extname(originalName);
 
         return {
             folder: `${contextPath}/${Date.now()}-${userId}`,
@@ -57,7 +57,7 @@ export class MediaService {
         userId: string,
         url: string,
     ) {
-        const payload = strategy.createPayload(dto, userId, path.dirname(url));
+        const payload = strategy.createPayload(dto, userId, url);
 
         return this.flow.add({
             name: MEDIA_JOBS.RESIZE_IMAGES,
@@ -79,7 +79,7 @@ export class MediaService {
         return {
             attempts,
             backoff: { type: backoffType, delay: backoffType === 'fixed' ? 2000 : 1000 },
-            removeOnComplete: true,
+            // removeOnComplete: true,
             removeOnFail: false,
         };
     }

@@ -26,8 +26,6 @@ export class UpdateTeamMediaListener extends WorkerHost {
         try {
             const teamId = await this.validatePermissionsAndGetTeamId(entity.slug, initiatorId);
 
-            await job.log(teamId);
-
             await this.executeMediaUpdate(teamId, type, path);
 
             this.logger.log(`Successfully updated ${type} for team ${entity.slug}`);
