@@ -3,12 +3,20 @@ import { BoardsFacade } from '@core/boards/application/boards.facade';
 import { Body, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { CreateBoardDto, UpdateBoardDto } from '@core/boards/application/dtos';
 import type { BoardWithRelations } from '@core/boards/domain/entities';
+import {
+    CreateBoardSwagger,
+    FindAllBoardsSwagger,
+    FindOneBoardSwagger,
+    RemoveBoardSwagger,
+    UpdateBoardSwagger,
+} from './swagger';
 
 @ApiBaseController('projects/:projectId/boards', 'Boards', true)
 export class BoardsController {
     constructor(private readonly facade: BoardsFacade) {}
 
     @Get()
+    @FindAllBoardsSwagger()
     async findAll(
         @Param('projectId') projectId: string,
         @GetUserId() userId: string,
@@ -17,6 +25,7 @@ export class BoardsController {
     }
 
     @Get(':id')
+    @FindOneBoardSwagger()
     async findOne(
         @Param('id') id: string,
         @Param('projectId') projectId: string,
@@ -26,6 +35,7 @@ export class BoardsController {
     }
 
     @Post()
+    @CreateBoardSwagger()
     async create(
         @Param('projectId') projectId: string,
         @GetUserId() userId: string,
@@ -35,6 +45,7 @@ export class BoardsController {
     }
 
     @Patch(':id')
+    @UpdateBoardSwagger()
     async update(
         @Param('id') id: string,
         @Param('projectId') projectId: string,
@@ -45,6 +56,7 @@ export class BoardsController {
     }
 
     @Delete(':id')
+    @RemoveBoardSwagger()
     async remove(
         @Param('id') id: string,
         @Param('projectId') projectId: string,

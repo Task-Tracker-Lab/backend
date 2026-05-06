@@ -1,5 +1,6 @@
 import { z } from 'zod/v4';
 import { createZodDto } from 'nestjs-zod';
+import { boardTypeEnum } from '@core/boards/infrastructure/persistence/models/boards.model';
 
 export const CreateBoardSchema = z.object({
     name: z
@@ -21,3 +22,43 @@ export const UpdateBoardSchema = CreateBoardSchema.partial().refine(
 );
 
 export class UpdateBoardDto extends createZodDto(UpdateBoardSchema) {}
+
+export const BoardColumnResponseSchema = z.object({
+    id: z.string().describe('ID колонки'),
+    boardId: z.string().describe('ID доски'),
+    name: z.string().describe('Название колонки'),
+    position: z.number().describe('Позиция колонки'),
+    color: z.string().describe('Цвет колонки в HEX'),
+    createdAt: z.string().datetime().describe('Дата создания'),
+    updatedAt: z.string().datetime().describe('Дата обновления'),
+});
+
+export class BoardColumnResponse extends createZodDto(BoardColumnResponseSchema) {}
+
+export const BoardViewResponseSchema = z.object({
+    id: z.string().describe('ID представления'),
+    boardId: z.string().describe('ID доски'),
+    type: z.enum(boardTypeEnum.enumValues).describe('Тип представления'),
+    name: z.string().describe('Название представления'),
+    settings: z.record(z.string(), z.unknown()).describe('Настройки представления'),
+    position: z.number().describe('Позиция представления'),
+    createdAt: z.string().datetime().describe('Дата создания'),
+    updatedAt: z.string().datetime().describe('Дата обновления'),
+});
+
+export class BoardViewResponse extends createZodDto(BoardViewResponseSchema) {}
+
+export const BoardResponseSchema = z.object({
+    id: z.string().describe('ID доски'),
+    name: z.string().describe('Название доски'),
+    projectId: z.string().describe('ID проекта'),
+    settings: z.record(z.string(), z.unknown()).describe('Настройки доски'),
+    position: z.number().describe('Позиция доски'),
+    ownerId: z.string().nullable().describe('ID владельца доски'),
+    createdAt: z.string().datetime().describe('Дата создания'),
+    updatedAt: z.string().datetime().describe('Дата обновления'),
+    boardColumns: z.array(BoardColumnResponseSchema).describe('Колонки доски'),
+    boardViews: z.array(BoardViewResponseSchema).describe('Представления доски'),
+});
+
+export class BoardResponse extends createZodDto(BoardResponseSchema) {}
