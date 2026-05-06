@@ -112,7 +112,6 @@ services:
         container_name: imagor
         restart: always
         environment:
-            - IMAGOR_UNSAFE=1
             - IMAGOR_SECRET=${IMAGOR_SECRET:-supersecret}
             - HTTP_LOADER_DISABLE=1
 
