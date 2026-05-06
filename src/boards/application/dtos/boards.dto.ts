@@ -23,6 +23,30 @@ export const UpdateBoardSchema = CreateBoardSchema.partial().refine(
 
 export class UpdateBoardDto extends createZodDto(UpdateBoardSchema) {}
 
+export const CreateBoardColumnSchema = z.object({
+    name: z
+        .string()
+        .min(1, 'Название колонки не может быть пустым')
+        .max(50, 'Название колонки не должно превышать 50 символов'),
+    position: z.number().finite(),
+    color: z
+        .string()
+        .regex(/^#[A-Fa-f0-9]{6}$/, 'Цвет должен быть в формате HEX (например, #FFFFFF)')
+        .optional(),
+});
+
+export class CreateBoardColumnDto extends createZodDto(CreateBoardColumnSchema) {}
+
+export const UpdateBoardColumnSchema = CreateBoardColumnSchema.partial().refine(
+    (data) => Object.keys(data).length > 0,
+    {
+        error: 'Необходимо передать хотя бы одно поле для обновления',
+        abort: true,
+    },
+);
+
+export class UpdateBoardColumnDto extends createZodDto(UpdateBoardColumnSchema) {}
+
 export const BoardColumnResponseSchema = z.object({
     id: z.string().describe('ID колонки'),
     boardId: z.string().describe('ID доски'),

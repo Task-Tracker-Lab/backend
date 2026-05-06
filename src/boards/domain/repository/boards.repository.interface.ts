@@ -1,5 +1,6 @@
 import {
     Board,
+    BoardColumn,
     BoardWithRelations,
     NewBoard,
     NewBoardColumn,
@@ -16,4 +17,9 @@ export interface IBoardsRepository {
     ): Promise<BoardWithRelations>;
     update(id: string, data: Partial<Board>): Promise<BoardWithRelations | null>;
     remove(id: string): Promise<boolean>;
+    findColumns(boardId: string): Promise<BoardColumn[]>;
+    findColumnById(id: string): Promise<BoardColumn | null>;
+    createColumn(column: NewBoardColumn): Promise<BoardColumn>;
+    updateColumn(id: string, data: Partial<BoardColumn>): Promise<BoardColumn | null>;
+    removeColumn(id: string): Promise<boolean>;
 }

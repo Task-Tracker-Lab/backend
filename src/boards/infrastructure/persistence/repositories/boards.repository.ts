@@ -152,6 +152,48 @@ export class BoardsRepository implements IBoardsRepository {
         return result.length > 0;
     }
 
+    async findColumns(boardId: string): Promise<BoardColumn[]> {
+        return this.db
+            .select()
+            .from(schema.boardColumns)
+            .where(eq(schema.boardColumns.boardId, boardId))
+            .orderBy(asc(schema.boardColumns.position));
+    }
+
+    async findColumnById(id: string): Promise<BoardColumn | null> {
+        const [column] = await this.db
+            .select()
+            .from(schema.boardColumns)
+            .where(eq(schema.boardColumns.id, id));
+
+        return column ?? null;
+    }
+
+    async createColumn(column: NewBoardColumn): Promise<BoardColumn> {
+        const [created] = await this.db.insert(schema.boardColumns).values(column).returning();
+
+        return created;
+    }
+
+    async updateColumn(id: string, data: Partial<BoardColumn>): Promise<BoardColumn | null> {
+        const [updated] = await this.db
+            .update(schema.boardColumns)
+            .set({ ...data, updatedAt: new Date() })
+            .where(eq(schema.boardColumns.id, id))
+            .returning();
+
+        return updated ?? null;
+    }
+
+    async removeColumn(id: string): Promise<boolean> {
+        const result = await this.db
+            .delete(schema.boardColumns)
+            .where(eq(schema.boardColumns.id, id))
+            .returning({ id: schema.boardColumns.id });
+
+        return result.length > 0;
+    }
+
     private groupByBoardId<T extends { boardId: string }>(items: T[]): Map<string, T[]> {
         const grouped = new Map<string, T[]>();
 

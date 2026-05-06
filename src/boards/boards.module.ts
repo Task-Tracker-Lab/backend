@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BoardsRepository } from './infrastructure/persistence/repositories';
-import { BoardsController } from './application/controller';
+import { BoardsController, ColumnsController } from './application/controller';
 import { BoardsFacade } from './application/boards.facade';
 import { BoardQueries, BoardUseCases } from './application/use-cases';
 
@@ -10,7 +10,7 @@ const REPOSITORY = {
 };
 
 @Module({
-    controllers: [BoardsController],
+    controllers: [BoardsController, ColumnsController],
     providers: [REPOSITORY, BoardsFacade, ...BoardUseCases, ...BoardQueries],
 })
 export class BoardsModule {}
