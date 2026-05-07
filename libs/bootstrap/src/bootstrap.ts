@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { setupThrottler } from './setups/throttler';
 import { DEFAULT_THROTTLER_OPTIONS } from './configs/throttler';
-import { setupCors, setupSwagger } from './setups';
+import { setupCors, setupLogger, setupSwagger } from './setups';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import type { BootstrapOptions } from './interfaces/options.interface';
 import fastifyCookie from '@fastify/cookie';
@@ -16,10 +16,13 @@ export async function bootstrapApp(options: BootstrapOptions) {
     const startTime = performance.now();
     const adapter = new FastifyAdapter({
         requestIdHeader: 'x-request-id',
+        requestIdLogLabel: 'request',
         genReqId: (req) => {
             return (req.headers['x-request-id'] as string) || createId();
         },
     });
+
+    const winston = setupLogger(options.serviceName);
 
     const {
         appModule,
@@ -43,13 +46,24 @@ export async function bootstrapApp(options: BootstrapOptions) {
 
     const app = await NestFactory.create<NestFastifyApplication>(rootModule, adapter, {
         rawBody: true,
+        bufferLogs: true,
     });
+
+    app.useLogger(winston);
+
     const logger = new Logger(serviceName[0].toUpperCase() + serviceName.slice(1));
     const configService = app.get(ConfigService);
     const port = configService.getOrThrow<number>(portEnvKey, defaultPort);
     const origins = configService.getOrThrow('CORS_ALLOWED_ORIGINS');
 
     app.enableShutdownHooks();
+
+    app.getHttpAdapter()
+        .getInstance()
+        .addHook('onSend', async (request, reply, payload) => {
+            reply.header('x-request-id', request.id);
+            return payload;
+        });
 
     await app.register(fastifyCompress, {
         global: true,

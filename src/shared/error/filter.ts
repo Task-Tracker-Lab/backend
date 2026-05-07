@@ -4,6 +4,7 @@ import {
     ExceptionFilter,
     HttpException,
     HttpStatus,
+    Logger,
 } from '@nestjs/common';
 import { ZodValidationException } from 'nestjs-zod';
 import type { FastifyReply, FastifyRequest } from 'fastify';
@@ -15,6 +16,7 @@ import { DATABASE_ERRORS } from './swagger';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+    private readonly logger = new Logger(GlobalExceptionFilter.name);
     private isDev = process.env.NODE_ENV === 'development';
 
     catch(exception: unknown, host: ArgumentsHost) {
@@ -43,6 +45,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
         const zodError = exception.getZodError() as ZodError;
         const issues: ZodIssue[] = zodError.issues || [];
+
+        this.log(exception, host, status, {
+            validationIssues: issues,
+            body: request.body,
+        });
 
         return response.status(status).send(
             this.formatErrorResponse(request, status, {
@@ -76,6 +83,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
             }
         }
 
+        this.log(exception, host, status, {
+            dbCode: error?.code,
+            dbTable: error?.table,
+            dbDetail: error?.detail,
+            query: this.isDev ? exception.message : undefined,
+        });
+
         return response.status(status).send(
             this.formatErrorResponse(request, status, {
                 code: errorCode,
@@ -92,6 +106,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         const status = exception.getStatus();
 
         const error = exception.getResponse() as IErrorOptions;
+
+        this.log(exception, host, status, {
+            errorCode: error.code,
+            details: error.details,
+            type: 'BUSINESS_EXCEPTION',
+        });
 
         return response.status(status).send(
             this.formatErrorResponse(request, status, {
@@ -115,6 +135,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
             typeof res === 'object' && res['error']
                 ? res['error'].toUpperCase().replace(/\s+/g, '_')
                 : 'HTTP_EXCEPTION';
+
+        this.log(exception, host, status, {
+            httpCode: code,
+            nestResponse: res,
+            type: 'NEST_HTTP_EXCEPTION',
+        });
 
         return response.status(status).send(
             this.formatErrorResponse(request, status, {
@@ -179,5 +205,33 @@ export class GlobalExceptionFilter implements ExceptionFilter {
             response: ctx.getResponse<FastifyReply>(),
             request: ctx.getRequest<FastifyRequest>(),
         };
+    }
+
+    private log(
+        exception: any,
+        host: ArgumentsHost,
+        status: number,
+        extraData: Record<string, unknown> = {},
+    ) {
+        const { request } = this.getCtxBase(host);
+
+        const logContext = {
+            status,
+            path: request.url,
+            method: request.method,
+            requestId: request.id ?? request.headers['x-request-id'],
+            ...extraData,
+            ...(status >= 500 && {
+                stack: exception instanceof Error ? exception.stack : exception,
+            }),
+        };
+
+        const message = `[${status}] ${request.method} ${request.url} - ${exception?.message || 'Unknown Error'}`;
+
+        if (status >= 500) {
+            this.logger.error(message, logContext);
+        } else {
+            this.logger.warn(message, logContext);
+        }
     }
 }
