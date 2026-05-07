@@ -4,6 +4,7 @@ import { ISessionRepository } from '../../domain/repository';
 import { TokenService } from '../../infrastructure/security';
 import { DeviceMetadata } from '../../infrastructure/utils/get-device-meta';
 import { FindUserQuery } from '@core/user';
+import { createId } from '@paralleldrive/cuid2';
 
 @Injectable()
 export class RefreshTokensUseCase {
@@ -54,20 +55,23 @@ export class RefreshTokensUseCase {
 
         await this.sessionRepo.revoke(session.id);
 
-        const newSession = await this.sessionRepo.create({
+        const sessionId = createId();
+        const { access, refresh, expiresAt } = await this.tokenService.generateTokens(
+            entity.user,
+            sessionId,
+        );
+
+        await this.sessionRepo.create({
+            id: sessionId,
             userId: entity.user.id,
             ...metadata,
-            expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+            expiresAt,
         });
-
-        const { access, refresh } = await this.tokenService.generateTokens(
-            entity.user,
-            newSession.id,
-        );
 
         return {
             tokens: { access, refresh },
             success: true,
+            expiresAt,
             message: 'Токены успешно обновлены',
         };
     }

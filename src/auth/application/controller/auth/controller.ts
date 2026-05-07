@@ -16,6 +16,9 @@ import { ConfigService } from '@nestjs/config';
 
 @ApiBaseController('auth', 'Auth')
 export class AuthController {
+    private readonly isProduction: boolean = false;
+    private readonly domain: string | null = null;
+
     constructor(
         private readonly facade: AuthFacade,
         private cfg: ConfigService,
@@ -23,9 +26,6 @@ export class AuthController {
         this.isProduction = this.cfg.get('NODE_ENV') === 'production';
         this.domain = this.cfg.get('DOMAIN');
     }
-
-    private readonly isProduction: boolean;
-    private readonly domain: string;
 
     @Post('sign-up')
     @PostRegisterSwagger()
@@ -43,9 +43,9 @@ export class AuthController {
         @Body() dto: VerifyDto,
     ) {
         const meta = getDeviceMeta(req);
-        const { tokens, ...response } = await this.facade.verifySignUp(dto, meta);
+        const { tokens, expiresAt, ...response } = await this.facade.verifySignUp(dto, meta);
 
-        this.setRefreshCookie(res, tokens.refresh);
+        this.setRefreshCookie(res, tokens.refresh, expiresAt);
 
         return { ...response, token: tokens.access };
     }
@@ -58,9 +58,9 @@ export class AuthController {
         @Body() dto: SignInDto,
     ) {
         const meta = getDeviceMeta(req);
-        const { tokens, ...response } = await this.facade.signIn(dto, meta);
+        const { tokens, expiresAt, ...response } = await this.facade.signIn(dto, meta);
 
-        this.setRefreshCookie(res, tokens.refresh);
+        this.setRefreshCookie(res, tokens.refresh, expiresAt);
 
         return { ...response, token: tokens.access };
     }
@@ -73,7 +73,10 @@ export class AuthController {
         const session = req.cookies?.['refresh'];
         const response = await this.facade.signOut(session);
 
-        res.clearCookie('refresh', { path: '/', domain: `.${this.domain}` });
+        res.clearCookie('refresh', {
+            path: '/',
+            domain: this.domain ? `.${this.domain}` : undefined,
+        });
 
         return response;
     }
@@ -85,20 +88,21 @@ export class AuthController {
     async refresh(@Res({ passthrough: true }) res: FastifyReply, @Req() req: FastifyRequest) {
         const meta = getDeviceMeta(req);
         const session = req.cookies?.['refresh'];
-        const { tokens, ...response } = await this.facade.refreshTokens(session, meta);
+        const { tokens, expiresAt, ...response } = await this.facade.refreshTokens(session, meta);
 
-        this.setRefreshCookie(res, tokens.refresh);
+        this.setRefreshCookie(res, tokens.refresh, expiresAt);
 
         return { token: tokens.access, ...response };
     }
 
-    private setRefreshCookie(res: FastifyReply, refreshToken: string) {
+    private setRefreshCookie(res: FastifyReply, refreshToken: string, expires: Date) {
         res.setCookie('refresh', refreshToken, {
             httpOnly: true,
             secure: this.isProduction,
             path: '/',
+            expires,
             sameSite: 'lax',
-            domain: `.${this.domain}`,
+            domain: this.domain ? `.${this.domain}` : undefined,
         });
     }
 }

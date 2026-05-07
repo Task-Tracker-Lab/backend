@@ -21,9 +21,29 @@ export class ResetPasswordUseCase {
     ) {}
 
     async execute(dto: ResetPasswordDto) {
+        const redisKey = `pass:reset:${dto.email}`;
+        const isExistsAttempt = await this.redis.get(redisKey);
+
+        if (isExistsAttempt) {
+            throw new BaseException(
+                {
+                    code: 'PASS_RESET_ATTEMPT_ACTIVE',
+                    message:
+                        'Запрос на сброс пароля уже активен. Проверьте почту или попробуйте позже.',
+                    details: [
+                        {
+                            target: 'email',
+                            value: dto.email,
+                        },
+                    ],
+                },
+                HttpStatus.CONFLICT,
+            );
+        }
+
         const entity = await this.findUserQuery.execute({ email: dto.email });
 
-        if (!entity.user) {
+        if (!entity?.user) {
             throw new BaseException(
                 {
                     code: 'USER_NOT_FOUND',
@@ -48,7 +68,7 @@ export class ResetPasswordUseCase {
             isVerified: false,
         };
 
-        await this.redis.set(`pass:reset:${dto.email}`, JSON.stringify(resetPayload), 'EX', 900);
+        await this.redis.set(redisKey, JSON.stringify(resetPayload), 'EX', 900);
 
         const event = new ResetPasswordEvent(dto.email, token);
         await this.mailQueue.add(AuthMailJobs.SEND_RESET_PASSWORD, event, {

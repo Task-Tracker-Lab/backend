@@ -23,18 +23,23 @@ export class TokenService {
             aud: btoa(audConstraint),
         };
 
+        const accessExp = this.cfg.get<any>('JWT_ACCESS_EXPIRES_IN');
+        const refreshExp = this.cfg.get<any>('JWT_REFRESH_EXPIRES_IN');
+
         const [access, refresh] = await Promise.all([
             this.jwtService.signAsync(payload, {
                 secret: this.cfg.get('JWT_ACCESS_SECRET'),
-                expiresIn: this.cfg.get<any>('JWT_ACCESS_EXPIRES_IN'),
+                expiresIn: accessExp,
             }),
             this.jwtService.signAsync(payload, {
                 secret: this.cfg.get('JWT_REFRESH_SECRET'),
-                expiresIn: this.cfg.get<any>('JWT_REFRESH_EXPIRES_IN'),
+                expiresIn: refreshExp,
             }),
         ]);
 
-        return { access, refresh };
+        const refreshDecodedData = this.jwtService.decode(refresh);
+
+        return { access, refresh, expiresAt: new Date(refreshDecodedData?.exp * 1000) };
     }
 
     async validateToken(token: string, type: 'access' | 'refresh'): Promise<JwtPayload> {

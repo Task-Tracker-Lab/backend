@@ -80,7 +80,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
             this.formatErrorResponse(request, status, {
                 code: errorCode,
                 message,
-                details: error?.constraint ? [{ target: error.constraint }] : [],
+                details: error?.detail ? [{ target: error.detail }] : [],
                 stack: exception.stack,
                 service: 'postgres',
             }),
