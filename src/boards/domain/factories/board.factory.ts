@@ -46,10 +46,48 @@ export class BoardFactory {
             }),
         );
 
-        const columns = [
-            { id: createId(), boardId, name: 'К выполнению', position: 1000, color: '#64748b' },
-            { id: createId(), boardId, name: 'В работе', position: 2000, color: '#3b82f6' },
-            { id: createId(), boardId, name: 'Готово', position: 3000, color: '#22c55e' },
+        const columns: NewBoardColumn[] = [
+            {
+                id: createId(),
+                boardId,
+                name: 'Беклог',
+                position: 1000,
+                color: '#bd6f2b',
+                status: 'backlog',
+            },
+            {
+                id: createId(),
+                boardId,
+                name: 'К выполнению',
+                position: 2000,
+                color: '#2d62ae',
+                status: 'todo',
+            },
+            {
+                id: createId(),
+                boardId,
+                name: 'В работе',
+                position: 3000,
+                color: '#c1ab38',
+                status: 'in_progress',
+            },
+            {
+                id: createId(),
+                boardId,
+                name: 'Готово',
+                position: 4000,
+                color: '#22c55e',
+                status: 'done',
+            },
+            {
+                id: createId(),
+                boardId,
+                name: 'Отменено',
+                position: 99999,
+                color: '#78817b',
+                status: 'canceled',
+                visibility: false,
+            },
         ];
 
         return { board, columns, views };

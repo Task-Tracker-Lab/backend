@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
 import { createZodDto } from 'nestjs-zod';
-import { boardTypeEnum } from '@core/boards/infrastructure/persistence/models/boards.model';
+import { boardTypeEnum, columnStatusEnum } from '@core/boards/infrastructure/persistence/models';
 
 export const CreateBoardSchema = z.object({
     name: z
@@ -74,6 +74,7 @@ export const BoardColumnResponseSchema = z.object({
     boardId: z.string().describe('ID доски'),
     name: z.string().describe('Название колонки'),
     position: z.number().describe('Позиция колонки'),
+    status: z.enum(columnStatusEnum.enumValues),
     color: z.string().describe('Цвет колонки в HEX'),
     createdAt: z.string().datetime().describe('Дата создания'),
     updatedAt: z.string().datetime().describe('Дата обновления'),

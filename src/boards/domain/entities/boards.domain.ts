@@ -4,9 +4,11 @@ import {
     boardViews,
     boardTypeEnum,
     boardColumns,
-} from '@core/boards/infrastructure/persistence/models/boards.model';
+    columnStatusEnum,
+} from '@core/boards/infrastructure/persistence/models';
 
 export type BoardType = (typeof boardTypeEnum.enumValues)[number];
+export type BoardColumnStatus = (typeof columnStatusEnum.enumValues)[number];
 
 export type Board = InferSelectModel<typeof boards>;
 export type NewBoard = InferInsertModel<typeof boards>;

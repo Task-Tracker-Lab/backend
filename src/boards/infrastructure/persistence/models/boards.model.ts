@@ -1,8 +1,15 @@
-import { text, varchar, timestamp, jsonb, doublePrecision, uniqueIndex } from 'drizzle-orm/pg-core';
+import {
+    text,
+    varchar,
+    timestamp,
+    jsonb,
+    doublePrecision,
+    uniqueIndex,
+    boolean,
+} from 'drizzle-orm/pg-core';
 import { baseSchema, projects, users } from '@shared/entities';
+import { columnStatusEnum, boardTypeEnum } from './enums';
 import { createId } from '@paralleldrive/cuid2';
-
-export const boardTypeEnum = baseSchema.enum('board_type', ['kanban', 'calendar', 'gantt_matrix']);
 
 export const boards = baseSchema.table(
     'boards',
@@ -33,6 +40,8 @@ export const boardColumns = baseSchema.table('board_columns', {
         .references(() => boards.id, { onDelete: 'cascade' })
         .notNull(),
     name: varchar('name', { length: 50 }).notNull(),
+    status: columnStatusEnum('status').default('backlog').notNull(),
+    visibility: boolean('visibility').default(true).notNull(),
     position: doublePrecision('position').notNull(),
 
     color: varchar('color', { length: 7 }).default('#64748b').notNull(),
