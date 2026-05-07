@@ -6,6 +6,7 @@ import { TokenService } from '../../infrastructure/security';
 import { DeviceMetadata } from '../../infrastructure/utils/get-device-meta';
 import { SignInDto } from '../dtos';
 import { FindUserQuery } from '@core/user';
+import { createId } from '@paralleldrive/cuid2';
 
 @Injectable()
 export class SignInUseCase {
@@ -41,14 +42,18 @@ export class SignInUseCase {
                 HttpStatus.UNAUTHORIZED,
             );
         }
+        const sessionId = createId();
+        const { access, refresh, expiresAt } = await this.tokenService.generateTokens(
+            user,
+            sessionId,
+        );
 
-        const { id } = await this.sessionRepo.create({
+        await this.sessionRepo.create({
+            id: sessionId,
             userId: user.id,
-            expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+            expiresAt,
             ...meta,
         });
-
-        const { access, refresh } = await this.tokenService.generateTokens(user, id);
 
         return {
             success: true,
@@ -56,6 +61,7 @@ export class SignInUseCase {
                 access,
                 refresh,
             },
+            expiresAt,
             message: 'Вы успешно вошли в систему',
         };
     }

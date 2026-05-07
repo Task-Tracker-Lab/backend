@@ -8,6 +8,7 @@ import { ISessionRepository } from '../../domain/repository';
 import { TokenService } from '../../infrastructure/security';
 import { DeviceMetadata } from '../../infrastructure/utils/get-device-meta';
 import { VerifyDto } from '../dtos';
+import { createId } from '@paralleldrive/cuid2';
 
 @Injectable()
 export class SignUpVerifyUseCase {
@@ -72,18 +73,25 @@ export class SignUpVerifyUseCase {
             password: userData.password,
         });
 
-        const session = await this.sessionRepo.create({
+        const sessionId = createId();
+        const { access, refresh, expiresAt } = await this.tokenService.generateTokens(
+            user,
+            sessionId,
+        );
+
+        await this.sessionRepo.create({
+            id: sessionId,
             userId: user.id,
-            expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
             ...meta,
+            expiresAt,
         });
-        const { access, refresh } = await this.tokenService.generateTokens(user, session.id);
 
         await this.redis.del(redisKey);
 
         return {
             success: true,
             tokens: { access, refresh },
+            expiresAt,
             message: 'Аккаунт успешно подтвержден',
         };
     }

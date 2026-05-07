@@ -1,3 +1,4 @@
+import { ActionResponseSchema } from '@shared/dtos';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod/v4';
 
@@ -56,3 +57,9 @@ export const VerifySchema = z
     .describe('Схема верификации OTP кода');
 
 export class VerifyDto extends createZodDto(VerifySchema) {}
+
+export const SignResponseSchema = ActionResponseSchema.extend({
+    token: z.string().describe('JWT токен доступа пользователя'),
+});
+
+export class SignResponse extends createZodDto(SignResponseSchema) {}

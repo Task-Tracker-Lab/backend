@@ -8,7 +8,7 @@ import {
     ApiUnauthorized,
     ApiValidationError,
 } from '@shared/error';
-import { SignInDto, SignUpDto, VerifyDto } from '../../dtos';
+import { SignInDto, SignResponse, SignUpDto, VerifyDto } from '../../dtos';
 import { ActionResponse } from '@shared/dtos';
 
 export const PostRegisterSwagger = () =>
@@ -38,13 +38,7 @@ export const PostLoginSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Успешный вход.',
-            schema: {
-                example: {
-                    success: true,
-                    message: false,
-                    token: 'eyJhbGciOiJIUzI1NiIsInR5c...',
-                },
-            },
+            type: SignResponse.Output,
         }),
         ApiBadRequest('Неверный формат email'),
         ApiUnauthorized('Неверный email или пароль'),
@@ -59,13 +53,7 @@ export const PostRefreshSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Токены успешно обновлены.',
-            schema: {
-                example: {
-                    success: true,
-                    token: 'eyJhbGciOiJIUzI1NiIsInR5c...',
-                    message: 'def50200508a1768c7e...',
-                },
-            },
+            type: SignResponse.Output,
         }),
         ApiBadRequest('Ошибка валидации (не передан refresh токен)'),
         ApiUnauthorized('Refresh токен недействителен, истек или отозван'),
@@ -92,13 +80,7 @@ export const PostSignUpConfirmSwagger = () =>
         ApiResponse({
             status: 201,
             description: 'Аккаунт подтверждён, сессия создана.',
-            schema: {
-                example: {
-                    success: true,
-                    message: 'Аккаунт успешно подтвержден',
-                    token: 'eyJhbGciOiJIUzI1NiIsInR5c...',
-                },
-            },
+            type: SignResponse.Output,
         }),
         ApiValidationError('Ошибка валидации (неверный формат email или длина кода)'),
         ApiBadRequest('Срок регистрации истёк или сессия не найдена'),
