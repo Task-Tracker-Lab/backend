@@ -29,7 +29,7 @@
         "k6:teams-settings": "pnpm --filter @project/performance-tests test:teams-settings",
         "k6:teams-me": "pnpm --filter @project/performance-tests test:teams-me",
         "k6:users": "pnpm --filter @project/performance-tests test:users",
-        "k6:board": "pnpm --filter @project/performance-tests test:board",
+        "k6:boards": "pnpm --filter @project/performance-tests test:boards:all",
         "k6:tasks": "pnpm --filter @project/performance-tests test:tasks",
         "k6:smoke": "pnpm --filter @project/performance-tests smoke",
         "k6:seed": "npx tsx infra/k6/scripts/seed-k6-data.ts",
