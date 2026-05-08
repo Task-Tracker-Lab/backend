@@ -55,7 +55,7 @@ export class BoardsRepository implements IBoardsRepository {
         }));
     }
 
-    async findById(id: string): Promise<BoardWithRelations | null> {
+    async findOne(id: string): Promise<BoardWithRelations | null> {
         const [board] = await this.db.select().from(schema.boards).where(eq(schema.boards.id, id));
 
         if (!board) {
@@ -80,6 +80,12 @@ export class BoardsRepository implements IBoardsRepository {
             boardColumns,
             boardViews,
         };
+    }
+
+    async findBoardById(id: string): Promise<Board | null> {
+        const [board] = await this.db.select().from(schema.boards).where(eq(schema.boards.id, id));
+
+        return board ?? null;
     }
 
     async create(

@@ -10,7 +10,8 @@ import {
 
 export interface IBoardsRepository {
     findAll(projectId: string): Promise<BoardWithRelations[]>;
-    findById(id: string): Promise<BoardWithRelations | null>;
+    findOne(id: string): Promise<BoardWithRelations | null>;
+    findBoardById(id: string): Promise<Board | null>;
     create(
         board: NewBoard,
         columns: NewBoardColumn[],
