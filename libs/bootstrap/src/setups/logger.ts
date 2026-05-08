@@ -9,42 +9,54 @@ import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import type { FastifyRequest } from 'fastify';
 import { WinstonModule, utilities } from 'nest-winston';
-import { format, transports } from 'winston';
+import { format, transport, transports } from 'winston';
+import Loki from 'winston-loki';
+import type { NestFastifyApplication } from '@nestjs/platform-fastify';
+import { ConfigService } from '@nestjs/config';
 
-export function setupLogger(service: string) {
-    const isProduction = process.env.NODE_ENV === 'production';
+export function setupLogger(app: NestFastifyApplication, service: string) {
+    const cfg = app.get(ConfigService);
 
-    return WinstonModule.createLogger({
-        level: isProduction ? 'info' : 'debug',
-        transports: [
-            new transports.Console({
-                format: format.combine(
-                    format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-                    format.ms(),
-                    format.errors({ stack: true }),
-                    format.metadata({ fillExcept: ['message', 'level', 'timestamp', 'context'] }),
-                    format((info) => {
-                        const mask = (obj: any) => {
-                            const sensitive = ['password', 'token', 'secret', 'authorization'];
-                            for (const key in obj) {
-                                if (sensitive.includes(key.toLowerCase())) obj[key] = '***';
-                                else if (typeof obj[key] === 'object') mask(obj[key]);
-                            }
-                        };
-                        if (info.metadata) mask(info.metadata);
-                        return info;
-                    })(),
+    const isProduction = cfg.get('NODE_ENV') === 'production';
+    const loki = cfg.get('LOKI_HOST');
 
-                    isProduction
-                        ? format.json()
-                        : utilities.format.nestLike(service, {
-                              colors: true,
-                              prettyPrint: false,
-                          }),
-                ),
+    const transportsList: transport[] = [
+        new transports.Console({
+            format: format.combine(
+                format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+                format.ms(),
+                format.errors({ stack: true }),
+
+                isProduction
+                    ? format.json()
+                    : utilities.format.nestLike(service, {
+                          colors: true,
+                          prettyPrint: false,
+                      }),
+            ),
+        }),
+    ];
+
+    if (loki) {
+        transportsList.push(
+            new Loki({
+                host: loki,
+                labels: { app: service },
+                json: true,
+                format: format.json(),
+                replaceTimestamp: true,
+                onConnectionError: (err) => console.error('Loki connection error:', err),
             }),
-        ],
+        );
+    }
+
+    const logger = WinstonModule.createLogger({
+        level: isProduction ? 'info' : 'debug',
+        transports: transportsList,
     });
+
+    app.useLogger(logger);
+    app.useGlobalInterceptors(new LoggingInterceptor());
 }
 
 @Injectable()
@@ -60,31 +72,66 @@ export class LoggingInterceptor implements NestInterceptor {
         const userAgent = headers['user-agent'] || 'unknown';
         const startTime = Date.now();
 
-        const sanitizedBody = this.sanitize(body);
-        const queryPart = Object.keys(query).length ? `| Query: ${JSON.stringify(query)} ` : '';
-        const bodyPart =
-            sanitizedBody && Object.keys(sanitizedBody).length
-                ? `| Body: ${JSON.stringify(sanitizedBody)} `
-                : '';
+        const controllerName = context.getClass().name;
+        const handlerName = context.getHandler().name;
 
-        this.logger.log(
-            `[${method}][${requestId}] ${url} ${queryPart}${bodyPart}| IP: ${ip} | UA: ${userAgent}`,
-        );
+        const sanitizedBody = this.sanitize(body);
+        const referer = headers['referer'] || 'direct';
+
+        this.logger.log(`--> ${method} ${url}`, {
+            context: 'HTTP',
+            type: 'request_incoming',
+            method,
+            url,
+            path: url.split('?')[0],
+            requestId,
+            controller: controllerName,
+            handler: handlerName,
+            ip,
+            userAgent,
+            referer,
+            protocol: request.protocol,
+            body: sanitizedBody,
+            query: query,
+        });
 
         return next.handle().pipe(
             tap(() => {
                 const delay = Date.now() - startTime;
 
-                this.logger.log(`[${method}][${requestId}] ${url} | Success | ${delay}ms`);
+                this.logger.log(`<-- ${method} ${url} | 200 | ${delay}ms`, {
+                    context: 'HTTP',
+                    type: 'request_completed',
+                    method,
+                    url,
+                    requestId,
+                    controller: controllerName,
+                    handler: handlerName,
+                    ip,
+                    delay_num: delay,
+                    status: 'success',
+                    statusCode: 200,
+                });
             }),
             catchError((err) => {
                 const delay = Date.now() - startTime;
                 const statusCode = err.status || err.statusCode || 500;
 
-                this.logger.error(
-                    `[${method}][${requestId}] ${url} | Status: ${statusCode} | ${delay}ms | Msg: ${err.message}`,
-                    err.stack,
-                );
+                this.logger.error(`<-- ${method} ${url} | ${statusCode} | ${delay}ms`, {
+                    context: 'HTTP',
+                    type: 'request_error',
+                    method,
+                    url,
+                    requestId,
+                    controller: controllerName,
+                    handler: handlerName,
+                    ip,
+                    statusCode,
+                    delay_num: delay,
+                    status: 'error',
+                    errorMessage: err?.message,
+                    errorStack: err?.stack,
+                });
 
                 return throwError(() => err);
             }),

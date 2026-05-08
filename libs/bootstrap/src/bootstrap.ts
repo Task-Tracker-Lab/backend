@@ -2,7 +2,7 @@ import { Logger, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DEFAULT_THROTTLER_OPTIONS } from './configs/throttler';
-import { setupCors, setupLogger, setupThrottler, setupSwagger, LoggingInterceptor } from './setups';
+import { setupCors, setupLogger, setupThrottler, setupSwagger } from './setups';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import type { BootstrapOptions } from './interfaces/options.interface';
 import fastifyCookie from '@fastify/cookie';
@@ -20,8 +20,6 @@ export async function bootstrapApp(options: BootstrapOptions) {
             return (req.headers['x-request-id'] as string) || createId();
         },
     });
-
-    const winston = setupLogger(options.serviceName);
 
     const {
         appModule,
@@ -48,8 +46,6 @@ export async function bootstrapApp(options: BootstrapOptions) {
         bufferLogs: true,
     });
 
-    app.useLogger(winston);
-
     const logger = new Logger(serviceName[0].toUpperCase() + serviceName.slice(1));
     const configService = app.get(ConfigService);
     const port = configService.getOrThrow<number>(portEnvKey, defaultPort);
@@ -64,7 +60,7 @@ export async function bootstrapApp(options: BootstrapOptions) {
             return payload;
         });
 
-    app.useGlobalInterceptors(new LoggingInterceptor());
+    await setupLogger(app, options.serviceName);
 
     await app.register(fastifyCompress, {
         global: true,
