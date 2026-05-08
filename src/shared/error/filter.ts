@@ -156,6 +156,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         const { request, response } = this.getCtxBase(host);
         const status = HttpStatus.INTERNAL_SERVER_ERROR;
 
+        this.log(exception, host, status, { type: 'UNKNOWN_SERVER_ERROR' });
+
         return response.status(status).send(
             this.formatErrorResponse(request, status, {
                 code: 'INTERNAL_SERVER_ERROR',
@@ -214,24 +216,21 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         extraData: Record<string, unknown> = {},
     ) {
         const { request } = this.getCtxBase(host);
+        const requestId = request.id ?? request.headers['x-request-id'];
 
-        const logContext = {
-            status,
-            path: request.url,
-            method: request.method,
-            requestId: request.id ?? request.headers['x-request-id'],
+        const logMetadata = {
+            requestId,
             ...extraData,
-            ...(status >= 500 && {
-                stack: exception instanceof Error ? exception.stack : exception,
-            }),
+            timestamp: new Date().toISOString(),
         };
 
         const message = `[${status}] ${request.method} ${request.url} - ${exception?.message || 'Unknown Error'}`;
 
         if (status >= 500) {
-            this.logger.error(message, logContext);
+            const stack = exception instanceof Error ? exception.stack : undefined;
+            this.logger.error(message, stack, JSON.stringify(logMetadata));
         } else {
-            this.logger.warn(message, logContext);
+            this.logger.warn(message, JSON.stringify(logMetadata));
         }
     }
 }

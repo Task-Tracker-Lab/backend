@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, Inject, Logger } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Inject } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
 import { HealthService } from '../health.service';
 import { GetHealthSwagger, GetPingSwagger } from './health.swagger';
@@ -9,8 +9,6 @@ import { BaseException } from '@shared/error';
 @Controller()
 @ApiTags('System')
 export class HealthController {
-    private logger = new Logger(HealthController.name);
-
     constructor(
         private readonly healthService: HealthService,
         @Inject('SERVICE_NAME') private readonly serviceName: string,
@@ -22,7 +20,6 @@ export class HealthController {
         const pingData = await this.healthService.getHealthData();
 
         if (pingData.status !== 'up') {
-            this.logger.error(`${this.serviceName} is unhealthy!`);
             throw new BaseException(
                 {
                     code: 'SERVICE_UNHEALTHY',

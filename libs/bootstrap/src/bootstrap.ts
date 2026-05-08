@@ -1,9 +1,8 @@
 import { Logger, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { setupThrottler } from './setups/throttler';
 import { DEFAULT_THROTTLER_OPTIONS } from './configs/throttler';
-import { setupCors, setupLogger, setupSwagger } from './setups';
+import { setupCors, setupLogger, setupThrottler, setupSwagger, LoggingInterceptor } from './setups';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import type { BootstrapOptions } from './interfaces/options.interface';
 import fastifyCookie from '@fastify/cookie';
@@ -64,6 +63,8 @@ export async function bootstrapApp(options: BootstrapOptions) {
             reply.header('x-request-id', request.id);
             return payload;
         });
+
+    app.useGlobalInterceptors(new LoggingInterceptor());
 
     await app.register(fastifyCompress, {
         global: true,

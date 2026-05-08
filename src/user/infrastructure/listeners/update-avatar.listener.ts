@@ -1,13 +1,11 @@
 import { IUserRepository } from '@core/user/domain/repository';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Inject, Logger } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { MEDIA_JOBS, MEDIA_QUEUES, type UpdateMediaUser } from '@shared/media';
 import { UnrecoverableError, type Job } from 'bullmq';
 
 @Processor(MEDIA_QUEUES.SAVE_ENTITY)
 export class UpdateAvatarListener extends WorkerHost {
-    private readonly logger = new Logger(UpdateAvatarListener.name);
-
     constructor(
         @Inject('IUserRepository')
         private readonly repository: IUserRepository,
@@ -19,7 +17,6 @@ export class UpdateAvatarListener extends WorkerHost {
         if (job.name !== MEDIA_JOBS.UPDATE_USER_AVATAR) return;
 
         const { entity, path } = job.data;
-        const jobId = job.id;
 
         try {
             await job.updateProgress(10);
@@ -35,7 +32,6 @@ export class UpdateAvatarListener extends WorkerHost {
             const userAccount = await this.repository.findById(entity.id);
 
             if (!userAccount) {
-                this.logger.warn(`[Job:${jobId}] User ${entity.id} not found. Skipping update.`);
                 await job.log(`User ${entity.id} missing in database.`);
                 return { status: 'aborted', reason: 'USER_NOT_FOUND' };
             }
@@ -46,12 +42,10 @@ export class UpdateAvatarListener extends WorkerHost {
 
             await job.updateProgress(100);
 
-            this.logger.log(
-                `[Job:${jobId}] Successfully updated avatar for user ${userAccount.user.id}`,
-            );
+            await job.log(`Successfully updated avatar for user ${userAccount.user.id}`);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            this.logger.error(`[Job:${jobId}] Critical failure: ${errorMessage}`);
+            await job.log(`Critical failure: ${errorMessage}`);
 
             throw error;
         }
