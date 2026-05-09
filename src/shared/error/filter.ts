@@ -216,21 +216,29 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         extraData: Record<string, unknown> = {},
     ) {
         const { request } = this.getCtxBase(host);
-        const requestId = request.id ?? request.headers['x-request-id'];
 
-        const logMetadata = {
-            requestId,
-            ...extraData,
-            timestamp: new Date().toISOString(),
+        const logData = {
+            request_id: request.id || request.headers['x-request-id'] || 'unknown',
+            triggered_by: 'filter_exception',
+            type: 'error',
+            method: request.method ?? 'Unknown',
+            url: request.url,
+            path: request.url.split('?')[0],
+            status_code: status,
+            ip: request.ip,
+            user_agent: request.headers['user-agent'] || 'unknown',
+            controller: 'Unknown',
+            handler: 'Unknown',
+            stack: exception instanceof Error ? exception.stack : undefined,
+            error_details: extraData,
         };
 
-        const message = `[${status}] ${request.method} ${request.url} - ${exception?.message || 'Unknown Error'}`;
+        const message = `Exception Filter: ${logData.method} ${logData.path} | ${status} | ${exception?.message || 'Unknown Error'}`;
 
         if (status >= 500) {
-            const stack = exception instanceof Error ? exception.stack : undefined;
-            this.logger.error(message, stack, JSON.stringify(logMetadata));
+            this.logger.error(message, logData);
         } else {
-            this.logger.warn(message, JSON.stringify(logMetadata));
+            this.logger.warn(message, logData);
         }
     }
 }

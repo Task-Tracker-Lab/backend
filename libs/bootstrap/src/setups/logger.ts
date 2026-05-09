@@ -9,50 +9,24 @@ import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import type { FastifyRequest } from 'fastify';
 import { WinstonModule, utilities } from 'nest-winston';
-import { format, transport, transports } from 'winston';
-import Loki from 'winston-loki';
+import { format, transports } from 'winston';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { ConfigService } from '@nestjs/config';
 
 export function setupLogger(app: NestFastifyApplication, service: string) {
     const cfg = app.get(ConfigService);
-
     const isProduction = cfg.get('NODE_ENV') === 'production';
-    const loki = cfg.get('LOKI_HOST');
-
-    const transportsList: transport[] = [
-        new transports.Console({
-            format: format.combine(
-                format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-                format.ms(),
-                format.errors({ stack: true }),
-
-                isProduction
-                    ? format.json()
-                    : utilities.format.nestLike(service, {
-                          colors: true,
-                          prettyPrint: false,
-                      }),
-            ),
-        }),
-    ];
-
-    if (loki) {
-        transportsList.push(
-            new Loki({
-                host: loki,
-                labels: { app: service },
-                json: true,
-                format: format.json(),
-                replaceTimestamp: true,
-                onConnectionError: (err) => console.error('Loki connection error:', err),
-            }),
-        );
-    }
 
     const logger = WinstonModule.createLogger({
         level: isProduction ? 'info' : 'debug',
-        transports: transportsList,
+        format: format.combine(
+            format.timestamp({ format: 'YYYY-MM-DDTHH:mm:ss.SSSZ' }),
+            format.errors({ stack: true }),
+            isProduction
+                ? format.json()
+                : format.combine(format.ms(), utilities.format.nestLike(service, { colors: true })),
+        ),
+        transports: [new transports.Console()],
     });
 
     app.useLogger(logger);
@@ -66,72 +40,54 @@ export class LoggingInterceptor implements NestInterceptor {
 
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
         const request = context.switchToHttp().getRequest<FastifyRequest>();
-        const { method, url, body, query, ip, headers } = request;
-
-        const requestId = request.id || request.headers['x-request-id'] || 'unknown';
-        const userAgent = headers['user-agent'] || 'unknown';
         const startTime = Date.now();
 
-        const controllerName = context.getClass().name;
-        const handlerName = context.getHandler().name;
+        const baseCtx = {
+            request_id: request.id || request.headers['x-request-id'] || 'unknown',
+            method: request.method,
+            url: request.url,
+            path: request.url.split('?')[0],
+            controller: context.getClass().name,
+            handler: context.getHandler().name,
+            ip: request.ip,
+            referer: request.headers['referer'] || 'direct',
+            user_agent: request.headers['user-agent'] || 'unknown',
+            triggered_by: 'interceptor',
+        };
 
-        const sanitizedBody = this.sanitize(body);
-        const referer = headers['referer'] || 'direct';
-
-        this.logger.log(`--> ${method} ${url}`, {
-            context: 'HTTP',
-            type: 'request_incoming',
-            method,
-            url,
-            path: url.split('?')[0],
-            requestId,
-            controller: controllerName,
-            handler: handlerName,
-            ip,
-            userAgent,
-            referer,
-            protocol: request.protocol,
-            body: sanitizedBody,
-            query: query,
+        this.logger.log(`Incoming ${baseCtx.method} ${baseCtx.url}`, {
+            ...baseCtx,
+            type: 'request',
+            body: this.sanitize(request.body),
+            query: request.query,
         });
 
         return next.handle().pipe(
             tap(() => {
-                const delay = Date.now() - startTime;
+                const delay_num = Date.now() - startTime;
 
-                this.logger.log(`<-- ${method} ${url} | 200 | ${delay}ms`, {
-                    context: 'HTTP',
-                    type: 'request_completed',
-                    method,
-                    url,
-                    requestId,
-                    controller: controllerName,
-                    handler: handlerName,
-                    ip,
-                    delay_num: delay,
-                    status: 'success',
-                    statusCode: 200,
+                this.logger.log(`${baseCtx.method} ${baseCtx.path} | 200 | ${delay_num}ms`, {
+                    ...baseCtx,
+                    type: 'response',
+                    status_code: 200,
+                    delay_num,
                 });
             }),
             catchError((err) => {
-                const delay = Date.now() - startTime;
-                const statusCode = err.status || err.statusCode || 500;
+                const delay_num = Date.now() - startTime;
+                const status_code = err.status || err.statusCode || 500;
 
-                this.logger.error(`<-- ${method} ${url} | ${statusCode} | ${delay}ms`, {
-                    context: 'HTTP',
-                    type: 'request_error',
-                    method,
-                    url,
-                    requestId,
-                    controller: controllerName,
-                    handler: handlerName,
-                    ip,
-                    statusCode,
-                    delay_num: delay,
-                    status: 'error',
-                    errorMessage: err?.message,
-                    errorStack: err?.stack,
-                });
+                this.logger.error(
+                    `${baseCtx.method} ${baseCtx.path} | ${status_code} | ${delay_num}ms`,
+                    {
+                        ...baseCtx,
+                        type: 'error',
+                        status_code,
+                        delay_num,
+                        stack: err.stack,
+                        error_details: err.response || err.message,
+                    },
+                );
 
                 return throwError(() => err);
             }),
@@ -142,19 +98,126 @@ export class LoggingInterceptor implements NestInterceptor {
         if (!data || typeof data !== 'object') return data;
         if (Array.isArray(data)) return data.map((v) => this.sanitize(v));
 
-        return Object.keys(data).reduce((acc, key) => {
+        const cleanData = JSON.parse(JSON.stringify(data));
+
+        return Object.keys(cleanData).reduce((acc, key) => {
             const isSensitive = this.sensitiveFields.some((field) =>
                 key.toLowerCase().includes(field),
             );
 
             if (isSensitive) {
                 acc[key] = '***';
-            } else if (typeof data[key] === 'object') {
-                acc[key] = this.sanitize(data[key]);
+            } else if (typeof cleanData[key] === 'object') {
+                acc[key] = this.sanitize(cleanData[key]);
             } else {
-                acc[key] = data[key];
+                acc[key] = cleanData[key];
             }
             return acc;
         }, {});
     }
 }
+
+/**
+ * Represents a structured application log payload for Grafana Loki.
+ * This object is flattened to ensure each property is indexed as a top-level label/column.
+ *
+ * @typedef {Object} TLog
+ */
+export type TLog = {
+    /**
+     * The severity level of the log.
+     * Used by Grafana to color-code rows and for alerting.
+     * @type {'info' | 'error' | 'warn'}
+     */
+    level: 'info' | 'error' | 'warn';
+    /**
+     * Human-readable summary of the event.
+     * @example 'Request completed POST /v1/auth/sign-in | 200 | 145ms'
+     * @type {string}
+     */
+    message: string;
+    /**
+     * Event occurrence time in ISO 8601 format.
+     * @example '2026-05-09T01:17:29.000Z'
+     * @type {string}
+     */
+    timestamp: string;
+    /**
+     * Unique identifier for the HTTP request (e.g., UUID, NanoID).
+     * Used to correlate all logs produced within a single request lifecycle.
+     * @type {string}
+     */
+    request_id: string;
+    /**
+     * The system component that triggered the log entry.
+     * @type {'interceptor' | 'filter_exception' | 'guard' | 'service'}
+     */
+    triggered_by: 'interceptor' | 'filter_exception' | 'guard' | 'service';
+    /**
+     * The logical type of the event within the request/response flow.
+     * @type {'request' | 'response' | 'error' | 'system'}
+     */
+    type: 'request' | 'response' | 'error' | 'system';
+    /**
+     * The HTTP method used for the request.
+     * @type {'POST' | 'GET' | 'DELETE' | 'PATCH' | 'PUT' | 'OPTIONS' | 'HEAD'}
+     */
+    method: 'POST' | 'GET' | 'DELETE' | 'PATCH' | 'PUT' | 'OPTIONS' | 'HEAD';
+    /**
+     * The full URL of the request, including query parameters.
+     * @example '/v1/auth/sign-in?source=mobile'
+     * @type {string}
+     */
+    url: string;
+    /**
+     * The sanitized API path, including versioning but excluding query parameters.
+     * Ideal for aggregating statistics per endpoint.
+     * @example '/v1/auth/sign-in'
+     * @type {string}
+     */
+    path: string;
+    /**
+     * The HTTP status code returned to the client.
+     * @example 200
+     * @type {number}
+     */
+    status_code: number;
+    /**
+     * Request processing time in milliseconds.
+     * Note: Typically undefined for entries with type 'request'.
+     * @type {number}
+     */
+    delay_num?: number;
+    /**
+     * The client's IP address.
+     * @type {string}
+     */
+    ip: string;
+    /**
+     * The client's application or browser identification string.
+     * @type {string}
+     */
+    user_agent: string;
+    /**
+     * The name of the NestJS controller handling the request.
+     * @example 'AuthController'
+     * @type {string}
+     */
+    controller: string;
+    /**
+     * The name of the specific controller method (handler).
+     * @example 'signIn'
+     * @type {string}
+     */
+    handler: string;
+    /**
+     * The error stack trace. Only populated when level is 'error'.
+     * @type {string}
+     */
+    stack?: string;
+    /**
+     * Additional contextual data for debugging (e.g., Zod validation issues, DB error details).
+     * @type {any}
+     */
+    error_details?: any;
+};

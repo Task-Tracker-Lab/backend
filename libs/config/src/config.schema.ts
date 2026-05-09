@@ -91,7 +91,6 @@ export const ConfigSchema = z.object({
     S3_SECRET_KEY: z.string({
         error: 'S3_SECRET_KEY is missing (MinIO root password or IAM secret)',
     }),
-    LOKI_HOST: z.string().url().min(1).optional(),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
