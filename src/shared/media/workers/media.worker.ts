@@ -4,12 +4,9 @@ import { MEDIA_JOBS, MEDIA_QUEUES, MEDIA_SPECS } from '../media.constant';
 import { Job } from 'bullmq';
 import { S3Service } from '@libs/s3';
 import { dirname } from 'path';
-import { Logger } from '@nestjs/common';
 
 @Processor(MEDIA_QUEUES.RESIZE)
 export class MediaProcessor extends WorkerHost {
-    private logger = new Logger(MediaProcessor.name);
-
     constructor(
         private readonly imagor: ImagorService,
         private readonly s3: S3Service,
@@ -21,7 +18,6 @@ export class MediaProcessor extends WorkerHost {
         if (job.name !== MEDIA_JOBS.RESIZE_IMAGES) return;
 
         const { original: originalFilePath, context } = job.data;
-        const jobId = job.id;
 
         try {
             await job.updateProgress(5);
@@ -59,7 +55,6 @@ export class MediaProcessor extends WorkerHost {
             };
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
-            this.logger.error(`[Job:${jobId}] Resize failed: ${errorMessage}`);
             await job.log(`Error during resizing: ${errorMessage}`);
 
             throw error;

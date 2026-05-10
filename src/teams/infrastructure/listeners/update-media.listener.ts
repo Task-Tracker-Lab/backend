@@ -1,15 +1,13 @@
-import { Inject, Logger } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { ITeamsRepository } from '@core/teams/domain/repository';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Job, UnrecoverableError } from 'bullmq';
+import { type Job, UnrecoverableError } from 'bullmq';
 import { MEDIA_JOBS, MEDIA_QUEUES, type UpdateMediaTeam } from '@shared/media';
 import { TeamMemberPolicy } from '@core/teams/domain/policy';
 import type { TeamRole } from '@shared/entities';
 
 @Processor(MEDIA_QUEUES.SAVE_ENTITY)
 export class UpdateTeamMediaListener extends WorkerHost {
-    private readonly logger = new Logger(UpdateTeamMediaListener.name);
-
     constructor(
         @Inject('ITeamsRepository')
         private readonly repository: ITeamsRepository,
@@ -28,9 +26,9 @@ export class UpdateTeamMediaListener extends WorkerHost {
 
             await this.executeMediaUpdate(teamId, type, path);
 
-            this.logger.log(`Successfully updated ${type} for team ${entity.slug}`);
+            await job.log(`Successfully updated ${type} for team ${entity.slug}`);
         } catch (error) {
-            this.logger.error(
+            await job.log(
                 `Failed to update ${type} for team ${entity.slug}: ${error instanceof Error ? error.message : String(error)}`,
             );
             throw error;
