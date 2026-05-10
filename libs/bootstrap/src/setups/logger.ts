@@ -94,7 +94,7 @@ export class LoggingInterceptor implements NestInterceptor {
         );
     }
 
-    private sanitize(data: any): any {
+    private sanitize<T>(data: T) {
         if (!data || typeof data !== 'object') return data;
         if (Array.isArray(data)) return data.map((v) => this.sanitize(v));
 
