@@ -2,16 +2,26 @@ name: 'CodeQL'
 
 on:
     push:
-        branches: [main, dev, feat/**, chore/**, build/**]
+        branches: [main, dev]
+        paths-ignore:
+            - '**.md'
+            - 'infra/**'
+            - 'migrations/**'
     pull_request:
-        branches: [main]
+        branches: [main, dev]
+        paths-ignore:
+            - '**.md'
     schedule:
         - cron: '15 13 * * 5'
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
     analyze:
         name: Analyze
         runs-on: ubuntu-latest
+        timeout-minutes: 360
         permissions:
             actions: read
             contents: read
@@ -25,9 +35,12 @@ jobs:
               uses: github/codeql-action/init@v3
               with:
                   languages: javascript-typescript
+                  queries: security-extended
 
             - name: Autobuild
               uses: github/codeql-action/autobuild@v3
 
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v3
+              with:
+                  category: '/language:javascript-typescript'
