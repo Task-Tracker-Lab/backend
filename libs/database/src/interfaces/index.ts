@@ -1,1 +1,1 @@
-export * from './database-module.interface';
+export * from './module.interface';
