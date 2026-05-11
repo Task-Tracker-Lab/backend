@@ -1,162 +1,80 @@
-import {
-    type DynamicModule,
-    Logger,
-    Module,
-    OnApplicationShutdown,
-    type Provider,
-    type Type,
-} from '@nestjs/common';
+import { Inject, Logger, Module, OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { Pool } from 'pg';
-import { DATABASE_OPTIONS, DATABASE_SERVICE } from './database.constants';
-import type {
-    DatabaseModuleAsyncOptions,
-    DatabaseModuleOptions,
-    DatabaseModuleOptionsFactory,
-} from './interfaces';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import { DATABASE_SERVICE, SQL_CLIENT } from './constants';
 import { MigrationService } from './migration.service';
+import {
+    ConfigurableModuleClass,
+    MODULE_OPTIONS_TOKEN,
+    OPTIONS_TYPE,
+} from './database.module-definition';
 
 @Module({
-    providers: [],
-})
-export class DatabaseModule implements OnApplicationShutdown {
-    private static logger = new Logger(DatabaseModule.name);
-
-    private static pool: Pool;
-
-    static register(config: DatabaseModuleOptions): DynamicModule {
-        return {
-            module: DatabaseModule,
-            global: config.global ?? false,
-            providers: [
-                this.createOptionsProvider(config),
-                this.createDatabaseProvider(),
-                MigrationService,
-            ],
-            exports: [DATABASE_SERVICE],
-        };
-    }
-
-    static registerAsync(config: DatabaseModuleAsyncOptions): DynamicModule {
-        return {
-            module: DatabaseModule,
-            global: config.global ?? false,
-            imports: config.imports ?? [],
-            providers: [
-                ...this.createAsyncProviders(config),
-                this.createDatabaseProvider(),
-                MigrationService,
-            ],
-            exports: [DATABASE_SERVICE],
-        };
-    }
-
-    private static createOptionsProvider(options: DatabaseModuleOptions): Provider {
-        return {
-            provide: DATABASE_OPTIONS,
-            useValue: options,
-        };
-    }
-
-    private static createDatabaseProvider(): Provider {
-        return {
-            provide: DATABASE_SERVICE,
-            useFactory: async (cfg: ConfigService, opts: DatabaseModuleOptions) => {
-                const baseUrl = cfg.get<string>('DATABASE_URL');
+    providers: [
+        MigrationService,
+        {
+            provide: SQL_CLIENT,
+            inject: [ConfigService, MODULE_OPTIONS_TOKEN],
+            useFactory: (configService: ConfigService, opts: typeof OPTIONS_TYPE) => {
+                const baseUrl = configService.getOrThrow<string>('DATABASE_URL');
                 const url = new URL(baseUrl);
-                url.searchParams.set('options', `-c search_path=${opts.schemaName || 'public'}`);
 
-                const pool = new Pool({
-                    connectionString: url.toString(),
-                    max: 20,
-                    min: 2,
-                    connectionTimeoutMillis: 2000,
-                    idleTimeoutMillis: 10000,
-                    maxUses: 5000,
-                    keepAlive: true,
+                if (opts.schemaName) {
+                    url.searchParams.set('options', `-c search_path=${opts.schemaName}`);
+                }
+
+                return postgres(url.toString(), {
+                    onnotice: (msg) => new Logger('PostgresJS').verbose(msg),
+                    backoff: (attempt) => Math.min(attempt * 100, 3000),
+                    target_session_attrs: 'read-write',
+                    publications: 'alltables',
+                    connect_timeout: 2,
+                    idle_timeout: 5,
+                    max_lifetime: 60 * 60,
+                    keep_alive: 30,
+                    transform: {
+                        undefined: null,
+                    },
+                    ...opts.pool,
                 });
+            },
+        },
+        {
+            provide: DATABASE_SERVICE,
+            inject: [SQL_CLIENT, MODULE_OPTIONS_TOKEN],
+            useFactory: (sql: postgres.Sql, opts: typeof OPTIONS_TYPE) => {
+                const logger = new Logger('Drizzle');
 
-                pool.on('error', (err) => {
-                    DatabaseModule.logger.error('Database pool connection lost or reset', err);
-                });
-
-                this.pool = pool;
-
-                return drizzle(pool, {
+                return drizzle(sql, {
                     schema: opts.schema,
                     logger: opts.logging
                         ? {
                               logQuery(query, params) {
-                                  const start = Date.now();
-                                  DatabaseModule.logger.debug(`SQL: ${query}`);
-
-                                  if (params?.length) {
-                                      DatabaseModule.logger.debug(
-                                          `Params: ${JSON.stringify(params)}`,
-                                      );
-                                  }
-
-                                  const duration = Date.now() - start;
-                                  DatabaseModule.logger.debug(`Execution time: ${duration}ms`);
+                                  logger.debug(`SQL: ${query}`);
+                                  if (params?.length)
+                                      logger.debug(`Params: ${JSON.stringify(params)}`);
                               },
                           }
                         : false,
                 });
             },
-            inject: [ConfigService, DATABASE_OPTIONS],
-        };
+        },
+    ],
+    exports: [DATABASE_SERVICE],
+})
+export class DatabaseModule extends ConfigurableModuleClass implements OnApplicationShutdown {
+    private readonly logger = new Logger(DatabaseModule.name);
+
+    constructor(
+        @Inject(SQL_CLIENT)
+        private readonly sql: postgres.Sql,
+    ) {
+        super();
     }
 
-    private static createAsyncProviders(options: DatabaseModuleAsyncOptions): Provider[] {
-        if (options.useFactory) {
-            return [
-                {
-                    provide: DATABASE_OPTIONS,
-                    useFactory: options.useFactory,
-                    inject: options.inject || [],
-                },
-                ...(options.extraProviders || []),
-            ];
-        }
-
-        const providers: Provider[] = [];
-
-        const useClass = options.useClass || options.useExisting;
-        if (!useClass) {
-            throw new Error(
-                'You must provide either useClass, useExisting or useFactory in DatabaseModuleAsyncOptions',
-            );
-        }
-
-        providers.push(this.createAsyncOptionsProvider(useClass));
-
-        if (options.useClass) {
-            providers.push({ provide: useClass, useClass });
-        }
-
-        if (options.extraProviders) {
-            providers.push(...options.extraProviders);
-        }
-
-        return providers;
-    }
-
-    private static createAsyncOptionsProvider(
-        useClass: Type<DatabaseModuleOptionsFactory>,
-    ): Provider {
-        return {
-            provide: DATABASE_OPTIONS,
-            useFactory: async (optionsFactory: DatabaseModuleOptionsFactory) =>
-                optionsFactory.createDatabaseOptions(),
-            inject: [useClass],
-        };
-    }
-
-    async onApplicationShutdown(_signal?: string) {
-        if (DatabaseModule.pool) {
-            DatabaseModule.logger.log('Closing database connections...');
-            await DatabaseModule.pool.end();
-        }
+    async onApplicationShutdown() {
+        this.logger.log('Closing database connections...');
+        await this.sql.end();
     }
 }

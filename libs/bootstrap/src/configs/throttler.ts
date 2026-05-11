@@ -1,5 +1,4 @@
-import * as dotenv from 'dotenv';
-dotenv.config();
+import 'dotenv/config';
 import type { ThrottlerModuleOptions } from '@nestjs/throttler';
 
 export const DEFAULT_THROTTLER_OPTIONS: ThrottlerModuleOptions = [

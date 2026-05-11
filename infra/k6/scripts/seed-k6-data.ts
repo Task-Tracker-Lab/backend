@@ -1,7 +1,7 @@
 import { createId } from '@paralleldrive/cuid2';
 import * as argon from 'argon2';
-import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { Pool } from 'pg';
+import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import * as sc from '../../../src/shared/entities/index';
@@ -9,7 +9,7 @@ import Redis from 'ioredis';
 import { assertEnv, DB_URL, REDIS_URL } from './k6-env';
 import { KEYS } from './k6-data-keys';
 
-async function seed_db(db: NodePgDatabase<typeof sc>) {
+async function seed_db(db: PostgresJsDatabase<typeof sc>) {
     const COUNT = 1000;
     const OUT_USERS_FILE = resolve(process.cwd(), 'infra/k6/data/users.json');
     const OUT_TEAMS_FILE = resolve(process.cwd(), 'infra/k6/data/teams.json');
@@ -149,6 +149,7 @@ async function seed_redis(redis: Redis) {
     const INVITES_PER_TEAM = 10;
 
     const invitesData = [];
+
     teams.forEach((team, teamIdx) => {
         for (let j = 1; j <= INVITES_PER_TEAM; j++) {
             const inviteeIdx = (teamIdx + j) % users.length;
@@ -193,8 +194,8 @@ async function seed_redis(redis: Redis) {
 async function main() {
     assertEnv();
     const redis = new Redis(REDIS_URL);
-    const pool = new Pool({ connectionString: DB_URL });
-    const db = drizzle(pool, { schema: sc });
+    const queryClient = postgres(DB_URL, { max: 1 });
+    const db = drizzle(queryClient, { schema: sc });
 
     try {
         await seed_db(db);
@@ -203,7 +204,7 @@ async function main() {
         console.error('Error:', e);
         process.exit(1);
     } finally {
-        await pool.end();
+        await queryClient.end();
         await redis.quit();
     }
 }

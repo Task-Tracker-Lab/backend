@@ -8,8 +8,8 @@ import {
 } from '@nestjs/common';
 import { ZodValidationException } from 'nestjs-zod';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { DatabaseError } from 'pg';
-import { BaseException, IErrorOptions } from './exception';
+import { PostgresError } from 'postgres';
+import { BaseException, type IErrorOptions } from './exception';
 import { DrizzleQueryError } from 'drizzle-orm';
 import type { ZodError, ZodIssue } from 'zod/v4';
 import { DATABASE_ERRORS } from './swagger';
@@ -65,9 +65,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         const { request, response } = this.getCtxBase(host);
 
         const error =
-            exception.cause instanceof DatabaseError
+            exception.cause instanceof PostgresError
                 ? exception.cause
-                : exception instanceof DatabaseError
+                : exception instanceof PostgresError
                   ? exception
                   : null;
 
@@ -85,9 +85,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
         this.log(exception, host, status, {
             dbCode: error?.code,
-            dbTable: error?.table,
+            dbTable: error?.table_name,
             dbDetail: error?.detail,
-            query: this.isDev ? exception.message : undefined,
+            query: this.isDev ? exception.query : undefined,
         });
 
         return response.status(status).send(

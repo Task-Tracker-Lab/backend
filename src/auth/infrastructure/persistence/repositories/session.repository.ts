@@ -35,12 +35,12 @@ export class SessionRepository implements ISessionRepository {
     }
 
     async revoke(id: string) {
-        const { rowCount } = await this.db
+        const result = await this.db
             .update(schema.sessions)
             .set({ isRevoked: true, updatedAt: new Date() })
             .where(eq(schema.sessions.id, id));
 
-        return (rowCount ?? 0) > 0;
+        return (result?.count ?? 0) > 0;
     }
 
     async revokeAllByUserId(userId: string, exceptSessionId?: string) {
@@ -61,6 +61,6 @@ export class SessionRepository implements ISessionRepository {
             .delete(schema.sessions)
             .where(lt(schema.sessions.expiresAt, new Date()));
 
-        return result.rowCount;
+        return result?.count ?? 0;
     }
 }
