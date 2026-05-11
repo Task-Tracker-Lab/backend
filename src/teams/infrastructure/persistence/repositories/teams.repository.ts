@@ -22,14 +22,14 @@ export class TeamsRepository implements ITeamsRepository {
     };
 
     public addMember = async (dto: NewTeamMember) => {
-        const { rowCount } = await this.db
+        const result = await this.db
             .insert(schema.teamMembers)
             .values(dto)
             .onConflictDoNothing({
                 target: [schema.teamMembers.teamId, schema.teamMembers.userId],
             });
 
-        return (rowCount ?? 0) > 0;
+        return (result?.count ?? 0) > 0;
     };
 
     public create = async (ownerId: string, dto: NewTeam, tags?: string[]) => {
@@ -95,7 +95,7 @@ export class TeamsRepository implements ITeamsRepository {
     public remove = async (teamId: string, userId) => {
         const suffix = Date.now().toString();
 
-        const { rowCount } = await this.db
+        const result = await this.db
             .update(schema.teams)
             .set({
                 deletedAt: new Date(),
@@ -103,7 +103,7 @@ export class TeamsRepository implements ITeamsRepository {
             })
             .where(and(eq(schema.teams.id, teamId), eq(schema.teams.ownerId, userId)));
 
-        return (rowCount ?? 0) > 0;
+        return (result?.count ?? 0) > 0;
     };
 
     public findMember = async (teamId: string, userId: string) => {
@@ -195,7 +195,7 @@ export class TeamsRepository implements ITeamsRepository {
                 and(eq(schema.teamMembers.teamId, teamId), eq(schema.teamMembers.userId, userId)),
             );
 
-        return (result.rowCount ?? 0) > 0;
+        return (result?.count ?? 0) > 0;
     };
 
     public syncTags = async (teamId: string, tagNames: string[]) => {
@@ -239,23 +239,23 @@ export class TeamsRepository implements ITeamsRepository {
                 and(eq(schema.teamMembers.teamId, teamId), eq(schema.teamMembers.userId, userId)),
             );
 
-        return (result.rowCount ?? 0) > 0;
+        return (result?.count ?? 0) > 0;
     };
 
     public async updateTeamAvatar(teamId: string, url: string): Promise<boolean> {
-        const { rowCount } = await this.db
+        const result = await this.db
             .update(schema.teams)
             .set({ avatarUrl: url, updatedAt: new Date() })
             .where(eq(schema.teams.id, teamId));
-        return (rowCount ?? 0) > 0;
+        return (result?.count ?? 0) > 0;
     }
 
     public async updateTeamBanner(teamId: string, url: string): Promise<boolean> {
-        const { rowCount } = await this.db
+        const result = await this.db
             .update(schema.teams)
             .set({ coverUrl: url, updatedAt: new Date() })
             .where(eq(schema.teams.id, teamId));
-        return (rowCount ?? 0) > 0;
+        return (result?.count ?? 0) > 0;
     }
 
     private get memberSelection() {

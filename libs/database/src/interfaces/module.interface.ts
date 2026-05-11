@@ -1,4 +1,5 @@
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import type { Options, Sql } from 'postgres';
 
 export interface DatabaseModuleOptions {
     /**
@@ -15,6 +16,15 @@ export interface DatabaseModuleOptions {
      * @example schema
      */
     schema: Record<string, unknown>;
+
+    /**
+     * Настройки драйвера `postgres.js`.
+     * * Позволяет настроить пул соединений, таймауты и SSL.
+     * * **Внимание:** Параметры отличаются от драйвера `pg`.
+     * @see https://github.com/porsager/postgres#options
+     * @example { max: 20, idle_timeout: 30, connect_timeout: 5 }
+     */
+    pool?: Options<any>;
 
     /**
      * Включение или выключение логирования SQL-запросов в консоль через NestJS Logger.
@@ -46,4 +56,6 @@ export interface DatabaseModuleOptions {
  * @Inject(DATABASE_SERVICE) private readonly db: DatabaseService<typeof schema>
  * ) {}
  */
-export type DatabaseService<T extends Record<string, unknown>> = NodePgDatabase<T>;
+export type DatabaseService<T extends Record<string, unknown>> = PostgresJsDatabase<T> & {
+    $client: Sql;
+};
