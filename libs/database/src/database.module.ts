@@ -2,20 +2,19 @@ import { Inject, Logger, Module, OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { DATABASE_SERVICE } from './constants';
+import { DATABASE_SERVICE, SQL_CLIENT } from './constants';
 import { MigrationService } from './migration.service';
 import {
     ConfigurableModuleClass,
     MODULE_OPTIONS_TOKEN,
     OPTIONS_TYPE,
 } from './database.module-definition';
-import { DatabaseService } from './interfaces';
 
 @Module({
     providers: [
         MigrationService,
         {
-            provide: 'SQL_CLIENT',
+            provide: SQL_CLIENT,
             inject: [ConfigService, MODULE_OPTIONS_TOKEN],
             useFactory: (configService: ConfigService, opts: typeof OPTIONS_TYPE) => {
                 const baseUrl = configService.getOrThrow<string>('DATABASE_URL');
@@ -43,7 +42,7 @@ import { DatabaseService } from './interfaces';
         },
         {
             provide: DATABASE_SERVICE,
-            inject: ['SQL_CLIENT', MODULE_OPTIONS_TOKEN],
+            inject: [SQL_CLIENT, MODULE_OPTIONS_TOKEN],
             useFactory: (sql: postgres.Sql, opts: typeof OPTIONS_TYPE) => {
                 const logger = new Logger('Drizzle');
 
@@ -68,14 +67,14 @@ export class DatabaseModule extends ConfigurableModuleClass implements OnApplica
     private readonly logger = new Logger(DatabaseModule.name);
 
     constructor(
-        @Inject(DATABASE_SERVICE)
-        private readonly db: DatabaseService<any>,
+        @Inject(SQL_CLIENT)
+        private readonly sql: postgres.Sql,
     ) {
         super();
     }
 
     async onApplicationShutdown() {
         this.logger.log('Closing database connections...');
-        await this.db.$client.end();
+        await this.sql.end();
     }
 }

@@ -1,1 +1,2 @@
 export const DATABASE_SERVICE = 'DATABASE_SERVICE';
+export const SQL_CLIENT = 'SQL_CLIENT';

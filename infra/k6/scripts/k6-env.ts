@@ -1,6 +1,4 @@
-import * as dotenv from 'dotenv';
-
-dotenv.config();
+import 'dotenv/config';
 
 export const DB_URL = process.env.DATABASE_URL;
 export const REDIS_URL =

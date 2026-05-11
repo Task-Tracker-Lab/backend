@@ -1,3 +1,3 @@
 export * from './database.module';
-export * from './constants';
+export { DATABASE_SERVICE } from './constants';
 export type { DatabaseService } from './interfaces';

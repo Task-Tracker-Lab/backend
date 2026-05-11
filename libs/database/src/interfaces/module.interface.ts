@@ -1,5 +1,5 @@
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import type { Options, Sql } from 'postgres';
+import type { Options } from 'postgres';
 
 export interface DatabaseModuleOptions {
     /**
@@ -48,14 +48,15 @@ export interface DatabaseModuleOptions {
 }
 
 /**
- * Основной тип сервиса базы данных для инъекции в репозитории.
- * * Включает в себя типизированный API Drizzle и прямой доступ к драйверу через `$client`.
- * * @template T - Тип вашей схемы данных (например, `typeof schema`).
- * * @example
+ * Тип для внедрения Drizzle ORM в репозитории.
+ * Использует драйвер postgres-js под капотом.
+ *
+ * @example
+ * // В репозитории:
  * constructor(
- * @Inject(DATABASE_SERVICE) private readonly db: DatabaseService<typeof schema>
+ *   @Inject(DATABASE_SERVICE) private readonly db: DatabaseService<typeof schema>
  * ) {}
+ *
+ * @template TSchema - Тип вашей схемы данных (например, `typeof schema`).
  */
-export type DatabaseService<T extends Record<string, unknown>> = PostgresJsDatabase<T> & {
-    $client: Sql;
-};
+export type DatabaseService<TSchema extends Record<string, unknown>> = PostgresJsDatabase<TSchema>;

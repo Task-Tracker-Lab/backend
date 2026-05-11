@@ -1,12 +1,12 @@
 import Redis from 'ioredis';
-import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as sc from '../../../src/shared/entities';
 import { sql } from 'drizzle-orm';
-import { Pool } from 'pg';
+import postgres from 'postgres';
 import { assertEnv, DB_URL, REDIS_URL } from './k6-env';
 import { KEYS } from './k6-data-keys';
 
-async function clearDB(db: NodePgDatabase<typeof sc>) {
+async function clearDB(db: PostgresJsDatabase<typeof sc>) {
     console.log('Cleaning up ONLY k6 test data from DB...');
     return await db.transaction(async (tx) => {
         await tx.delete(sc.users).where(sql`${sc.users.email} LIKE 'k6_user_%'`);
@@ -32,8 +32,8 @@ async function clearRedis(redis: Redis) {
 async function main() {
     assertEnv();
     const redis = new Redis(REDIS_URL);
-    const pool = new Pool({ connectionString: DB_URL });
-    const db = drizzle(pool, { schema: sc });
+    const queryClient = postgres(DB_URL, { max: 1 });
+    const db = drizzle(queryClient, { schema: sc });
 
     try {
         await clearDB(db);
@@ -42,7 +42,7 @@ async function main() {
         console.error('Error:', e);
         process.exit(1);
     } finally {
-        await pool.end();
+        await queryClient.end();
         await redis.quit();
     }
 }
