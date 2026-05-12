@@ -1,0 +1,43 @@
+name: 'Cleanup'
+
+on:
+    schedule:
+        - cron: '0 0 * * 0'
+    workflow_dispatch:
+
+permissions:
+    actions: write
+    contents: read
+
+jobs:
+    garbage-collector:
+        name: 'Cache & Artifacts'
+        runs-on: ubuntu-latest
+        steps:
+            - name: 'Purge All Caches'
+              shell: bash
+              run: |
+                  gh extension install actions/gh-actions-cache
+                  echo "::group::Cleaning Caches"
+                  # Удаляем все кэши. Если нужно оставить main, добавь: -B main
+                  gh actions-cache delete --all --confirm
+                  echo "::endgroup::"
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: 'Purge Old Artifacts'
+              shell: bash
+              run: |
+                  echo "::group::Cleaning Artifacts"
+                  gh run allocation-status --repo ${{ github.repository }}
+
+                  artifacts=$(gh api repos/${{ github.repository }}/actions/artifacts --paginate -q '.artifacts[].id')
+
+                  for artifact_id in $artifacts; do
+                    gh api -X DELETE repos/${{ github.repository }}/actions/artifacts/$artifact_id
+                  done
+
+                  echo "All artifacts deleted."
+                  echo "::endgroup::"
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
