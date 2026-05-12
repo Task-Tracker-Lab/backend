@@ -11,33 +11,35 @@ permissions:
 
 jobs:
     garbage-collector:
-        name: 'Cache & Artifacts'
+        name: 'Purge Storage'
         runs-on: ubuntu-latest
         steps:
-            - name: 'Purge All Caches'
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: 'Clean Actions Cache'
               shell: bash
               run: |
-                  gh extension install actions/gh-actions-cache
-                  echo "::group::Cleaning Caches"
-                  # Удаляем все кэши. Если нужно оставить main, добавь: -B main
-                  gh actions-cache delete --all --confirm
+                  echo "::group::Deleting Caches"
+                  gh cache delete --all --succeed-on-no-caches || echo "Caches already empty or cleared"
                   echo "::endgroup::"
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: 'Purge Old Artifacts'
+            - name: 'Clean Old Artifacts'
               shell: bash
               run: |
-                  echo "::group::Cleaning Artifacts"
-                  gh run allocation-status --repo ${{ github.repository }}
+                  echo "::group::Deleting Artifacts"
+                  artifacts=$(gh api repos/${{ github.repository }}/actions/artifacts --paginate -q '.artifacts[].id' || echo "")
 
-                  artifacts=$(gh api repos/${{ github.repository }}/actions/artifacts --paginate -q '.artifacts[].id')
-
-                  for artifact_id in $artifacts; do
-                    gh api -X DELETE repos/${{ github.repository }}/actions/artifacts/$artifact_id
-                  done
-
-                  echo "All artifacts deleted."
+                  if [ -n "$artifacts" ]; then
+                    for id in $artifacts; do
+                      gh api -X DELETE repos/${{ github.repository }}/actions/artifacts/$id || true
+                    done
+                    echo "Artifacts cleared."
+                  else
+                    echo "No artifacts found."
+                  fi
                   echo "::endgroup::"
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

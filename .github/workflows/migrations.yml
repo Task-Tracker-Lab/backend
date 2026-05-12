@@ -16,10 +16,10 @@ concurrency:
 
 env:
     FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-    DB_USER: test
-    DB_PASSWORD: password
+    DB_USER: tracker
+    DB_PASSWORD: super-tracker-password
     DB_NAME: test
-    DB_URL: postgres://user:password@localhost:5432/test_db
+    DB_URL: postgres://tracker:super-tracker-password@localhost:5432/test
 
 jobs:
     check:
