@@ -1,4 +1,4 @@
-name: '🚀 Feature Request'
+name: 'Feature Request'
 description: 'Предложить новую идею или улучшение'
 labels: ['enhancement']
 body:
