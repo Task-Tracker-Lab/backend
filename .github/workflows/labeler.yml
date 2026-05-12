@@ -1,0 +1,38 @@
+name: 'Pull Request Labeler'
+
+on:
+    # Важно: target позволяет работать в PR из форков
+    pull_request_target:
+        types: [opened, synchronize]
+
+jobs:
+    label:
+        permissions:
+            contents: read
+            pull-requests: write
+        runs-on: ubuntu-latest
+        steps:
+            - name: Ensure Labels Exist
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  labels=(
+                    "database:5319e7:Database schema and migrations"
+                    "core:e99695:Main application logic"
+                    "testing:ff69b4:Unit and E2E tests"
+                    "devops:006b75:Infrastructure and CI/CD"
+                    "shared-libs:bfdadc:Shared libraries in libs/"
+                    "dx:eeeeee:Developer experience and configs"
+                    "documentation:0075ca:Documentation and markdown files"
+                  )
+
+                  for label in "${labels[@]}"; do
+                    IFS=":" read -r name color desc <<< "$label"
+                    gh label create "$name" --color "$color" --description "$desc" --repo ${{ github.repository }} || true
+                  done
+
+            - name: Run Labeler
+              uses: actions/labeler@v5
+              with:
+                  configuration-path: .github/labeler.yml
+                  sync-labels: true
