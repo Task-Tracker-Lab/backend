@@ -1,0 +1,45 @@
+name: 'Cleanup'
+
+on:
+    schedule:
+        - cron: '0 0 * * 0'
+    workflow_dispatch:
+
+permissions:
+    actions: write
+    contents: read
+
+jobs:
+    garbage-collector:
+        name: 'Purge Storage'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: 'Clean Actions Cache'
+              shell: bash
+              run: |
+                  echo "::group::Deleting Caches"
+                  gh cache delete --all --succeed-on-no-caches || echo "Caches already empty or cleared"
+                  echo "::endgroup::"
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: 'Clean Old Artifacts'
+              shell: bash
+              run: |
+                  echo "::group::Deleting Artifacts"
+                  artifacts=$(gh api repos/${{ github.repository }}/actions/artifacts --paginate -q '.artifacts[].id' || echo "")
+
+                  if [ -n "$artifacts" ]; then
+                    for id in $artifacts; do
+                      gh api -X DELETE repos/${{ github.repository }}/actions/artifacts/$id || true
+                    done
+                    echo "Artifacts cleared."
+                  else
+                    echo "No artifacts found."
+                  fi
+                  echo "::endgroup::"
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

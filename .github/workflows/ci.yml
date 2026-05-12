@@ -1,10 +1,38 @@
 name: CI
 
 on:
-    pull_request:
-        branches: [dev, main, 'feat/**']
     push:
-        branches: [dev, main, 'feat/**']
+        branches:
+            - main
+            - dev
+            - 'feat/**'
+            - 'fix/**'
+            - 'refactor/**'
+            - 'chore/**'
+            - 'perf/**'
+            - 'build/**'
+            - 'ci/**'
+        paths-ignore:
+            - '**.md'
+            - 'infra/**'
+            - '.gitignore'
+            - 'docker-compose.yml'
+
+    pull_request:
+        branches:
+            - main
+            - dev
+        paths-ignore:
+            - '**.md'
+            - 'infra/**'
+    workflow_dispatch:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
     quality-check:
@@ -21,11 +49,11 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: 20
+                  node-version: 24
                   cache: 'pnpm'
 
             - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+              run: pnpm install --frozen-lockfile --prefer-offline
 
             - name: Run Lint
               run: pnpm run lint
