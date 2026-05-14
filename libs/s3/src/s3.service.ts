@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { DeleteObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { S3_CLIENT } from './s3.constants';
+import { DeleteObjectCommand, HeadBucketCommand, S3Client } from '@aws-sdk/client-s3';
+import { S3_CLIENT } from './constants';
 import { S3ModuleOptions } from './interfaces';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
@@ -14,13 +14,26 @@ export class S3Service {
         private s3Client: S3Client,
         @Inject(MODULE_OPTIONS_TOKEN)
         private options: S3ModuleOptions,
-    ) {}
+    ) { }
 
     private get bucket(): string {
         return this.options.bucket;
     }
 
-    async deleteFile(fileUrl: string): Promise<void> {
+    async isAlive(): Promise<boolean> {
+        try {
+            await this.s3Client.send(
+                new HeadBucketCommand({
+                    Bucket: this.bucket,
+                }),
+            );
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    async delete(fileUrl: string): Promise<void> {
         try {
             const url = new URL(fileUrl);
             const pathParts = url.pathname.split('/');
@@ -37,18 +50,18 @@ export class S3Service {
         }
     }
 
-    async uploadFile(
+    async upload(
         file: Buffer,
         fileOptions: {
             original: string;
             mimetype: string;
             cacheControl?: string;
             path?:
-                | {
-                      folder: string;
-                      key?: string;
-                  }
-                | string;
+            | {
+                folder: string;
+                key?: string;
+            }
+            | string;
         },
     ): Promise<string> {
         const { mimetype, original, path, cacheControl } = fileOptions;
