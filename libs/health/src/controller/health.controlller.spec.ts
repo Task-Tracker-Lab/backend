@@ -5,18 +5,25 @@ import { HttpStatus, Logger } from '@nestjs/common';
 describe('HealthController', () => {
     let controller: HealthController;
     let healthServiceMock: { getHealthData: ReturnType<typeof vi.fn> };
+
     const SERVICE_NAME = 'MyService';
+    const mockOptions = { serviceName: SERVICE_NAME };
+
     beforeEach(() => {
         healthServiceMock = {
             getHealthData: vi.fn(),
         };
-        controller = new HealthController(healthServiceMock as any, SERVICE_NAME);
+
+        controller = new HealthController(mockOptions as any, healthServiceMock as any);
 
         vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
     });
 
-    it('should throw SERVICE_UNAVAILABLE when service status is "down"', async () => {
-        healthServiceMock.getHealthData.mockResolvedValue({ status: 'down' });
+    it('should throw SERVICE_UNAVAILABLE when service status is false (down)', async () => {
+        healthServiceMock.getHealthData.mockResolvedValue({
+            status: false,
+            components: { database: 'down' },
+        });
 
         await expect(controller.checkHealth()).rejects.toMatchObject({
             status: HttpStatus.SERVICE_UNAVAILABLE,
@@ -25,17 +32,30 @@ describe('HealthController', () => {
                 message: expect.stringContaining(SERVICE_NAME),
                 details: expect.arrayContaining([
                     expect.objectContaining({
-                        status: 'down',
                         target: SERVICE_NAME,
+                        status: false,
                     }),
                 ]),
             },
         });
     });
 
+    it('should return "healthy" when status is true', async () => {
+        healthServiceMock.getHealthData.mockResolvedValue({ status: true });
+
+        const result = await controller.checkHealth();
+
+        expect(result).toBe('healthy');
+    });
+
     describe('ping', () => {
         it('should return the full health payload', async () => {
-            const mockPayload = { status: 'up' };
+            const mockPayload = {
+                service: SERVICE_NAME,
+                status: true,
+                components: {},
+                time: { uptime: '1h 0m 0s' },
+            };
             healthServiceMock.getHealthData.mockResolvedValue(mockPayload);
 
             const result = await controller.ping();

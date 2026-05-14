@@ -18,6 +18,7 @@ import { TeamsModule } from './teams';
 import { ProjectsModule } from './projects';
 import { HttpModule } from '@nestjs/axios';
 import { MediaModule } from '@shared/media';
+import { version } from '../package.json';
 
 @Module({
     imports: [
@@ -69,7 +70,21 @@ import { MediaModule } from '@shared/media';
             },
             adapter: FastifyAdapter,
         }),
-        HealthModule.register('gateway'),
+        HealthModule.registerAsync({
+            inject: [],
+            useFactory: () => {
+                return {
+                    serviceName: 'gateway',
+                    version,
+                    indicators: {
+                        database: async () => true,
+                        redis: async () => true,
+                        storage: async () => true,
+                        http: async () => true,
+                    },
+                };
+            },
+        }),
     ],
     providers: [
         {

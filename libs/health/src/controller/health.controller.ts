@@ -4,29 +4,33 @@ import { HealthService } from '../health.service';
 import { GetHealthSwagger, GetPingSwagger } from './health.swagger';
 import { ApiTags } from '@nestjs/swagger';
 import { BaseException } from '@shared/error';
+import { MODULE_OPTIONS_TOKEN } from '../health.module-definition';
+import { HealthModuleOptions } from '../interfaces';
 
 @SkipThrottle()
 @Controller()
 @ApiTags('System')
 export class HealthController {
     constructor(
-        private readonly healthService: HealthService,
-        @Inject('SERVICE_NAME') private readonly serviceName: string,
+        @Inject(MODULE_OPTIONS_TOKEN)
+        private readonly options: HealthModuleOptions,
+        private readonly service: HealthService,
     ) {}
 
     @Get('health')
     @GetHealthSwagger()
     async checkHealth() {
-        const pingData = await this.healthService.getHealthData();
+        const { serviceName } = this.options;
+        const pingData = await this.service.getHealthData();
 
-        if (pingData.status !== 'up') {
+        if (!pingData.status) {
             throw new BaseException(
                 {
                     code: 'SERVICE_UNHEALTHY',
-                    message: `Сервис ${this.serviceName} временно недоступен или работает некорректно`,
+                    message: `Сервис ${serviceName} временно недоступен или работает некорректно`,
                     details: [
                         {
-                            target: this.serviceName,
+                            target: serviceName,
                             status: pingData.status,
                             timestamp: new Date().toISOString(),
                         },
@@ -42,6 +46,6 @@ export class HealthController {
     @Get('ping')
     @GetPingSwagger()
     async ping() {
-        return this.healthService.getHealthData();
+        return this.service.getHealthData();
     }
 }
