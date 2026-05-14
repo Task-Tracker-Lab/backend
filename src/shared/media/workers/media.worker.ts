@@ -34,7 +34,7 @@ export class MediaProcessor extends WorkerHost {
 
                 const processedImage = await this.imagor.get(`/${originalFilePath}`, dimensions);
 
-                const uploadedPath = await this.s3.uploadFile(processedImage, {
+                const uploadedPath = await this.s3.upload(processedImage, {
                     original: targetFileName,
                     mimetype: 'image/webp',
                     path: {

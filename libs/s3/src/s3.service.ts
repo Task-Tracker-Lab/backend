@@ -1,34 +1,39 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { DeleteObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { S3_OPTIONS } from './s3.constants';
+import { DeleteObjectCommand, HeadBucketCommand, S3Client } from '@aws-sdk/client-s3';
+import { S3_CLIENT } from './constants';
 import { S3ModuleOptions } from './interfaces';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 import { extname } from 'path';
+import { MODULE_OPTIONS_TOKEN } from './s3.module-definition';
 
 @Injectable()
 export class S3Service {
-    private readonly s3Client: S3Client;
-    public readonly bucket: string;
-    private readonly endpoint: string;
-
     constructor(
-        @Inject(S3_OPTIONS)
+        @Inject(S3_CLIENT)
+        private s3Client: S3Client,
+        @Inject(MODULE_OPTIONS_TOKEN)
         private options: S3ModuleOptions,
-    ) {
-        const { bucket, credentials, endpoint, region } = options.connection;
-        this.bucket = bucket;
-        this.endpoint = endpoint as string;
+    ) { }
 
-        this.s3Client = new S3Client({
-            region,
-            endpoint,
-            credentials,
-            ...options.config,
-        });
+    private get bucket(): string {
+        return this.options.bucket;
     }
 
-    async deleteFile(fileUrl: string): Promise<void> {
+    async isAlive(): Promise<boolean> {
+        try {
+            await this.s3Client.send(
+                new HeadBucketCommand({
+                    Bucket: this.bucket,
+                }),
+            );
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    async delete(fileUrl: string): Promise<void> {
         try {
             const url = new URL(fileUrl);
             const pathParts = url.pathname.split('/');
@@ -45,21 +50,21 @@ export class S3Service {
         }
     }
 
-    async uploadFile(
+    async upload(
         file: Buffer,
-        options: {
+        fileOptions: {
             original: string;
             mimetype: string;
             cacheControl?: string;
             path?:
-                | {
-                      folder: string;
-                      key?: string;
-                  }
-                | string;
+            | {
+                folder: string;
+                key?: string;
+            }
+            | string;
         },
     ): Promise<string> {
-        const { mimetype, original, path, cacheControl } = options;
+        const { mimetype, original, path, cacheControl } = fileOptions;
 
         const folder = typeof path === 'object' ? path.folder : '';
         const key =

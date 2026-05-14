@@ -15,8 +15,8 @@ import { MediaProcessor } from './workers/media.worker';
         S3Module.registerAsync({
             inject: [ConfigService],
             useFactory: (cfg: ConfigService) => ({
+                bucket: cfg.getOrThrow('S3_BUCKET_NAME'),
                 connection: {
-                    bucket: cfg.getOrThrow('S3_BUCKET_NAME'),
                     endpoint: cfg.getOrThrow('S3_ENDPOINT'),
                     region: cfg.getOrThrow('S3_REGION'),
                     credentials: {
@@ -24,8 +24,11 @@ import { MediaProcessor } from './workers/media.worker';
                         secretAccessKey: cfg.getOrThrow('S3_SECRET_KEY'),
                     },
                 },
-                // FOR MINIO COMPARTABLE
-                config: { forcePathStyle: true },
+                config: {
+                    connectTimeout: 2000,
+                    requestTimeout: 5000,
+                    maxAttempts: 3,
+                }
             }),
         }),
         ImagorModule.forRootAsync({
@@ -55,4 +58,4 @@ import { MediaProcessor } from './workers/media.worker';
     controllers: [MediaController],
     providers: [MediaProcessor, MediaService],
 })
-export class MediaModule {}
+export class MediaModule { }

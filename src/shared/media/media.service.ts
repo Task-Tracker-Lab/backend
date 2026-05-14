@@ -24,7 +24,7 @@ export class MediaService {
         const { folder, fileName } = this.generateStoragePath(context, userId, file.filename);
 
         try {
-            const originalUrl = await this.s3.uploadFile(file.buffer, {
+            const originalUrl = await this.s3.upload(file.buffer, {
                 mimetype: file.mimetype,
                 original: file.filename,
                 path: { folder, key: fileName },
