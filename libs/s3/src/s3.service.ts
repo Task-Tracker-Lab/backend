@@ -1,31 +1,23 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DeleteObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { S3_OPTIONS } from './s3.constants';
+import { S3_CLIENT } from './s3.constants';
 import { S3ModuleOptions } from './interfaces';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 import { extname } from 'path';
+import { MODULE_OPTIONS_TOKEN } from './s3.module-definition';
 
 @Injectable()
 export class S3Service {
-    private readonly s3Client: S3Client;
-    public readonly bucket: string;
-    private readonly endpoint: string;
-
     constructor(
-        @Inject(S3_OPTIONS)
+        @Inject(S3_CLIENT)
+        private s3Client: S3Client,
+        @Inject(MODULE_OPTIONS_TOKEN)
         private options: S3ModuleOptions,
-    ) {
-        const { bucket, credentials, endpoint, region } = options.connection;
-        this.bucket = bucket;
-        this.endpoint = endpoint as string;
+    ) {}
 
-        this.s3Client = new S3Client({
-            region,
-            endpoint,
-            credentials,
-            ...options.config,
-        });
+    private get bucket(): string {
+        return this.options.bucket;
     }
 
     async deleteFile(fileUrl: string): Promise<void> {
@@ -47,7 +39,7 @@ export class S3Service {
 
     async uploadFile(
         file: Buffer,
-        options: {
+        fileOptions: {
             original: string;
             mimetype: string;
             cacheControl?: string;
@@ -59,7 +51,7 @@ export class S3Service {
                 | string;
         },
     ): Promise<string> {
-        const { mimetype, original, path, cacheControl } = options;
+        const { mimetype, original, path, cacheControl } = fileOptions;
 
         const folder = typeof path === 'object' ? path.folder : '';
         const key =

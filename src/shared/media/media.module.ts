@@ -15,17 +15,17 @@ import { MediaProcessor } from './workers/media.worker';
         S3Module.registerAsync({
             inject: [ConfigService],
             useFactory: (cfg: ConfigService) => ({
-                connection: {
-                    bucket: cfg.getOrThrow('S3_BUCKET_NAME'),
+                bucket: cfg.getOrThrow('S3_BUCKET_NAME'),
+                clientConfig: {
                     endpoint: cfg.getOrThrow('S3_ENDPOINT'),
                     region: cfg.getOrThrow('S3_REGION'),
                     credentials: {
                         accessKeyId: cfg.getOrThrow('S3_ACCESS_KEY'),
                         secretAccessKey: cfg.getOrThrow('S3_SECRET_KEY'),
                     },
+                    // FOR MINIO COMPARTABLE
+                    forcePathStyle: true,
                 },
-                // FOR MINIO COMPARTABLE
-                config: { forcePathStyle: true },
             }),
         }),
         ImagorModule.forRootAsync({

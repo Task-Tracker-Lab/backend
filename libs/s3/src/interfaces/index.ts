@@ -1,5 +1,1 @@
-export type {
-    S3ModuleOptions,
-    S3ModuleAsyncOptions,
-    S3ModuleOptionsFactory,
-} from './module.interface';
+export type { S3ModuleOptions } from './module.interface';

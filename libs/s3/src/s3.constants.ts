@@ -1,1 +1,1 @@
-export const S3_OPTIONS = 'S3_OPTIONS';
+export const S3_CLIENT = 'S3_CLIENT';
