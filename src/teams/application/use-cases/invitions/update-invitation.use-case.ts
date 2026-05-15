@@ -1,12 +1,12 @@
 import { ITeamsRepository } from '@core/teams/domain/repository';
-import { InjectRedis } from '@nestjs-modules/ioredis';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import Redis from 'ioredis';
 import { UpdateInvitationDto } from '../../dtos';
 import { BaseException } from '@shared/error';
 import { TeamInvite } from '../../dtos/invitation.dto';
 import { TeamMemberPolicy } from '@core/teams/domain/policy';
 import { TeamRole } from '@shared/entities';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
 
 @Injectable()
 export class UpdateInvitationUseCase {
@@ -14,7 +14,7 @@ export class UpdateInvitationUseCase {
 
     constructor(
         @Inject('ITeamsRepository') private readonly teamsRepo: ITeamsRepository,
-        @InjectRedis() private readonly redis: Redis,
+        @Inject(CACHE_SERVICE) private readonly cacheService: ICacheService,
         private readonly policy: TeamMemberPolicy,
     ) {}
 
@@ -23,13 +23,13 @@ export class UpdateInvitationUseCase {
         const member = await this.getMemberOrThrow(team.id, userId);
 
         const key = this.INVITES_KEY(code);
-        const { invite, ttl } = await this.getInviteContextOrThrow(key);
+        const { invite, ttlSeconds } = await this.getInviteContextOrThrow(key);
 
         this.validateInviteOwnership(invite, team.id);
         this.validatePolicy(member.role as TeamRole, invite.role as TeamRole, dto.role as TeamRole);
 
         invite.role = dto.role as TeamRole;
-        await this.redis.set(key, JSON.stringify(invite), 'EX', ttl);
+        await this.cacheService.setOne(key, JSON.stringify(invite), ttlSeconds);
 
         return {
             success: true,
@@ -60,9 +60,9 @@ export class UpdateInvitationUseCase {
     }
 
     private async getInviteContextOrThrow(key: string) {
-        const [rawInvite, ttl] = await Promise.all([this.redis.get(key), this.redis.ttl(key)]);
+        const { value, ttlSeconds } = await this.cacheService.getOneWithTtl(key);
 
-        if (!rawInvite || ttl <= 0) {
+        if (!value || ttlSeconds <= 0) {
             throw new BaseException(
                 {
                     code: 'INVITE_NOT_FOUND_OR_EXPIRED',
@@ -72,7 +72,7 @@ export class UpdateInvitationUseCase {
             );
         }
 
-        return { invite: JSON.parse(rawInvite) as TeamInvite, ttl };
+        return { invite: JSON.parse(value) as TeamInvite, ttlSeconds };
     }
 
     private validateInviteOwnership(invite: TeamInvite, teamId: string) {

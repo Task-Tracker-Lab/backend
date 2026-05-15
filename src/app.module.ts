@@ -19,6 +19,7 @@ import { ProjectsModule } from './projects';
 import { HttpModule } from '@nestjs/axios';
 import { MediaModule } from '@shared/media';
 import { version } from '../package.json';
+import { CacheModule } from '@shared/adapters/cache/module';
 
 @Module({
     imports: [
@@ -52,6 +53,7 @@ import { version } from '../package.json';
                 },
             }),
         }),
+        CacheModule,
         MediaModule,
         HttpModule.register({ global: true }),
         MailModule,

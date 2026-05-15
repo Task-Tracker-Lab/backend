@@ -1,9 +1,9 @@
 import { ITeamsRepository } from '@core/teams/domain/repository';
-import { InjectRedis } from '@nestjs-modules/ioredis';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
-import Redis from 'ioredis';
 import type { TeamInvite } from '../../dtos/invitation.dto';
+import { ICacheService } from '@shared/adapters/cache/ports';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 
 @Injectable()
 export class AcceptInvitationUseCase {
@@ -13,11 +13,11 @@ export class AcceptInvitationUseCase {
 
     constructor(
         @Inject('ITeamsRepository') private readonly teamsRepo: ITeamsRepository,
-        @InjectRedis() private readonly redis: Redis,
+        @Inject(CACHE_SERVICE) private readonly cacheService: ICacheService,
     ) {}
 
     async execute(code: string, userId: string, email: string) {
-        const inviteRaw = await this.redis.get(this.INVITES_KEY(code));
+        const inviteRaw = await this.cacheService.getOne(this.INVITES_KEY(code));
         if (!inviteRaw) {
             throw new BaseException(
                 {
@@ -64,12 +64,12 @@ export class AcceptInvitationUseCase {
             joinedAt: new Date(),
         });
 
-        await this.redis
-            .multi()
-            .del(this.INVITES_KEY(code))
-            .srem(this.TEAM_INVITES_KEY(invite.teamId), code)
-            .srem(this.USER_INVITES_KEY(email.toLowerCase()), code)
-            .exec();
+        await this.cacheService
+            .transaction()
+            .removeOne(this.INVITES_KEY(code))
+            .removeOneFromCollection(this.TEAM_INVITES_KEY(invite.teamId), code)
+            .removeOneFromCollection(this.USER_INVITES_KEY(email.toLowerCase()), code)
+            .execute();
 
         return { success: true, message: 'Вы успешно присоединились к команде' };
     }
@@ -84,11 +84,11 @@ export class AcceptInvitationUseCase {
     }
 
     private async cleanupInvite(code: string, teamId: string, email: string) {
-        await this.redis
-            .multi()
-            .del(this.INVITES_KEY(code))
-            .srem(this.TEAM_INVITES_KEY(teamId), code)
-            .srem(this.USER_INVITES_KEY(email.toLowerCase()), code)
-            .exec();
+        await this.cacheService
+            .transaction()
+            .removeOne(this.INVITES_KEY(code))
+            .removeOneFromCollection(this.TEAM_INVITES_KEY(teamId), code)
+            .removeOneFromCollection(this.USER_INVITES_KEY(email.toLowerCase()), code)
+            .execute();
     }
 }

@@ -1,9 +1,9 @@
 import { ITeamsRepository } from '@core/teams/domain/repository';
-import { InjectRedis } from '@nestjs-modules/ioredis';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
-import Redis from 'ioredis';
 import type { TeamInvite } from '../../dtos/invitation.dto';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
 
 @Injectable()
 export class DeclineInvitationUseCase {
@@ -13,7 +13,7 @@ export class DeclineInvitationUseCase {
 
     constructor(
         @Inject('ITeamsRepository') private readonly teamsRepo: ITeamsRepository,
-        @InjectRedis() private readonly redis: Redis,
+        @Inject(CACHE_SERVICE) private readonly cacheService: ICacheService,
     ) {}
 
     async execute(slug: string, code: string, userId: string, userEmail: string) {
@@ -67,7 +67,7 @@ export class DeclineInvitationUseCase {
     }
 
     private async getInviteOrThrow(code: string) {
-        const rawInvite = await this.redis.get(this.INVITES_KEY(code));
+        const rawInvite = await this.cacheService.getOne(this.INVITES_KEY(code));
         if (!rawInvite) {
             throw new BaseException(
                 { code: 'INVITE_NOT_FOUND', message: 'Приглашение не найдено' },
@@ -87,12 +87,11 @@ export class DeclineInvitationUseCase {
     }
 
     private async cleanupInvite(code: string, teamId: string, email: string) {
-        await this.redis
-            .multi()
-            .del(this.INVITES_KEY(code))
-            .srem(this.TEAM_INVITES_KEY(teamId), code)
-            .srem(this.USER_INVITES_KEY(email), code)
-            .exec();
+        await this.cacheService
+            .transaction()
+            .removeOne(this.INVITES_KEY(code))
+            .removeOneFromCollection(this.TEAM_INVITES_KEY(teamId), code)
+            .removeOneFromCollection(this.USER_INVITES_KEY(email), code)
+            .execute();
     }
-    ы;
 }

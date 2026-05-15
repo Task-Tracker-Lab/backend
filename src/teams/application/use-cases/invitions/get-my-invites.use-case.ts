@@ -1,23 +1,23 @@
 import { TeamMemberMapper } from '@core/teams/application/mappers';
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import { Injectable } from '@nestjs/common';
-import Redis from 'ioredis';
+import { Inject, Injectable } from '@nestjs/common';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
 
 @Injectable()
 export class GetMyInvitesUseCase {
     constructor(
-        @InjectRedis()
-        private readonly redis: Redis,
+        @Inject(CACHE_SERVICE)
+        private readonly cacheService: ICacheService,
     ) {}
 
     async execute(email: string) {
         const userKey = `user:invites:${email.toLowerCase()}`;
-        const codes = await this.redis.smembers(userKey);
+        const codes = await this.cacheService.getCollection(userKey);
 
         if (!codes.length) return [];
 
         const inviteKeys = codes.map((c) => `inv:code:${c}`);
-        const results = await this.redis.mget(inviteKeys);
+        const results = await this.cacheService.getMany(inviteKeys);
 
         const { activeInvites, expiredCodes } = results.reduce(
             (acc, raw, i) => {
@@ -32,7 +32,7 @@ export class GetMyInvitesUseCase {
         );
 
         if (expiredCodes.length > 0) {
-            this.redis.srem(userKey, ...expiredCodes).catch((err) => {
+            this.cacheService.removeManyFromCollection(userKey, expiredCodes).catch((err) => {
                 console.error('Failed to cleanup expired invites:', err);
             });
         }

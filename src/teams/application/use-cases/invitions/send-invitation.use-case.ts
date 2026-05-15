@@ -1,11 +1,9 @@
 import { TeamMailJobs, TeamQueues } from '@core/teams/domain/enums';
 import { ITeamsRepository } from '@core/teams/domain/repository';
-import { InjectRedis } from '@nestjs-modules/ioredis';
 import { InjectQueue } from '@nestjs/bullmq';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
-import Redis from 'ioredis';
 import { InviteMemberDto } from '../../dtos';
 import { BaseException } from '@shared/error';
 import { generateSecret } from 'otplib';
@@ -13,6 +11,8 @@ import type { TeamInvite } from '../../dtos/invitation.dto';
 import { TeamInvitationEvent } from '@core/teams/domain/events';
 import { TeamMemberPolicy } from '@core/teams/domain/policy';
 import type { TeamRole } from '@shared/entities';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
 
 @Injectable()
 export class SendInvitationUseCase {
@@ -23,7 +23,7 @@ export class SendInvitationUseCase {
 
     constructor(
         @Inject('ITeamsRepository') private readonly teamsRepo: ITeamsRepository,
-        @InjectRedis() private readonly redis: Redis,
+        @Inject(CACHE_SERVICE) private readonly cacheService: ICacheService,
         @InjectQueue(TeamQueues.TEAM_MAIL) private readonly mailQueue: Queue,
         private readonly cfg: ConfigService,
         private readonly policy: TeamMemberPolicy,
@@ -86,10 +86,10 @@ export class SendInvitationUseCase {
     }
 
     private async ensureNoPendingInvite(teamId: string, email: string) {
-        const activeCodes = await this.redis.smembers(this.USER_INVITES_KEY(email));
+        const activeCodes = await this.cacheService.getCollection(this.USER_INVITES_KEY(email));
         if (activeCodes.length === 0) return;
 
-        const invitesData = await this.redis.mget(activeCodes.map(this.INVITES_KEY));
+        const invitesData = await this.cacheService.getMany(activeCodes.map(this.INVITES_KEY));
         const hasDuplicate = invitesData
             .filter((d): d is string => !!d)
             .map((d) => JSON.parse(d) as TeamInvite)
@@ -119,14 +119,12 @@ export class SendInvitationUseCase {
     }
 
     private async saveInviteToCache(code: string, data: TeamInvite) {
-        await this.redis
-            .multi()
-            .set(this.INVITES_KEY(code), JSON.stringify(data), 'EX', this.INVITE_TTL)
-            .sadd(this.TEAM_INVITES_KEY(data.teamId), code)
-            .expire(this.TEAM_INVITES_KEY(data.teamId), this.INVITE_TTL)
-            .sadd(this.USER_INVITES_KEY(data.email), code)
-            .expire(this.USER_INVITES_KEY(data.email), this.INVITE_TTL)
-            .exec();
+        await this.cacheService
+            .transaction()
+            .setOne(this.INVITES_KEY(code), JSON.stringify(data), this.INVITE_TTL)
+            .addOneToCollection(this.TEAM_INVITES_KEY(data.teamId), code)
+            .addOneToCollection(this.USER_INVITES_KEY(data.email), code)
+            .execute();
     }
 
     private async sendEmailNotification(code: string, teamName: string, email: string) {

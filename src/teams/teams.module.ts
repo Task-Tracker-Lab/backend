@@ -6,8 +6,6 @@ import {
     TeamsController,
     MeController,
 } from './application/controller';
-import { RedisModule } from '@nestjs-modules/ioredis';
-import { ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { BullBoardModule } from '@bull-board/nestjs';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
@@ -23,27 +21,6 @@ const REPOSITORY = { provide: 'ITeamsRepository', useClass: TeamsRepository };
 
 @Module({
     imports: [
-        RedisModule.forRootAsync({
-            inject: [ConfigService],
-            useFactory: async (cfg: ConfigService) => {
-                const host = cfg.getOrThrow('REDIS_HOST', { infer: true });
-                const port = cfg.get('REDIS_PORT');
-                const password = cfg.get('REDIS_PASSWORD');
-                const url = `redis://${host}${port ? `:${port}` : ''}`;
-
-                return {
-                    type: 'single',
-                    url,
-                    options: {
-                        password,
-                        retryStrategy(times) {
-                            return Math.min(times * 50, 2000);
-                        },
-                        commandTimeout: 3000,
-                    },
-                };
-            },
-        }),
         BullModule.registerQueue({
             name: TeamQueues.TEAM_MAIL,
         }),

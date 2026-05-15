@@ -1,6 +1,5 @@
 import { BullBoardModule } from '@bull-board/nestjs';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
-import { RedisModule } from '@nestjs-modules/ioredis';
 import { BullModule } from '@nestjs/bullmq';
 import { Module, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -44,27 +43,6 @@ const REPOSITORY = {
                     clockTolerance: 10,
                 },
             }),
-        }),
-        RedisModule.forRootAsync({
-            inject: [ConfigService],
-            useFactory: async (cfg: ConfigService) => {
-                const host = cfg.getOrThrow('REDIS_HOST', { infer: true });
-                const port = cfg.get('REDIS_PORT');
-                const password = cfg.get('REDIS_PASSWORD');
-                const url = `redis://${host}${port ? `:${port}` : ''}`;
-
-                return {
-                    type: 'single',
-                    url,
-                    options: {
-                        password,
-                        retryStrategy(times) {
-                            return Math.min(times * 50, 2000);
-                        },
-                        commandTimeout: 3000,
-                    },
-                };
-            },
         }),
         BullModule.registerQueue({
             name: AuthQueues.AUTH_MAIL,
