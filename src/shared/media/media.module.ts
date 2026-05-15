@@ -26,6 +26,7 @@ import { MediaProcessor } from './workers/media.worker';
                     },
                 },
                 config: {
+                    forcePathStyle: true,
                     connectTimeout: 2000,
                     requestTimeout: 5000,
                     maxAttempts: 3,
