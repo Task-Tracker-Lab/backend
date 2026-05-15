@@ -9,10 +9,12 @@ import {
     MODULE_OPTIONS_TOKEN,
     OPTIONS_TYPE,
 } from './database.module-definition';
+import { DatabaseHealthcheckService } from '@libs/database/database-healthcheck.service';
 
 @Module({
     providers: [
         MigrationService,
+        DatabaseHealthcheckService,
         {
             provide: SQL_CLIENT,
             inject: [ConfigService, MODULE_OPTIONS_TOKEN],
@@ -61,7 +63,7 @@ import {
             },
         },
     ],
-    exports: [DATABASE_SERVICE],
+    exports: [DATABASE_SERVICE, DatabaseHealthcheckService],
 })
 export class DatabaseModule extends ConfigurableModuleClass implements OnApplicationShutdown {
     private readonly logger = new Logger(DatabaseModule.name);

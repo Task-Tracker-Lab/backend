@@ -21,29 +21,26 @@ export class HealthService {
 
         const results = await Promise.all(
             Object.entries(indicators).map(async ([name, check]) => {
+                let timeoutId: NodeJS.Timeout;
+
+                const timeoutPromise = new Promise((_, reject) => {
+                    timeoutId = setTimeout(() => reject(new Error('Timeout')), 5000);
+                });
+
                 try {
-                    const result = await Promise.race([
-                        check(),
-                        new Promise((_, reject) =>
-                            setTimeout(() => reject(new Error('Timeout')), 5000),
-                        ),
-                    ]);
+                    const result = await Promise.race([check(), timeoutPromise]);
                     return { name, ok: !!result };
                 } catch (e) {
                     const message = e instanceof Error ? e.message : String(e);
                     return { name, ok: false, error: message };
+                } finally {
+                    clearTimeout(timeoutId);
                 }
             }),
         );
 
         const isAllOk = results.every((r) => r.ok);
-        const components = results.reduce(
-            (acc, curr) => ({
-                ...acc,
-                [curr.name]: curr.ok ? 'up' : 'down',
-            }),
-            {},
-        );
+        const components = Object.fromEntries(results.map((r) => [r.name, r.ok ? 'up' : 'down']));
 
         return {
             service: serviceName,

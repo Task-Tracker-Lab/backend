@@ -7,20 +7,20 @@ describe('HealthController', () => {
     let healthServiceMock: { getHealthData: ReturnType<typeof vi.fn> };
 
     const SERVICE_NAME = 'MyService';
-    const mockOptions = { serviceName: SERVICE_NAME };
 
     beforeEach(() => {
         healthServiceMock = {
             getHealthData: vi.fn(),
         };
 
-        controller = new HealthController(mockOptions as any, healthServiceMock as any);
+        controller = new HealthController(healthServiceMock as any);
 
         vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
     });
 
     it('should throw SERVICE_UNAVAILABLE when service status is false (down)', async () => {
         healthServiceMock.getHealthData.mockResolvedValue({
+            service: SERVICE_NAME,
             status: false,
             components: { database: 'down' },
         });
@@ -41,7 +41,7 @@ describe('HealthController', () => {
     });
 
     it('should return "healthy" when status is true', async () => {
-        healthServiceMock.getHealthData.mockResolvedValue({ status: true });
+        healthServiceMock.getHealthData.mockResolvedValue({ service: SERVICE_NAME, status: true });
 
         const result = await controller.checkHealth();
 

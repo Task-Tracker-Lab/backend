@@ -20,6 +20,10 @@ import { HttpModule } from '@nestjs/axios';
 import { MediaModule } from '@shared/media';
 import { version } from '../package.json';
 import { CacheModule } from '@shared/adapters/cache/module';
+import { S3Service } from '@libs/s3';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
+import { DatabaseHealthcheckService } from '@libs/database/database-healthcheck.service';
 
 @Module({
     imports: [
@@ -73,16 +77,15 @@ import { CacheModule } from '@shared/adapters/cache/module';
             adapter: FastifyAdapter,
         }),
         HealthModule.registerAsync({
-            inject: [],
-            useFactory: () => {
+            inject: [DatabaseHealthcheckService, S3Service, CACHE_SERVICE],
+            useFactory: (db: DatabaseHealthcheckService, s3: S3Service, cache: ICacheService) => {
                 return {
                     serviceName: 'gateway',
                     version,
                     indicators: {
-                        database: async () => true,
-                        redis: async () => true,
-                        storage: async () => true,
-                        http: async () => true,
+                        database: async () => db.isAlive(),
+                        cache: async () => cache.isAlive(),
+                        storage: async () => s3.isAlive(),
                     },
                 };
             },
