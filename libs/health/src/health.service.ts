@@ -1,28 +1,54 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as os from 'os';
+import { MODULE_OPTIONS_TOKEN } from './health.module-definition';
+import type { HealthModuleOptions } from './interfaces';
 
 @Injectable()
 export class HealthService {
     private readonly startTime: Date;
 
     constructor(
-        @Inject('SERVICE_NAME')
-        private readonly serviceName: string,
+        @Inject(MODULE_OPTIONS_TOKEN)
+        private readonly options: HealthModuleOptions,
     ) {
         this.startTime = new Date();
     }
 
     async getHealthData() {
+        const { serviceName, version = 'v1.0.0', indicators = {} } = this.options;
+
         const uptimeSeconds = Math.floor(process.uptime());
-        const mem = process.memoryUsage();
+
+        const results = await Promise.all(
+            Object.entries(indicators).map(async ([name, check]) => {
+                let timeoutId: NodeJS.Timeout;
+
+                const timeoutPromise = new Promise((_, reject) => {
+                    timeoutId = setTimeout(() => reject(new Error('Timeout')), 5000);
+                });
+
+                try {
+                    const result = await Promise.race([check(), timeoutPromise]);
+                    return { name, ok: !!result };
+                } catch (e) {
+                    const message = e instanceof Error ? e.message : String(e);
+                    return { name, ok: false, error: message };
+                } finally {
+                    clearTimeout(timeoutId);
+                }
+            }),
+        );
+
+        const isAllOk = results.every((r) => r.ok);
+        const components = Object.fromEntries(results.map((r) => [r.name, r.ok ? 'up' : 'down']));
 
         return {
-            service: this.serviceName,
-            status: 'up',
+            service: serviceName,
+            status: isAllOk,
+            components,
             info: {
-                version: '1.0.0',
+                version,
                 node: process.version,
-                pid: process.pid,
             },
             time: {
                 now: new Date().toISOString(),
@@ -30,16 +56,8 @@ export class HealthService {
                 uptime: this.formatUptime(uptimeSeconds),
                 uptimeSeconds: uptimeSeconds,
             },
-            metrics: {
-                rss: this.toMb(mem.rss),
-                heapUsed: this.toMb(mem.heapUsed),
-                loadAverage: os.loadavg()[0].toFixed(2),
-            },
+            loaded: os.loadavg()[0].toFixed(2),
         };
-    }
-
-    private toMb(bytes: number) {
-        return `${Math.round(bytes / 1024 / 1024)}MB`;
     }
 
     private formatUptime(seconds: number) {

@@ -1,20 +1,20 @@
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import { HttpStatus, Injectable } from '@nestjs/common';
-import Redis from 'ioredis';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { verify as verifyOTP } from 'otplib';
 import { BaseException } from '@shared/error';
 import { VerifyResetCodeDto } from '../dtos';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
 
 @Injectable()
 export class VerifyResetPasswordUseCase {
     constructor(
-        @InjectRedis()
-        private readonly redis: Redis,
+        @Inject(CACHE_SERVICE)
+        private readonly cacheService: ICacheService,
     ) {}
 
     async execute(dto: VerifyResetCodeDto) {
         const redisKey = `pass:reset:${dto.email}`;
-        const cachedData = await this.redis.get(redisKey);
+        const cachedData = await this.cacheService.getOne(redisKey);
 
         if (!cachedData) {
             throw new BaseException(
@@ -48,10 +48,9 @@ export class VerifyResetPasswordUseCase {
             );
         }
 
-        await this.redis.set(
+        await this.cacheService.setOne(
             redisKey,
             JSON.stringify({ ...resetSession, isVerified: true }),
-            'EX',
             600,
         );
 

@@ -1,21 +1,21 @@
-import { InjectRedis } from '@nestjs-modules/ioredis';
 import { InjectQueue } from '@nestjs/bullmq';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import * as argon from 'argon2';
 import { Queue } from 'bullmq';
-import Redis from 'ioredis';
 import { generate, generateSecret } from 'otplib';
 import { FindUserQuery } from '@core/user';
 import { BaseException } from '@shared/error';
 import { AuthQueues, AuthMailJobs } from '../../domain/enums';
 import { RegisterCodeEvent } from '../../domain/events';
 import { SignUpDto } from '../dtos';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
 
 @Injectable()
 export class SignUpUseCase {
     constructor(
-        @InjectRedis()
-        private readonly redis: Redis,
+        @Inject(CACHE_SERVICE)
+        private readonly cacheService: ICacheService,
         @InjectQueue(AuthQueues.AUTH_MAIL)
         private readonly mailQueue: Queue,
         private readonly findUserQuery: FindUserQuery,
@@ -23,7 +23,7 @@ export class SignUpUseCase {
 
     async execute(dto: SignUpDto) {
         const redisKey = `reg:${dto.email}`;
-        const cachedData = await this.redis.get(redisKey);
+        const cachedData = await this.cacheService.getOne(redisKey);
 
         if (cachedData) {
             throw new BaseException(
@@ -66,7 +66,7 @@ export class SignUpUseCase {
             otp: { token, secret },
         };
 
-        await this.redis.set(`reg:${dto.email}`, JSON.stringify(data), 'EX', 900);
+        await this.cacheService.setOne(`reg:${dto.email}`, JSON.stringify(data), 900);
 
         const event = new RegisterCodeEvent(dto.email, dto.firstName, token);
         await this.mailQueue.add(AuthMailJobs.SEND_REGISTER_CODE, event, {

@@ -1,9 +1,9 @@
 import { ITeamsRepository } from '@core/teams/domain/repository';
-import { InjectRedis } from '@nestjs-modules/ioredis';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
-import Redis from 'ioredis';
 import type { TeamInvite } from '../../dtos/invitation.dto';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
 
 @Injectable()
 export class GetInvitationQuery {
@@ -11,7 +11,7 @@ export class GetInvitationQuery {
 
     constructor(
         @Inject('ITeamsRepository') private readonly teamsRepo: ITeamsRepository,
-        @InjectRedis() private readonly redis: Redis,
+        @Inject(CACHE_SERVICE) private readonly cacheService: ICacheService,
     ) {}
 
     async execute(slug: string, code: string, userId: string, userEmail: string) {
@@ -35,7 +35,7 @@ export class GetInvitationQuery {
     }
 
     private async getInviteOrThrow(code: string) {
-        const raw = await this.redis.get(this.INVITES_KEY(code));
+        const raw = await this.cacheService.getOne(this.INVITES_KEY(code));
         if (!raw)
             throw new BaseException(
                 { code: 'INVITE_EXPIRED', message: 'Срок действия приглашения истек' },

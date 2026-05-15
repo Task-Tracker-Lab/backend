@@ -1,20 +1,20 @@
-import { InjectRedis } from '@nestjs-modules/ioredis';
 import { InjectQueue } from '@nestjs/bullmq';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import Redis from 'ioredis';
 import { generate, generateSecret } from 'otplib';
 import { BaseException } from '@shared/error';
 import { AuthMailJobs, AuthQueues } from '../../domain/enums';
 import { ResetPasswordEvent } from '../../domain/events';
 import { ResetPasswordDto } from '../dtos';
 import { FindUserQuery } from '@core/user';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
 
 @Injectable()
 export class ResetPasswordUseCase {
     constructor(
-        @InjectRedis()
-        private readonly redis: Redis,
+        @Inject(CACHE_SERVICE)
+        private readonly cacheService: ICacheService,
         @InjectQueue(AuthQueues.AUTH_MAIL)
         private readonly mailQueue: Queue,
         private readonly findUserQuery: FindUserQuery,
@@ -22,7 +22,7 @@ export class ResetPasswordUseCase {
 
     async execute(dto: ResetPasswordDto) {
         const redisKey = `pass:reset:${dto.email}`;
-        const isExistsAttempt = await this.redis.get(redisKey);
+        const isExistsAttempt = await this.cacheService.getOne(redisKey);
 
         if (isExistsAttempt) {
             throw new BaseException(
@@ -68,7 +68,7 @@ export class ResetPasswordUseCase {
             isVerified: false,
         };
 
-        await this.redis.set(redisKey, JSON.stringify(resetPayload), 'EX', 900);
+        await this.cacheService.setOne(redisKey, JSON.stringify(resetPayload), 900);
 
         const event = new ResetPasswordEvent(dto.email, token);
         await this.mailQueue.add(AuthMailJobs.SEND_RESET_PASSWORD, event, {

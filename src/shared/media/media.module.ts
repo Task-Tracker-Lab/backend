@@ -14,6 +14,7 @@ import { MediaProcessor } from './workers/media.worker';
     imports: [
         S3Module.registerAsync({
             inject: [ConfigService],
+            global: true,
             useFactory: (cfg: ConfigService) => ({
                 bucket: cfg.getOrThrow('S3_BUCKET_NAME'),
                 connection: {
@@ -25,10 +26,11 @@ import { MediaProcessor } from './workers/media.worker';
                     },
                 },
                 config: {
+                    forcePathStyle: true,
                     connectTimeout: 2000,
                     requestTimeout: 5000,
                     maxAttempts: 3,
-                }
+                },
             }),
         }),
         ImagorModule.forRootAsync({
@@ -58,4 +60,4 @@ import { MediaProcessor } from './workers/media.worker';
     controllers: [MediaController],
     providers: [MediaProcessor, MediaService],
 })
-export class MediaModule { }
+export class MediaModule {}

@@ -1,8 +1,8 @@
 import { ITeamsRepository } from '@core/teams/domain/repository';
-import { InjectRedis } from '@nestjs-modules/ioredis';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
-import Redis from 'ioredis';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
 
 @Injectable()
 export class GetInvitationsQuery {
@@ -11,7 +11,7 @@ export class GetInvitationsQuery {
 
     constructor(
         @Inject('ITeamsRepository') private readonly teamsRepo: ITeamsRepository,
-        @InjectRedis() private readonly redis: Redis,
+        @Inject(CACHE_SERVICE) private readonly cacheService: ICacheService,
     ) {}
 
     async execute(slug: string, userId: string) {
@@ -19,10 +19,10 @@ export class GetInvitationsQuery {
         await this.ensureAdminPermissions(team.id, userId);
 
         const teamKey = this.TEAM_INVITES_KEY(team.id);
-        const codes = await this.redis.smembers(teamKey);
+        const codes = await this.cacheService.getCollection(teamKey);
         if (!codes.length) return [];
 
-        const results = await this.redis.mget(...codes.map(this.INVITES_KEY));
+        const results = await this.cacheService.getMany(codes.map(this.INVITES_KEY));
 
         const { active, expired } = results.reduce(
             (acc, raw, i) => {
@@ -37,7 +37,9 @@ export class GetInvitationsQuery {
         );
 
         if (expired.length > 0) {
-            this.redis.srem(teamKey, ...expired).catch((e) => console.error('Cleanup error:', e));
+            this.cacheService
+                .removeManyFromCollection(teamKey, expired)
+                .catch((e) => console.error('Cleanup error:', e));
         }
 
         return active;

@@ -1,6 +1,4 @@
-import { InjectRedis } from '@nestjs-modules/ioredis';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import Redis from 'ioredis';
 import { verify as verifyOTP } from 'otplib';
 import { RegisterUserUseCase } from '@core/user';
 import { BaseException } from '@shared/error';
@@ -9,12 +7,14 @@ import { TokenService } from '../../infrastructure/security';
 import { DeviceMetadata } from '../../infrastructure/utils/get-device-meta';
 import { VerifyDto } from '../dtos';
 import { createId } from '@paralleldrive/cuid2';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
 
 @Injectable()
 export class SignUpVerifyUseCase {
     constructor(
-        @InjectRedis()
-        private readonly redis: Redis,
+        @Inject(CACHE_SERVICE)
+        private readonly cacheService: ICacheService,
         @Inject('ISessionRepository')
         private readonly sessionRepo: ISessionRepository,
         private readonly tokenService: TokenService,
@@ -23,7 +23,7 @@ export class SignUpVerifyUseCase {
 
     async execute(dto: VerifyDto, meta: DeviceMetadata) {
         const redisKey = `reg:${dto.email}`;
-        const cachedData = await this.redis.get(redisKey);
+        const cachedData = await this.cacheService.getOne(redisKey);
 
         if (!cachedData) {
             throw new BaseException(
@@ -86,7 +86,7 @@ export class SignUpVerifyUseCase {
             expiresAt,
         });
 
-        await this.redis.del(redisKey);
+        await this.cacheService.removeOne(redisKey);
 
         return {
             success: true,

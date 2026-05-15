@@ -1,21 +1,11 @@
-import { type DynamicModule, Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { HealthController } from './controller/health.controller';
 import { HealthService } from './health.service';
+import { ConfigurableModuleClass } from './health.module-definition';
 
-@Global()
-@Module({})
-export class HealthModule {
-    static register(serviceName: string): DynamicModule {
-        return {
-            module: HealthModule,
-            providers: [
-                {
-                    provide: 'SERVICE_NAME',
-                    useValue: serviceName,
-                },
-                HealthService,
-            ],
-            controllers: [HealthController],
-        };
-    }
-}
+@Module({
+    controllers: [HealthController],
+    providers: [HealthService],
+    exports: [HealthService],
+})
+export class HealthModule extends ConfigurableModuleClass {}

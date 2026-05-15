@@ -1,22 +1,22 @@
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import * as argon from 'argon2';
-import Redis from 'ioredis';
 import { BaseException } from '@shared/error';
 import { PasswordResetConfirmDto } from '../dtos';
 import { UpdatePasswordUseCase } from '@core/user';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
 
 @Injectable()
 export class ConfirmResetPasswordUseCase {
     constructor(
-        @InjectRedis()
-        private readonly redis: Redis,
+        @Inject(CACHE_SERVICE)
+        private readonly cacheService: ICacheService,
         private readonly updatePasswordUserUseCase: UpdatePasswordUseCase,
     ) {}
 
     async execute(dto: PasswordResetConfirmDto) {
         const redisKey = `pass:reset:${dto.email}`;
-        const cachedData = await this.redis.get(redisKey);
+        const cachedData = await this.cacheService.getOne(redisKey);
 
         if (!cachedData) {
             throw new BaseException(
@@ -55,7 +55,7 @@ export class ConfirmResetPasswordUseCase {
             );
         }
 
-        await this.redis.del(redisKey);
+        await this.cacheService.removeOne(redisKey);
 
         return {
             success: true,
