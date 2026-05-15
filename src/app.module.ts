@@ -18,12 +18,11 @@ import { TeamsModule } from './teams';
 import { ProjectsModule } from './projects';
 import { HttpModule } from '@nestjs/axios';
 import { MediaModule } from '@shared/media';
-import { version } from '../package.json';
 import { CacheModule } from '@shared/adapters/cache/module';
 import { S3Service } from '@libs/s3';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
-import { DatabaseHealthcheckService } from '@libs/database/database-healthcheck.service';
+import { DatabaseHealthService } from '@libs/database';
 
 @Module({
     imports: [
@@ -77,8 +76,10 @@ import { DatabaseHealthcheckService } from '@libs/database/database-healthcheck.
             adapter: FastifyAdapter,
         }),
         HealthModule.registerAsync({
-            inject: [DatabaseHealthcheckService, S3Service, CACHE_SERVICE],
-            useFactory: (db: DatabaseHealthcheckService, s3: S3Service, cache: ICacheService) => {
+            inject: [DatabaseHealthService, S3Service, CACHE_SERVICE],
+            useFactory: (db: DatabaseHealthService, s3: S3Service, cache: ICacheService) => {
+                const version = process.env.npm_package_version;
+
                 return {
                     serviceName: 'gateway',
                     version,
