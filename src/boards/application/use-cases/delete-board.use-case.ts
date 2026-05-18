@@ -1,18 +1,34 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { IBoardsRepository } from '@core/boards/domain/repository';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import type { IBoardsRepository } from '@core/boards/domain/repository';
 import { BoardAccessPolicy } from '@core/boards/domain/policy';
+import { BaseException } from '@shared/error';
 
 @Injectable()
 export class DeleteBoardUseCase {
     constructor(
         @Inject('IBoardsRepository')
         private readonly boardsRepo: IBoardsRepository,
-        private readonly boardAccess: BoardAccessPolicy,
+        private readonly policyAccess: BoardAccessPolicy,
     ) {}
 
-    public async execute(id: string, projectId: string, userId: string): Promise<boolean> {
-        await this.boardAccess.validateBoardAccess(id, userId, projectId);
+    public async execute(id: string, projectId: string, userId: string) {
+        await this.policyAccess.validateBoardAccess(id, userId, projectId);
 
-        return this.boardsRepo.remove(id);
+        const result = await this.boardsRepo.remove(id);
+
+        if (!result) {
+            throw new BaseException(
+                {
+                    code: 'DELETE_FAILED',
+                    message: 'Не удалось удалить доску',
+                },
+                HttpStatus.SERVICE_UNAVAILABLE,
+            );
+        }
+
+        return {
+            success: true,
+            message: `Доска успешно удалена`,
+        };
     }
 }

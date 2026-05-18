@@ -1,7 +1,8 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ApiForbidden, ApiNotFound, ApiUnauthorized, ApiValidationError } from '@shared/error';
-import { BoardResponse, CreateBoardDto, UpdateBoardDto } from '../../dtos';
+import { ActionResponse } from '@shared/dtos';
+import { BoardResponse, CreateBoardDto, CreateBoardResponse, UpdateBoardDto } from '../../dtos';
 
 export const FindAllBoardsSwagger = () =>
     applyDecorators(
@@ -39,7 +40,7 @@ export const CreateBoardSwagger = () =>
         ApiResponse({
             status: 201,
             description: 'Доска успешно создана',
-            type: BoardResponse.Output,
+            type: CreateBoardResponse.Output,
         }),
         ApiValidationError(),
         ApiUnauthorized(),
@@ -55,7 +56,7 @@ export const UpdateBoardSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Доска обновлена',
-            type: BoardResponse.Output,
+            type: ActionResponse.Output,
         }),
         ApiValidationError(),
         ApiNotFound('Доска не найдена'),
@@ -71,7 +72,7 @@ export const RemoveBoardSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Доска удалена',
-            type: Boolean,
+            type: ActionResponse.Output,
         }),
         ApiNotFound('Доска не найдена'),
         ApiUnauthorized(),

@@ -19,12 +19,16 @@ import {
 import {
     CreateBoardDto,
     CreateBoardColumnDto,
+    CreateBoardColumnResponse,
     CreateBoardViewDto,
+    CreateBoardViewResponse,
+    CreateBoardResponse,
     UpdateBoardColumnDto,
     UpdateBoardDto,
     UpdateBoardViewDto,
 } from './dtos';
 import type { BoardColumn, BoardView, BoardWithRelations } from '@core/boards/domain/entities';
+import type { ActionResponse } from '@shared/dtos';
 
 @Injectable()
 export class BoardsFacade {
@@ -52,7 +56,7 @@ export class BoardsFacade {
         projectId: string,
         userId: string,
         dto: CreateBoardDto,
-    ): Promise<BoardWithRelations> {
+    ): Promise<CreateBoardResponse> {
         return this.createBoardUC.execute(projectId, userId, dto);
     }
 
@@ -61,11 +65,11 @@ export class BoardsFacade {
         projectId: string,
         userId: string,
         dto: UpdateBoardDto,
-    ): Promise<BoardWithRelations | null> {
+    ): Promise<ActionResponse> {
         return this.updateBoardUC.execute(id, projectId, userId, dto);
     }
 
-    public async delete(id: string, projectId: string, userId: string): Promise<boolean> {
+    public async delete(id: string, projectId: string, userId: string): Promise<ActionResponse> {
         return this.deleteBoardUC.execute(id, projectId, userId);
     }
 
@@ -85,7 +89,7 @@ export class BoardsFacade {
         boardId: string,
         userId: string,
         dto: CreateBoardColumnDto,
-    ): Promise<BoardColumn> {
+    ): Promise<CreateBoardColumnResponse> {
         return this.createBoardColumnUC.execute(boardId, userId, dto);
     }
 
@@ -94,11 +98,15 @@ export class BoardsFacade {
         boardId: string,
         userId: string,
         dto: UpdateBoardColumnDto,
-    ): Promise<BoardColumn | null> {
+    ): Promise<ActionResponse> {
         return this.updateBoardColumnUC.execute(id, boardId, userId, dto);
     }
 
-    public async deleteColumn(id: string, boardId: string, userId: string): Promise<boolean> {
+    public async deleteColumn(
+        id: string,
+        boardId: string,
+        userId: string,
+    ): Promise<ActionResponse> {
         return this.deleteBoardColumnUC.execute(id, boardId, userId);
     }
 
@@ -118,7 +126,7 @@ export class BoardsFacade {
         boardId: string,
         userId: string,
         dto: CreateBoardViewDto,
-    ): Promise<BoardView> {
+    ): Promise<CreateBoardViewResponse> {
         return this.createBoardViewUC.execute(boardId, userId, dto);
     }
 
@@ -127,11 +135,11 @@ export class BoardsFacade {
         boardId: string,
         userId: string,
         dto: UpdateBoardViewDto,
-    ): Promise<BoardView | null> {
+    ): Promise<ActionResponse> {
         return this.updateBoardViewUC.execute(id, boardId, userId, dto);
     }
 
-    public async deleteView(id: string, boardId: string, userId: string): Promise<boolean> {
+    public async deleteView(id: string, boardId: string, userId: string): Promise<ActionResponse> {
         return this.deleteBoardViewUC.execute(id, boardId, userId);
     }
 

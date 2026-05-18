@@ -1,7 +1,13 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ApiForbidden, ApiNotFound, ApiUnauthorized, ApiValidationError } from '@shared/error';
-import { BoardViewResponse, CreateBoardViewDto, UpdateBoardViewDto } from '../../dtos';
+import { ActionResponse } from '@shared/dtos';
+import {
+    BoardViewResponse,
+    CreateBoardViewDto,
+    CreateBoardViewResponse,
+    UpdateBoardViewDto,
+} from '../../dtos';
 
 export const FindAllBoardViewsSwagger = () =>
     applyDecorators(
@@ -42,7 +48,7 @@ export const CreateBoardViewSwagger = () =>
         ApiResponse({
             status: 201,
             description: 'Представление создано',
-            type: BoardViewResponse.Output,
+            type: CreateBoardViewResponse.Output,
         }),
         ApiValidationError(),
         ApiUnauthorized(),
@@ -59,7 +65,7 @@ export const UpdateBoardViewSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Представление обновлено',
-            type: BoardViewResponse.Output,
+            type: ActionResponse.Output,
         }),
         ApiValidationError(),
         ApiNotFound('Представление не найдено'),
@@ -76,7 +82,7 @@ export const RemoveBoardViewSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Представление удалено',
-            type: Boolean,
+            type: ActionResponse.Output,
         }),
         ApiNotFound('Представление не найдено'),
         ApiUnauthorized(),

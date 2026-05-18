@@ -2,7 +2,6 @@ import { ApiBaseController, GetUserId } from '@shared/decorators';
 import { BoardsFacade } from '@core/boards/application/boards.facade';
 import { Body, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { CreateBoardDto, UpdateBoardDto } from '@core/boards/application/dtos';
-import type { BoardWithRelations } from '@core/boards/domain/entities';
 import {
     CreateBoardSwagger,
     FindAllBoardsSwagger,
@@ -17,10 +16,7 @@ export class BoardsController {
 
     @Get()
     @FindAllBoardsSwagger()
-    async findAll(
-        @Param('projectId') projectId: string,
-        @GetUserId() userId: string,
-    ): Promise<BoardWithRelations[]> {
+    async findAll(@Param('projectId') projectId: string, @GetUserId() userId: string) {
         return this.facade.getAll(projectId, userId);
     }
 
@@ -30,7 +26,7 @@ export class BoardsController {
         @Param('id') id: string,
         @Param('projectId') projectId: string,
         @GetUserId() userId: string,
-    ): Promise<BoardWithRelations | null> {
+    ) {
         return this.facade.getOne(id, projectId, userId);
     }
 
@@ -40,7 +36,7 @@ export class BoardsController {
         @Param('projectId') projectId: string,
         @GetUserId() userId: string,
         @Body() dto: CreateBoardDto,
-    ): Promise<BoardWithRelations> {
+    ) {
         return this.facade.create(projectId, userId, dto);
     }
 
@@ -51,7 +47,7 @@ export class BoardsController {
         @Param('projectId') projectId: string,
         @GetUserId() userId: string,
         @Body() dto: UpdateBoardDto,
-    ): Promise<BoardWithRelations | null> {
+    ) {
         return this.facade.update(id, projectId, userId, dto);
     }
 
@@ -61,7 +57,7 @@ export class BoardsController {
         @Param('id') id: string,
         @Param('projectId') projectId: string,
         @GetUserId() userId: string,
-    ): Promise<boolean> {
+    ) {
         return this.facade.delete(id, projectId, userId);
     }
 }

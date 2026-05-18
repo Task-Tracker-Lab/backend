@@ -1,6 +1,7 @@
 import { z } from 'zod/v4';
 import { createZodDto } from 'nestjs-zod';
 import { boardTypeEnum, columnStatusEnum } from '@core/boards/infrastructure/persistence/models';
+import { ActionResponseSchema } from '@shared/dtos';
 
 export const CreateBoardSchema = z.object({
     name: z
@@ -12,6 +13,12 @@ export const CreateBoardSchema = z.object({
 });
 
 export class CreateBoardDto extends createZodDto(CreateBoardSchema) {}
+
+const CreateBoardResponseSchema = ActionResponseSchema.extend({
+    boardId: z.string().describe('ID созданной доски'),
+});
+
+export class CreateBoardResponse extends createZodDto(CreateBoardResponseSchema) {}
 
 export const UpdateBoardSchema = CreateBoardSchema.partial().refine(
     (data) => Object.keys(data).length > 0,
@@ -37,6 +44,12 @@ export const CreateBoardColumnSchema = z.object({
 
 export class CreateBoardColumnDto extends createZodDto(CreateBoardColumnSchema) {}
 
+const CreateBoardColumnResponseSchema = ActionResponseSchema.extend({
+    columnId: z.string().describe('ID созданной колонки'),
+});
+
+export class CreateBoardColumnResponse extends createZodDto(CreateBoardColumnResponseSchema) {}
+
 export const UpdateBoardColumnSchema = CreateBoardColumnSchema.partial().refine(
     (data) => Object.keys(data).length > 0,
     {
@@ -58,6 +71,12 @@ export const CreateBoardViewSchema = z.object({
 });
 
 export class CreateBoardViewDto extends createZodDto(CreateBoardViewSchema) {}
+
+const CreateBoardViewResponseSchema = ActionResponseSchema.extend({
+    viewId: z.string().describe('ID созданного представления'),
+});
+
+export class CreateBoardViewResponse extends createZodDto(CreateBoardViewResponseSchema) {}
 
 export const UpdateBoardViewSchema = CreateBoardViewSchema.partial().refine(
     (data) => Object.keys(data).length > 0,

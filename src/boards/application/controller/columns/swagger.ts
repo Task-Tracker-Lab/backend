@@ -1,7 +1,13 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ApiForbidden, ApiNotFound, ApiUnauthorized, ApiValidationError } from '@shared/error';
-import { BoardColumnResponse, CreateBoardColumnDto, UpdateBoardColumnDto } from '../../dtos';
+import { ActionResponse } from '@shared/dtos';
+import {
+    BoardColumnResponse,
+    CreateBoardColumnDto,
+    CreateBoardColumnResponse,
+    UpdateBoardColumnDto,
+} from '../../dtos';
 
 export const FindAllBoardColumnsSwagger = () =>
     applyDecorators(
@@ -42,7 +48,7 @@ export const CreateBoardColumnSwagger = () =>
         ApiResponse({
             status: 201,
             description: 'Колонка создана',
-            type: BoardColumnResponse.Output,
+            type: CreateBoardColumnResponse.Output,
         }),
         ApiValidationError(),
         ApiUnauthorized(),
@@ -59,7 +65,7 @@ export const UpdateBoardColumnSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Колонка обновлена',
-            type: BoardColumnResponse.Output,
+            type: ActionResponse.Output,
         }),
         ApiValidationError(),
         ApiNotFound('Колонка не найдена'),
@@ -76,7 +82,7 @@ export const RemoveBoardColumnSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Колонка удалена',
-            type: Boolean,
+            type: ActionResponse.Output,
         }),
         ApiNotFound('Колонка не найдена'),
         ApiUnauthorized(),
