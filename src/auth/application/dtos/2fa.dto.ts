@@ -23,3 +23,12 @@ export const Disable2FaSchema = z
     .describe('Схема отключения 2FA');
 
 export class Disable2FaDto extends createZodDto(Disable2FaSchema) {}
+
+export const Enable2FaResponseSchema = z
+    .object({
+        secret: z.string().describe('Секрет для генерации кодов'),
+        qrCodeUrl: z.string().describe('Ссылка для приложения (otpauth) для привязки 2FA'),
+    })
+    .describe('Ответ на запрос генерации 2FA');
+
+export class Enable2FaResponse extends createZodDto(Enable2FaResponseSchema) {}

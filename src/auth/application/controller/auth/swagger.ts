@@ -1,4 +1,4 @@
-import { applyDecorators } from '@nestjs/common';
+import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import {
     ApiBadRequest,
@@ -8,8 +8,16 @@ import {
     ApiUnauthorized,
     ApiValidationError,
 } from '@shared/error';
-import { SignInDto, SignResponse, SignUpDto, VerifyDto } from '../../dtos';
+import {
+    SignInDto,
+    SignResponse,
+    SignUpDto,
+    VerifyDto,
+    SessionsResponse,
+    SessionResponse,
+} from '../../dtos';
 import { ActionResponse } from '@shared/dtos';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
 
 export const PostRegisterSwagger = () =>
     applyDecorators(
@@ -25,6 +33,8 @@ export const PostRegisterSwagger = () =>
         }),
         ApiValidationError('Ошибка валидации данных (например, неверный формат email)'),
         ApiConflict('Пользователь с таким email уже существует'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const PostLoginSwagger = () =>
@@ -42,6 +52,8 @@ export const PostLoginSwagger = () =>
         }),
         ApiBadRequest('Неверный формат email'),
         ApiUnauthorized('Неверный email или пароль'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, SignResponse),
     );
 
 export const PostRefreshSwagger = () =>
@@ -57,6 +69,8 @@ export const PostRefreshSwagger = () =>
         }),
         ApiBadRequest('Ошибка валидации (не передан refresh токен)'),
         ApiUnauthorized('Refresh токен недействителен, истек или отозван'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, SignResponse),
     );
 
 export const PostLogoutSwagger = () =>
@@ -67,6 +81,8 @@ export const PostLogoutSwagger = () =>
         }),
         ApiResponse({ status: 200, description: 'Успешный выход.', type: ActionResponse.Output }),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const PostSignUpConfirmSwagger = () =>
@@ -85,6 +101,8 @@ export const PostSignUpConfirmSwagger = () =>
         ApiValidationError('Ошибка валидации (неверный формат email или длина кода)'),
         ApiBadRequest('Срок регистрации истёк или сессия не найдена'),
         ApiBadRequest('Неверный или истёкший код подтверждения'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, SignResponse),
     );
 
 export const GetSessionsSwagger = () =>
@@ -96,19 +114,11 @@ export const GetSessionsSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Список сессий успешно получен.',
-            schema: {
-                example: [
-                    {
-                        id: 'clj1xyz990000abc1',
-                        device: 'Chrome on macOS',
-                        ip: '192.168.1.1',
-                        lastActive: '2026-04-11T14:30:00.000Z',
-                        isCurrent: true,
-                    },
-                ],
-            },
+            type: [SessionResponse.Output],
         }),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, SessionsResponse),
     );
 
 export const DeleteSessionSwagger = () =>
@@ -118,8 +128,14 @@ export const DeleteSessionSwagger = () =>
             description: 'Принудительно удаляет указанную сессию из Redis.',
         }),
         ApiParam({ name: 'cuid', description: 'ID сессии, которую нужно завершить' }),
-        ApiResponse({ status: 200, description: 'Сессия успешно завершена.' }),
+        ApiResponse({
+            status: 200,
+            description: 'Сессия успешно завершена.',
+            type: ActionResponse.Output,
+        }),
         ApiUnauthorized(),
         ApiForbidden(),
         ApiNotFound('Сессия не найдена или уже истекла'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );

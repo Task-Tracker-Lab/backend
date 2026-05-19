@@ -1,4 +1,4 @@
-import { applyDecorators } from '@nestjs/common';
+import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import {
     ApiBadRequest,
@@ -15,8 +15,12 @@ import {
     PasswordResetConfirmDto,
     ResetPasswordDto,
     VerifyResetCodeDto,
+    Enable2FaResponse,
+    SessionsResponse,
+    SessionResponse,
 } from '../../dtos';
 import { ActionResponse } from '@shared/dtos';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
 
 export const PostPasswordResetSwagger = () =>
     applyDecorators(
@@ -37,6 +41,8 @@ export const PostPasswordResetSwagger = () =>
             'Указанный email адрес имеет некорректный формат',
         ),
         ApiNotFound('Пользователь с таким email не найден'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const PostPasswordResetVerifySwagger = () =>
@@ -54,6 +60,8 @@ export const PostPasswordResetVerifySwagger = () =>
         ApiValidationError('Ошибка валидации (email или формат кода)'),
         ApiBadRequest('Время подтверждения истекло или запрос не найден'),
         ApiBadRequest('Неверный или истёкший код подтверждения'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const PostPasswordResetConfirmSwagger = () =>
@@ -76,6 +84,8 @@ export const PostPasswordResetConfirmSwagger = () =>
             'PASSWORD_UPDATE_FAILED',
             'Не удалось обновить пароль. Попробуйте позже.',
         ),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const GetSessionsSwagger = () =>
@@ -87,19 +97,11 @@ export const GetSessionsSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Список сессий успешно получен.',
-            schema: {
-                example: [
-                    {
-                        id: 'clj1xyz990000abc1',
-                        device: 'Chrome on macOS',
-                        ip: '192.168.1.1',
-                        lastActive: '2026-04-11T14:30:00.000Z',
-                        isCurrent: true,
-                    },
-                ],
-            },
+            type: [SessionResponse.Output],
         }),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, SessionsResponse),
     );
 
 export const DeleteSessionSwagger = () =>
@@ -109,10 +111,16 @@ export const DeleteSessionSwagger = () =>
             description: 'Принудительно удаляет указанную сессию из Redis.',
         }),
         ApiParam({ name: 'cuid', description: 'ID сессии, которую нужно завершить' }),
-        ApiResponse({ status: 200, description: 'Сессия успешно завершена.' }),
+        ApiResponse({
+            status: 200,
+            description: 'Сессия успешно завершена.',
+            type: ActionResponse.Output,
+        }),
         ApiUnauthorized(),
         ApiForbidden(),
         ApiNotFound('Сессия не найдена или уже истекла'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const PostChangePasswordSwagger = () =>
@@ -122,9 +130,15 @@ export const PostChangePasswordSwagger = () =>
             description: 'Требует текущий и новый пароль. Инвалидирует все остальные сессии.',
         }),
         ApiBody({ type: ChangePasswordDto.Output }),
-        ApiResponse({ status: 200, description: 'Пароль успешно изменен.' }),
+        ApiResponse({
+            status: 200,
+            description: 'Пароль успешно изменен.',
+            type: ActionResponse.Output,
+        }),
         ApiBadRequest('Неверный старый пароль'),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const PostEnable2faSwagger = () =>
@@ -136,15 +150,11 @@ export const PostEnable2faSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'QR-код сгенерирован.',
-            schema: {
-                example: {
-                    secret: 'JBSWY3DPEHPK3PXP',
-                    qrCodeUrl:
-                        'otpauth://totp/TaskTracker:alexey?secret=JBSWY3DPEHPK3PXP&issuer=TaskTracker',
-                },
-            },
+            type: Enable2FaResponse.Output,
         }),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, Enable2FaResponse),
     );
 
 export const PostDisable2faSwagger = () =>
@@ -154,9 +164,15 @@ export const PostDisable2faSwagger = () =>
             description: 'Проверяет первый код из приложения для окончательной активации 2FA.',
         }),
         ApiBody({ type: Confirm2FaDto.Output }),
-        ApiResponse({ status: 200, description: 'Двухфакторная аутентификация успешно включена.' }),
+        ApiResponse({
+            status: 200,
+            description: 'Двухфакторная аутентификация успешно включена.',
+            type: ActionResponse.Output,
+        }),
         ApiBadRequest('Неверный код подтверждения'),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const PostConfirm2faSwagger = () =>
@@ -167,7 +183,13 @@ export const PostConfirm2faSwagger = () =>
                 'Отключает двухфакторную аутентификацию (требует подтверждения паролем или текущим кодом).',
         }),
         ApiBody({ type: Disable2FaDto.Output }),
-        ApiResponse({ status: 200, description: '2FA успешно отключена.' }),
+        ApiResponse({
+            status: 200,
+            description: '2FA успешно отключена.',
+            type: ActionResponse.Output,
+        }),
         ApiBadRequest('Неверный код или пароль для отключения'),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
