@@ -1,13 +1,14 @@
-import { applyDecorators } from '@nestjs/common';
+import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ActionResponse } from '@shared/dtos';
 import { ApiForbidden, ApiNotFound, ApiUnauthorized } from '@shared/error';
 import {
-    TeamMemberResponse,
     UpdateMemberDto,
-    UserTeamResponse,
-    UserInviteResponse,
+    TeamMembersResponse,
+    UserTeamsResponse,
+    UserInvitesResponse,
 } from '../../dtos';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
 
 export const FindTeamsSwagger = () =>
     applyDecorators(
@@ -19,9 +20,11 @@ export const FindTeamsSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Список команд получен',
-            type: [UserTeamResponse.Output],
+            type: UserTeamsResponse.Output,
         }),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, UserTeamsResponse),
     );
 
 export const FindInvitesSwagger = () =>
@@ -34,9 +37,11 @@ export const FindInvitesSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Список приглашений успешно получен',
-            type: [UserInviteResponse.Output],
+            type: UserInvitesResponse.Output,
         }),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, UserInvitesResponse),
     );
 
 export const GetMembersSwagger = () =>
@@ -46,10 +51,12 @@ export const GetMembersSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Список участников получен',
-            type: [TeamMemberResponse.Output],
+            type: TeamMembersResponse.Output,
         }),
         ApiUnauthorized(),
         ApiForbidden(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, TeamMembersResponse),
     );
 
 export const UpdateMemberSwagger = () =>
@@ -71,6 +78,8 @@ export const UpdateMemberSwagger = () =>
         ApiNotFound('Участник или команда не найдены'),
         ApiUnauthorized(),
         ApiForbidden(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const RemoveMemberSwagger = () =>
@@ -86,4 +95,6 @@ export const RemoveMemberSwagger = () =>
         ApiNotFound(),
         ApiUnauthorized(),
         ApiForbidden(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );

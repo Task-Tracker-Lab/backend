@@ -14,11 +14,22 @@ export class GetMyInvitesUseCase {
         const userKey = `user:invites:${email.toLowerCase()}`;
         const codes = await this.cacheService.getCollection(userKey);
 
-        if (!codes.length) return [];
+        if (!codes.length)
+            return {
+                // TODO: реализовать полноценную пагинацию для инвайтов пользователя.
+                items: [],
+                meta: {
+                    total: 0,
+                    totalPages: 0,
+                    page: 1,
+                    limit: 10,
+                    hasPrevPage: false,
+                    hasNextPage: false,
+                },
+            };
 
         const inviteKeys = codes.map((c) => `inv:code:${c}`);
         const results = await this.cacheService.getMany(inviteKeys);
-
         const { activeInvites, expiredCodes } = results.reduce(
             (acc, raw, i) => {
                 if (raw) {
@@ -37,6 +48,17 @@ export class GetMyInvitesUseCase {
             });
         }
 
-        return activeInvites;
+        return {
+            // TODO: реализовать полноценную пагинацию для инвайтов пользователя.
+            items: activeInvites,
+            meta: {
+                total: activeInvites.length,
+                totalPages: activeInvites.length ? 1 : 0,
+                page: 1,
+                limit: activeInvites.length,
+                hasPrevPage: false,
+                hasNextPage: false,
+            },
+        };
     }
 }

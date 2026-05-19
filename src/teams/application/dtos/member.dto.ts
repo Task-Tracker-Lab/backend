@@ -1,6 +1,8 @@
 import { z } from 'zod/v4';
 import { createZodDto } from 'nestjs-zod';
 import { roleEnum } from '@core/teams/infrastructure/persistence/models';
+import { AvatarResponseSchema, createPaginationSchema } from '@shared/schemas';
+import { zResponseDate } from '@shared/schemas/response-date.schema';
 
 export const InviteMemberSchema = z.object({
     email: z.string().email().describe('Email пользователя, которого нужно пригласить'),
@@ -35,28 +37,32 @@ export const TeamMemberResponseSchema = z.object({
     fullName: z.string().describe('Полное имя для отображения (Фамилия Имя Отчество)'),
     firstName: z.string().describe('Имя пользователя'),
     lastName: z.string().describe('Фамилия пользователя'),
-    avatarUrl: z
-        .string()
-        .url()
-        .nullable()
-        .describe('Прямая ссылка на изображение профиля или null, если не задано'),
+    avatar: AvatarResponseSchema,
 
     initials: z.string().max(2).describe('Две буквы для аватара-заглушки (например, "ИИ")'),
-    joinedAt: z
-        .string()
-        .datetime()
-        .describe('Дата и время вступления в команду в формате ISO 8601'),
+    joinedAt: zResponseDate().describe('Дата и время вступления в команду в формате ISO 8601'),
 });
 
 export class TeamMemberResponse extends createZodDto(TeamMemberResponseSchema) {}
 
+export class TeamMembersResponse extends createZodDto(
+    createPaginationSchema(TeamMemberResponseSchema),
+) {}
+
 export const UserInviteSchema = z.object({
     code: z.string().describe('Код инвайта'),
     teamName: z.string().describe('Название команды'),
-    teamAvatar: z.string().nullable().describe('Аватар команды'),
+    teamAvatar: z
+        .string()
+        .url()
+        .describe('URL аватара команды (может быть null, если аватар не установлен)'),
+    //TODO: replace with right schema after handling avatar in use-case
+    // avatar: AvatarResponseSchema,
     role: z.string().describe('Роль'),
     inviterName: z.string().describe('Имя пригласившего'),
-    expiresAt: z.string().datetime().describe('Дата истечения'),
+    expiresAt: zResponseDate().describe('Дата истечения'),
 });
 
 export class UserInviteResponse extends createZodDto(UserInviteSchema) {}
+
+export class UserInvitesResponse extends createZodDto(createPaginationSchema(UserInviteSchema)) {}

@@ -1,4 +1,4 @@
-import { applyDecorators } from '@nestjs/common';
+import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ActionResponse } from '@shared/dtos';
 import {
@@ -13,8 +13,10 @@ import {
     InviteMemberDto,
     TeamInvitationResponse,
     UpdateInvitationDto,
-    UserInviteResponse,
+    TeamInvitationsResponse,
+    UserInvitesResponse,
 } from '../../dtos';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
 
 export const FindInvitesSwagger = () =>
     applyDecorators(
@@ -26,9 +28,11 @@ export const FindInvitesSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Список приглашений успешно получен',
-            type: [UserInviteResponse.Output],
+            type: UserInvitesResponse.Output,
         }),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, UserInvitesResponse),
     );
 
 export const InviteMemberSwagger = () =>
@@ -50,6 +54,8 @@ export const InviteMemberSwagger = () =>
         ApiValidationError('Некорректный формат Email или роль не поддерживается'),
         ApiUnauthorized(),
         ApiForbidden(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const AcceptInviteSwagger = () =>
@@ -75,6 +81,8 @@ export const AcceptInviteSwagger = () =>
         ApiNotFound('Приглашение с таким кодом не найдено'),
         ApiConflict('Пользователь уже является участником этой команды'),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const GetTeamInvitationsSwagger = () =>
@@ -87,11 +95,13 @@ export const GetTeamInvitationsSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Список приглашений команды',
-            type: [TeamInvitationResponse.Output],
+            type: TeamInvitationsResponse.Output,
         }),
         ApiNotFound('Команда не найдена'),
         ApiForbidden('Недостаточно прав (только owner/admin)'),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, TeamInvitationsResponse),
     );
 
 export const GetTeamInvitationSwagger = () =>
@@ -111,6 +121,8 @@ export const GetTeamInvitationSwagger = () =>
         ApiNotFound('Инвайт или команда не найдены'),
         ApiForbidden('Недостаточно прав (только owner/admin)'),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, TeamInvitationResponse),
     );
 
 export const UpdateTeamInvitationSwagger = () =>
@@ -126,12 +138,13 @@ export const UpdateTeamInvitationSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Инвайт обновлён',
-            type: TeamInvitationResponse.Output,
+            type: ActionResponse.Output,
         }),
         ApiValidationError(),
         ApiNotFound('Инвайт или команда не найдены'),
         ApiForbidden('Недостаточно прав (только owner/admin)'),
         ApiUnauthorized(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const DeleteTeamInvitationSwagger = () =>
@@ -151,4 +164,6 @@ export const DeleteTeamInvitationSwagger = () =>
         ApiNotFound('Инвайт или команда не найдены'),
         ApiForbidden('Недостаточно прав (только owner/admin)'),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );

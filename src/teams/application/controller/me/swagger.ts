@@ -1,7 +1,8 @@
-import { applyDecorators } from '@nestjs/common';
+import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ApiUnauthorized } from '@shared/error';
-import { UserTeamResponse, UserInviteResponse } from '../../dtos';
+import { UserTeamsResponse, UserInvitesResponse } from '../../dtos';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
 
 export const FindTeamsSwagger = () =>
     applyDecorators(
@@ -13,9 +14,11 @@ export const FindTeamsSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Список команд получен',
-            type: [UserTeamResponse.Output],
+            type: UserTeamsResponse.Output,
         }),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, UserTeamsResponse),
     );
 
 export const FindInvitesSwagger = () =>
@@ -28,7 +31,9 @@ export const FindInvitesSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Список приглашений успешно получен',
-            type: [UserInviteResponse.Output],
+            type: UserInvitesResponse.Output,
         }),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, UserInvitesResponse),
     );

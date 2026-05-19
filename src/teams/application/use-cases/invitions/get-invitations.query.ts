@@ -20,7 +20,19 @@ export class GetInvitationsQuery {
 
         const teamKey = this.TEAM_INVITES_KEY(team.id);
         const codes = await this.cacheService.getCollection(teamKey);
-        if (!codes.length) return [];
+        if (!codes.length)
+            return {
+                // TODO: реализовать полноценную пагинацию для инвайтов команды.
+                items: [],
+                meta: {
+                    total: 0,
+                    totalPages: 0,
+                    page: 1,
+                    limit: 0,
+                    hasPrevPage: false,
+                    hasNextPage: false,
+                },
+            };
 
         const results = await this.cacheService.getMany(codes.map(this.INVITES_KEY));
 
@@ -42,7 +54,18 @@ export class GetInvitationsQuery {
                 .catch((e) => console.error('Cleanup error:', e));
         }
 
-        return active;
+        return {
+            // TODO: реализовать полноценную пагинацию для инвайтов команды.
+            items: active,
+            meta: {
+                total: active.length,
+                totalPages: active.length ? 1 : 0,
+                page: 1,
+                limit: active.length,
+                hasPrevPage: false,
+                hasNextPage: false,
+            },
+        };
     }
 
     private async getTeamOrThrow(slug: string) {

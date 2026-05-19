@@ -1,6 +1,8 @@
 import { z } from 'zod/v4';
 import { createZodDto } from 'nestjs-zod';
 import { roleEnum, TeamRole } from '../../infrastructure/persistence/models/enums';
+import { createPaginationSchema } from '@shared/schemas';
+import { zResponseDate } from '@shared/schemas/response-date.schema';
 
 export const UpdateInvitationSchema = z.object({
     role: z
@@ -19,11 +21,15 @@ export const TeamInvitationSchema = z.object({
     role: z.string().describe('Роль, которая будет назначена после принятия инвайта'),
     inviterId: z.string().describe('ID пользователя, отправившего приглашение'),
     inviterName: z.string().describe('Имя пригласившего'),
-    createdAt: z.string().datetime().describe('Дата создания инвайта (ISO 8601)'),
-    expiresAt: z.string().datetime().describe('Дата истечения инвайта (ISO 8601)'),
+    createdAt: zResponseDate().describe('Дата создания инвайта (ISO 8601)'),
+    expiresAt: zResponseDate().describe('Дата истечения инвайта (ISO 8601)'),
 });
 
 export class TeamInvitationResponse extends createZodDto(TeamInvitationSchema) {}
+
+export class TeamInvitationsResponse extends createZodDto(
+    createPaginationSchema(TeamInvitationSchema),
+) {}
 
 export interface TeamInvite {
     teamId: string;
