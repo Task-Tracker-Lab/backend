@@ -79,7 +79,7 @@ export class UserRepository implements IUserRepository {
     async updateProfile(id: string, data: Partial<User>) {
         const result = await this.db
             .update(sc.users)
-            .set({ ...data, updatedAt: new Date() })
+            .set({ ...data, updatedAt: new Date().toISOString() })
             .where(eq(sc.users.id, id));
         return (result?.count ?? 0) > 0;
     }
@@ -95,7 +95,7 @@ export class UserRepository implements IUserRepository {
     async updateAvatar(id: string, url: string) {
         const result = await this.db
             .update(sc.users)
-            .set({ avatarUrl: url, updatedAt: new Date() })
+            .set({ avatarUrl: url, updatedAt: new Date().toISOString() })
             .where(eq(sc.users.id, id));
         return (result?.count ?? 0) > 0;
     }
@@ -106,7 +106,7 @@ export class UserRepository implements IUserRepository {
             .values({ userId: id, passwordHash: hash })
             .onConflictDoUpdate({
                 target: sc.userSecurity.userId,
-                set: { passwordHash: hash, lastPasswordChange: new Date() },
+                set: { passwordHash: hash, lastPasswordChange: new Date().toISOString() },
             });
         return (result?.count ?? 0) > 0;
     }

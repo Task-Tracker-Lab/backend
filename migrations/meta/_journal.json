@@ -43,6 +43,13 @@
       "when": 1776614072462,
       "tag": "0005_calm_vivisector",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1779204823788,
+      "tag": "0006_absent_doctor_doom",
+      "breakpoints": false
     }
   ]
 }

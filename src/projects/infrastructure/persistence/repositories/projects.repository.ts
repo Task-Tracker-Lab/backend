@@ -24,7 +24,7 @@ export class ProjectsRepository implements IProjectsRepository {
     public update = async (id: string, data: Partial<NewProject>) => {
         const result = await this.db
             .update(schema.projects)
-            .set({ ...data, updatedAt: new Date() })
+            .set({ ...data, updatedAt: new Date().toISOString() })
             .where(eq(schema.projects.id, id))
             .returning({ id: schema.projects.id });
 
@@ -34,7 +34,7 @@ export class ProjectsRepository implements IProjectsRepository {
     public delete = async (id: string) => {
         const result = await this.db
             .update(schema.projects)
-            .set({ deletedAt: new Date() })
+            .set({ deletedAt: new Date().toISOString() })
             .where(eq(schema.projects.id, id))
             .returning({ id: schema.projects.id });
 
@@ -85,7 +85,7 @@ export class ProjectsRepository implements IProjectsRepository {
                     eq(schema.projectShares.token, token),
                     or(
                         isNull(schema.projectShares.expiresAt),
-                        gt(schema.projectShares.expiresAt, new Date()),
+                        gt(schema.projectShares.expiresAt, new Date().toISOString()),
                     ),
                 ),
             )

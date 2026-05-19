@@ -3,7 +3,6 @@ import { createZodDto } from 'nestjs-zod';
 import { ActionResponseSchema } from '@shared/dtos';
 import { createPaginationSchema } from '@shared/schemas';
 import { ProjectStatus, ProjectVisibility } from '@core/projects/domain/entities';
-import { zResponseDate } from '@shared/schemas/response-date.schema';
 
 export const CreateProjectSchema = z.object({
     name: z
@@ -61,9 +60,12 @@ export const CreateShareTokenResponseSchema = ActionResponseSchema.extend({
         isYourself: z
             .boolean()
             .describe('Флаг указывает, что ссылка была сгенерирована текущим пользователем'),
-        expiresAt: zResponseDate().describe(
-            "'Дата истечения ссылки. Если не была указана — ставится дефолт 3 месяца'",
-        ),
+        expiresAt: z
+            .string()
+            .refine((val) => !isNaN(Date.parse(val)), {
+                message: 'Строка не является валидной датой',
+            })
+            .describe("'Дата истечения ссылки. Если не была указана — ставится дефолт 3 месяца'"),
     }),
 });
 
@@ -83,7 +85,12 @@ export const ProjectListItemSchema = z.object({
     status: z.nativeEnum(ProjectStatus).describe('Статус проекта'),
     color: z.string().describe('Цвет проекта'),
     icon: z.string().nullable().optional().describe('Иконка проекта'),
-    createdAt: zResponseDate().describe('Дата создания проекта'),
+    createdAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата создания проекта'),
     canEdit: z.boolean().describe('Флаг возможности редактировать проект'),
 });
 
@@ -105,8 +112,18 @@ export const ProjectDetailResponseSchema = z.object({
     }),
     meta: z.object({
         taskSequence: z.number().int().nonnegative().describe('Счётчик задач'),
-        createdAt: zResponseDate().describe('Дата создания'),
-        updatedAt: zResponseDate().describe('Дата обновления'),
+        createdAt: z
+            .string()
+            .refine((val) => !isNaN(Date.parse(val)), {
+                message: 'Строка не является валидной датой',
+            })
+            .describe('Дата создания'),
+        updatedAt: z
+            .string()
+            .refine((val) => !isNaN(Date.parse(val)), {
+                message: 'Строка не является валидной датой',
+            })
+            .describe('Дата обновления'),
     }),
     access: z.object({
         visibility: z.nativeEnum(ProjectVisibility).describe('Видимость проекта'),

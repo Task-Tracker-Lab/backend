@@ -6,7 +6,7 @@ export type RawMemberRow = {
     userId: string;
     role: string;
     status: string;
-    joinedAt: Date | string | null;
+    joinedAt: string | null;
     firstName: string | null;
     lastName: string | null;
     middleName: string | null;
@@ -21,7 +21,7 @@ export type RawMemberTeams = {
     description: string | null;
     avatarUrl: string | null;
     role: string;
-    joinedAt: Date;
+    joinedAt: string;
 };
 
 export interface ITeamsRepository {

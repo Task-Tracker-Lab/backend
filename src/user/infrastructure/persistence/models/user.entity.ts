@@ -15,8 +15,12 @@ export const users = baseSchema.table('users', {
     avatarUrl: varchar('avatar_url', { length: 512 }),
     timezone: varchar('timezone', { length: 50 }).default('UTC').notNull(),
     language: varchar('language', { length: 5 }).default('ru').notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+        .defaultNow()
+        .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+        .defaultNow()
+        .notNull(),
 });
 
 export const userSecurity = baseSchema.table('user_security', {
@@ -26,7 +30,7 @@ export const userSecurity = baseSchema.table('user_security', {
     passwordHash: varchar('password_hash', { length: 255 }).notNull(),
     is2faEnabled: boolean('is_2fa_enabled').default(false).notNull(),
     twoFactorSecret: text('two_factor_secret'),
-    lastPasswordChange: timestamp('last_password_change', { withTimezone: true })
+    lastPasswordChange: timestamp('last_password_change', { withTimezone: true, mode: 'string' })
         .defaultNow()
         .notNull(),
 });
@@ -55,5 +59,7 @@ export const userActivity = baseSchema.table('user_activity', {
     eventType: varchar('event_type', { length: 50 }).notNull(),
     entityId: varchar('entity_id'),
     metadata: jsonb('metadata'),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+        .defaultNow()
+        .notNull(),
 });

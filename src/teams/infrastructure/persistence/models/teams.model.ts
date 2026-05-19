@@ -17,9 +17,13 @@ export const teams = baseSchema.table(
         avatarUrl: text('avatar_url'),
         coverUrl: text('cover_url'),
         ownerId: text('owner_id').references(() => users.id, { onDelete: 'set null' }),
-        createdAt: timestamp('created_at').defaultNow().notNull(),
-        updatedAt: timestamp('updated_at').defaultNow().notNull(),
-        deletedAt: timestamp('deleted_at'),
+        createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+            .defaultNow()
+            .notNull(),
+        updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+            .defaultNow()
+            .notNull(),
+        deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'string' }),
     },
     (t) => ({
         uniqueActiveSlug: uniqueIndex('team_active_slug_idx').on(t.slug).where(isNull(t.deletedAt)),
@@ -40,8 +44,10 @@ export const teamMembers = baseSchema.table(
             .notNull(),
         role: roleEnum('role').default('member').notNull(),
         status: statusEnum('status').default('inactive').notNull(),
-        joinedAt: timestamp('joined_at'),
-        createdAt: timestamp('created_at').defaultNow().notNull(),
+        joinedAt: timestamp('joined_at', { withTimezone: true, mode: 'string' }),
+        createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+            .defaultNow()
+            .notNull(),
     },
     (t) => ({
         pk: primaryKey({ columns: [t.teamId, t.userId] }),

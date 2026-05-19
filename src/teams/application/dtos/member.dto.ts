@@ -2,7 +2,6 @@ import { z } from 'zod/v4';
 import { createZodDto } from 'nestjs-zod';
 import { roleEnum } from '@core/teams/infrastructure/persistence/models';
 import { AvatarResponseSchema, createPaginationSchema } from '@shared/schemas';
-import { zResponseDate } from '@shared/schemas/response-date.schema';
 
 export const InviteMemberSchema = z.object({
     email: z.string().email().describe('Email пользователя, которого нужно пригласить'),
@@ -40,7 +39,12 @@ export const TeamMemberResponseSchema = z.object({
     avatar: AvatarResponseSchema,
 
     initials: z.string().max(2).describe('Две буквы для аватара-заглушки (например, "ИИ")'),
-    joinedAt: zResponseDate().describe('Дата и время вступления в команду в формате ISO 8601'),
+    joinedAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата и время вступления в команду в формате ISO 8601'),
 });
 
 export class TeamMemberResponse extends createZodDto(TeamMemberResponseSchema) {}
@@ -60,7 +64,12 @@ export const UserInviteSchema = z.object({
     // avatar: AvatarResponseSchema,
     role: z.string().describe('Роль'),
     inviterName: z.string().describe('Имя пригласившего'),
-    expiresAt: zResponseDate().describe('Дата истечения'),
+    expiresAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата истечения'),
 });
 
 export class UserInviteResponse extends createZodDto(UserInviteSchema) {}

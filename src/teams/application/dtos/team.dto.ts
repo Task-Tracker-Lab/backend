@@ -1,7 +1,6 @@
 import { z } from 'zod/v4';
 import { createZodDto } from 'nestjs-zod';
 import { AvatarResponseSchema, createPaginationSchema } from '@shared/schemas';
-import { zResponseDate } from '@shared/schemas/response-date.schema';
 
 export const CreateTeamSchema = z.object({
     name: z.string().min(2).max(100).describe('Название команды, отображаемое в интерфейсе'),
@@ -105,7 +104,12 @@ export const UserTeamSchema = z.object({
     description: z.string().nullable().describe('Краткое описание команды'),
     avatar: AvatarResponseSchema,
     role: z.string().describe('Системное название роли пользователя'),
-    joinedAt: zResponseDate().describe('Дата, когда пользователь вступил в команду'),
+    joinedAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата, когда пользователь вступил в команду'),
     permissions: TeamPermissionsSchema.describe('Объект прав доступа текущего пользователя'),
 });
 
@@ -127,9 +131,25 @@ export const TeamResponseSchema = z.object({
     // avatar: AvatarResponseSchema,
     coverUrl: z.string().nullable().describe('URL обложки команды'),
     ownerId: z.string().nullable().describe('ID владельца команды'),
-    createdAt: zResponseDate().describe('Дата создания команды'),
-    updatedAt: zResponseDate().describe('Дата обновления команды'),
-    deletedAt: zResponseDate().nullable().describe('Дата удаления (если удалена)'),
+    createdAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата создания команды'),
+    updatedAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата обновления команды'),
+    deletedAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .nullable()
+        .describe('Дата удаления (если удалена)'),
 });
 
 export class TeamResponse extends createZodDto(TeamResponseSchema) {}

@@ -51,7 +51,7 @@ export class SignInUseCase {
         await this.sessionRepo.create({
             id: sessionId,
             userId: user.id,
-            expiresAt,
+            expiresAt: expiresAt.toISOString(),
             ...meta,
         });
 

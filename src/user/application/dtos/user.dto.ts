@@ -1,7 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod/v4';
 import { AvatarResponseSchema, createPaginationSchema } from '@shared/schemas';
-import { zResponseDate } from '@shared/schemas/response-date.schema';
 
 const NotificationsSchema = z
     .object({
@@ -29,7 +28,12 @@ export class UpdateNotificationsDto extends createZodDto(UpdateNotificationsSche
 const SecuritySchema = z
     .object({
         is2faEnabled: z.boolean().describe('Статус двухфакторной аутентификации'),
-        lastPasswordChange: zResponseDate().describe('Дата последнего изменения пароля'),
+        lastPasswordChange: z
+            .string()
+            .refine((val) => !isNaN(Date.parse(val)), {
+                message: 'Строка не является валидной датой',
+            })
+            .describe('Дата последнего изменения пароля'),
     })
     .describe('Данные безопасности аккаунта');
 
@@ -41,8 +45,18 @@ const ProfileSchema = z.object({
     avatar: AvatarResponseSchema,
     timezone: z.string().describe('Временная зона'),
     language: z.string().describe('Язык интерфейса'),
-    createdAt: zResponseDate().describe('Дата регистрации'),
-    updatedAt: zResponseDate().describe('Дата последнего обновления профиля'),
+    createdAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата регистрации'),
+    updatedAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата последнего обновления профиля'),
 });
 
 export const UserSchema = z.object({
@@ -93,7 +107,12 @@ const UserActivityItemSchema = z
             .nullable()
             .optional()
             .describe('Дополнительные данные'),
-        createdAt: zResponseDate().describe('Дата и время события (ISO 8601)'),
+        createdAt: z
+            .string()
+            .refine((val) => !isNaN(Date.parse(val)), {
+                message: 'Строка не является валидной датой',
+            })
+            .describe('Дата и время события (ISO 8601)'),
     })
     .describe('Элемент активности пользователя');
 

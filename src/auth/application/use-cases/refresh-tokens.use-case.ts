@@ -65,7 +65,7 @@ export class RefreshTokensUseCase {
             id: sessionId,
             userId: entity.user.id,
             ...metadata,
-            expiresAt,
+            expiresAt: expiresAt.toISOString(),
         });
 
         return {

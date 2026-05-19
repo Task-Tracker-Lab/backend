@@ -43,7 +43,7 @@ export class GenerateShareTokenUseCase {
         const isSaved = await this.projectsRepo.createShare({
             projectId: project.id,
             token: this.hash(rawToken),
-            expiresAt,
+            expiresAt: expiresAt.toISOString(),
             createdBy: userId,
         });
 
