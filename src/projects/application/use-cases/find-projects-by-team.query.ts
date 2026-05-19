@@ -14,6 +14,7 @@ export class FindProjectsByTeamQuery {
     public async execute(slug: string, userId: string) {
         const { team, member } = await this.policy.ensureTeamAccess(slug, userId, 'viewer');
         const projects = await this.projectsRepo.findByTeam(team.id);
+        const items = projects.map((p) => ProjectsMapper.toListResponse(p, member));
 
         return {
             team: {
@@ -22,9 +23,15 @@ export class FindProjectsByTeamQuery {
                 slug: team.slug,
                 role: member.role,
             },
-            items: projects.map((p) => ProjectsMapper.toListResponse(p, member)),
+            // TODO: реализовать полноценную пагинацию для проектов команды.
+            items,
             meta: {
-                total: projects.length,
+                total: items.length,
+                totalPages: items.length ? 1 : 0,
+                page: 1,
+                limit: 10,
+                hasPrevPage: false,
+                hasNextPage: false,
             },
         };
     }
