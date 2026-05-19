@@ -62,11 +62,12 @@ export default function () {
 
     sleep(1);
 
-    // --- POST /me/avatar ---
+    // --- Update user avatar ---
     const fd = new FormData();
     fd.append('file', http.file(avatar, 'avatar.png', 'image/png'));
+    fd.append('context', 'user.avatar');
 
-    client.post('/users/me/avatar', fd.body(), {
+    client.post('/upload', fd.body(), {
         rawBody: true,
         headers: {
             'Content-Type': `multipart/form-data; boundary=${fd.boundary}`,

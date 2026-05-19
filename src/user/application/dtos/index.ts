@@ -1,1 +1,6 @@
-export { UpdateProfileDto, UpdateNotificationsDto, UserResponse } from './user.dto';
+export {
+    UpdateProfileDto,
+    UpdateNotificationsDto,
+    UserResponse,
+    UserActivityResponse,
+} from './user.dto';

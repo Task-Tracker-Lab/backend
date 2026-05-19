@@ -1,8 +1,9 @@
-import { applyDecorators } from '@nestjs/common';
+import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UploadMediaDto } from '../dtos';
 import { ApiUnauthorized, ApiValidationError } from '@shared/error';
 import { ActionResponse } from '@shared/dtos';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
 
 export const UploadMediaSwagger = () =>
     applyDecorators(
@@ -23,4 +24,6 @@ export const UploadMediaSwagger = () =>
         }),
         ApiValidationError('Неверный формат файла или отсутствуют обязательные поля'),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );

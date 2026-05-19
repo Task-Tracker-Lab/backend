@@ -17,13 +17,18 @@ export class GetActivityQuery {
             offset,
         });
 
+        const totalPages = Math.ceil(total / safeLimit);
+
         return {
+            // TODO: реализовать полноценную пагинацию по общей схеме (hasNextPage/hasPrevPage) везде.
             items,
             meta: {
                 total,
                 page,
                 limit: safeLimit,
-                totalPages: Math.ceil(total / safeLimit),
+                totalPages,
+                hasPrevPage: page > 1,
+                hasNextPage: totalPages > 0 && page < totalPages,
             },
         };
     }

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
+import { zResponseDate } from '@shared/schemas/response-date.schema';
 
 const ErrorDetailSchema = z.object({
     field: z.string().describe('Путь к полю (например, "user.email")'),
@@ -15,7 +16,7 @@ const ErrorMetaSchema = z.object({
         method: z.string().describe('HTTP метод'),
         ip: z.string().optional().describe('IP клиента'),
     }),
-    timestamp: z.string().datetime().describe('Время ошибки ISO 8601'),
+    timestamp: zResponseDate().describe('Время ошибки ISO 8601'),
     debug: z
         .object({
             stack: z.string().optional().describe('Стек вызовов (только в Dev)'),
