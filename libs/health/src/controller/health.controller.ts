@@ -33,7 +33,7 @@ export class HealthController {
             );
         }
 
-        return 'healthy';
+        return { status: 'healthy' };
     }
 
     @Get('ping')

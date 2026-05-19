@@ -1,6 +1,7 @@
-import { applyDecorators } from '@nestjs/common';
+import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { HealthResponse } from '../dtos';
+import { HealthResponse, HealthDetailedResponse } from '../dtos';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
 
 export const GetHealthSwagger = () =>
     applyDecorators(
@@ -8,8 +9,14 @@ export const GetHealthSwagger = () =>
             summary: 'Краткий статус (Health Check)',
             description: 'Используется внешними системами для проверки доступности сервиса.',
         }),
-        ApiResponse({ status: 200, description: 'Сервис работает нормально', type: String }),
+        ApiResponse({
+            status: 200,
+            description: 'Сервис работает нормально',
+            type: HealthResponse.Output,
+        }),
         ApiResponse({ status: 503, description: 'Сервис недоступен или критическая ошибка' }),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, HealthResponse),
     );
 
 export const GetPingSwagger = () =>
@@ -21,6 +28,8 @@ export const GetPingSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Полная статистика сервиса',
-            type: HealthResponse.Output,
+            type: HealthDetailedResponse.Output,
         }),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, HealthDetailedResponse),
     );
