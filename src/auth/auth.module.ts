@@ -1,5 +1,3 @@
-import { BullBoardModule } from '@bull-board/nestjs';
-import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { BullModule } from '@nestjs/bullmq';
 import { Module, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -46,10 +44,6 @@ const REPOSITORY = {
         }),
         BullModule.registerQueue({
             name: AuthQueues.AUTH_MAIL,
-        }),
-        BullBoardModule.forFeature({
-            name: AuthQueues.AUTH_MAIL,
-            adapter: BullMQAdapter,
         }),
         forwardRef(() => UserModule),
     ],
