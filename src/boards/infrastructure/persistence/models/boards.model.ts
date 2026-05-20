@@ -24,8 +24,12 @@ export const boards = baseSchema.table(
         settings: jsonb('settings').default({}).notNull(),
         position: doublePrecision('position').notNull(),
         ownerId: text('owner_id').references(() => users.id, { onDelete: 'set null' }),
-        createdAt: timestamp('created_at').defaultNow().notNull(),
-        updatedAt: timestamp('updated_at').defaultNow().notNull(),
+        createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+            .defaultNow()
+            .notNull(),
+        updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+            .defaultNow()
+            .notNull(),
     },
     (table) => ({
         projectBoardNameIdx: uniqueIndex('project_board_name_idx').on(table.projectId, table.name),
@@ -46,8 +50,12 @@ export const boardColumns = baseSchema.table('board_columns', {
 
     color: varchar('color', { length: 7 }).default('#64748b').notNull(),
 
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+        .defaultNow()
+        .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+        .defaultNow()
+        .notNull(),
 });
 
 export const boardViews = baseSchema.table('boards_views', {
@@ -61,6 +69,10 @@ export const boardViews = baseSchema.table('boards_views', {
     name: varchar('name', { length: 100 }).notNull(),
     settings: jsonb('settings').default({}).notNull(),
     position: doublePrecision('position').notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+        .defaultNow()
+        .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+        .defaultNow()
+        .notNull(),
 });

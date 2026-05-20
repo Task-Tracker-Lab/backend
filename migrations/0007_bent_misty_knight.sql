@@ -8,8 +8,8 @@ CREATE TABLE "base"."board_columns" (
 	"visibility" boolean DEFAULT true NOT NULL,
 	"position" double precision NOT NULL,
 	"color" varchar(7) DEFAULT '#64748b' NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 
 CREATE TABLE "base"."boards_views" (
@@ -19,8 +19,8 @@ CREATE TABLE "base"."boards_views" (
 	"name" varchar(100) NOT NULL,
 	"settings" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"position" double precision NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 
 CREATE TABLE "base"."boards" (
@@ -30,8 +30,8 @@ CREATE TABLE "base"."boards" (
 	"settings" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"position" double precision NOT NULL,
 	"owner_id" text,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 
 ALTER TABLE "base"."board_columns" ADD CONSTRAINT "board_columns_board_id_boards_id_fk" FOREIGN KEY ("board_id") REFERENCES "base"."boards"("id") ON DELETE cascade ON UPDATE no action;

@@ -121,7 +121,7 @@ export class BoardsRepository implements IBoardsRepository {
     async update(id: string, data: Partial<Board>): Promise<BoardWithRelations | null> {
         const [updated] = await this.db
             .update(schema.boards)
-            .set({ ...data, updatedAt: new Date() })
+            .set({ ...data, updatedAt: new Date().toISOString() })
             .where(eq(schema.boards.id, id))
             .returning();
 
@@ -184,7 +184,7 @@ export class BoardsRepository implements IBoardsRepository {
     async updateColumn(id: string, data: Partial<BoardColumn>): Promise<BoardColumn | null> {
         const [updated] = await this.db
             .update(schema.boardColumns)
-            .set({ ...data, updatedAt: new Date() })
+            .set({ ...data, updatedAt: new Date().toISOString() })
             .where(eq(schema.boardColumns.id, id))
             .returning();
 
@@ -226,7 +226,7 @@ export class BoardsRepository implements IBoardsRepository {
     async updateView(id: string, data: Partial<BoardView>): Promise<BoardView | null> {
         const [updated] = await this.db
             .update(schema.boardViews)
-            .set({ ...data, updatedAt: new Date() })
+            .set({ ...data, updatedAt: new Date().toISOString() })
             .where(eq(schema.boardViews.id, id))
             .returning();
 
