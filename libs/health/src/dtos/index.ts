@@ -1,1 +1,1 @@
-export { HealthResponse } from './health.dto';
+export { HealthResponse, HealthDetailedResponse } from './health.dto';

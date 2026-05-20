@@ -23,7 +23,7 @@ export class GetAllTagsUseCase {
         const totalPages = total === 0 ? 0 : Math.ceil(total / safeLimit);
 
         return {
-            data,
+            items: data,
             meta: {
                 hasNextPage: safePage < totalPages,
                 hasPrevPage: safePage > 1,

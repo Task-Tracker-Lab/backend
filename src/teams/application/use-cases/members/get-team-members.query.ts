@@ -23,7 +23,20 @@ export class GetTeamMembersQuery {
         }
         const cdn = this.getCdnBaseUrl();
         const members = await this.teamsRepo.findMembers(team.id);
-        return TeamMemberMapper.toList(members, cdn);
+        const data = TeamMemberMapper.toList(members, cdn);
+
+        return {
+            // TODO: реализовать полноценную пагинацию для участников команды.
+            items: data,
+            meta: {
+                total: data.length,
+                totalPages: data.length ? 1 : 0,
+                page: 1,
+                limit: data.length,
+                hasPrevPage: false,
+                hasNextPage: false,
+            },
+        };
     }
 
     private getCdnBaseUrl(): string {

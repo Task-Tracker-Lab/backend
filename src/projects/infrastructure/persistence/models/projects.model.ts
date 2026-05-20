@@ -23,9 +23,13 @@ export const projects = baseSchema.table(
         ownerId: text('owner_id').references(() => users.id, { onDelete: 'set null' }),
         visibility: projectVisibilityEnum('visibility').default('public').notNull(),
         settings: jsonb('settings').default({}),
-        createdAt: timestamp('created_at').defaultNow().notNull(),
-        updatedAt: timestamp('updated_at').defaultNow().notNull(),
-        deletedAt: timestamp('deleted_at'),
+        createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+            .defaultNow()
+            .notNull(),
+        updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+            .defaultNow()
+            .notNull(),
+        deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'string' }),
     },
     (t) => ({
         uniqueTeamKey: uniqueIndex('project_team_key_idx')
@@ -49,9 +53,11 @@ export const projectShares = baseSchema.table(
             .notNull()
             .references(() => projects.id, { onDelete: 'cascade' }),
         token: text('token').notNull().unique(),
-        expiresAt: timestamp('expires_at', { withTimezone: true }),
+        expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'string' }),
         createdBy: text('created_by').notNull(),
-        createdAt: timestamp('created_at').defaultNow().notNull(),
+        createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+            .defaultNow()
+            .notNull(),
     },
     (table) => ({
         tokenIdx: index('token_idx').on(table.token),

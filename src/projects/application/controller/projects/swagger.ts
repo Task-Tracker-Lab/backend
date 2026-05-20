@@ -1,4 +1,4 @@
-import { applyDecorators } from '@nestjs/common';
+import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiOperation, ApiBody, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { ActionResponse } from '@shared/dtos';
 import { ApiValidationError, ApiUnauthorized, ApiForbidden, ApiNotFound } from '@shared/error';
@@ -7,7 +7,11 @@ import {
     CreateProjectResponse,
     CreateShareTokenDto,
     UpdateProjectDto,
+    ProjectListResponse,
+    ProjectDetailResponse,
 } from '../../dtos';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
+import { CreateShareTokenResponse } from '@core/projects/application/dtos/projects.dto';
 
 export const CreateProjectSwagger = () =>
     applyDecorators(
@@ -22,6 +26,8 @@ export const CreateProjectSwagger = () =>
         ApiValidationError(),
         ApiUnauthorized(),
         ApiForbidden(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, CreateProjectResponse),
     );
 
 export const FindAllProjectsSwagger = () =>
@@ -31,9 +37,11 @@ export const FindAllProjectsSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Список проектов получен',
-            type: [Object],
+            type: ProjectListResponse.Output,
         }),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ProjectListResponse),
     );
 
 export const FindOneProjectSwagger = () =>
@@ -45,9 +53,11 @@ export const FindOneProjectSwagger = () =>
             type: 'string',
             example: 'clv123456',
         }),
-        ApiResponse({ status: 200, type: Object }),
+        ApiResponse({ status: 200, type: ProjectDetailResponse.Output }),
         ApiNotFound('Проект не найден'),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ProjectDetailResponse),
     );
 
 export const UpdateProjectSwagger = () =>
@@ -64,6 +74,8 @@ export const UpdateProjectSwagger = () =>
         ApiValidationError(),
         ApiNotFound(),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const RemoveProjectSwagger = () =>
@@ -78,6 +90,8 @@ export const RemoveProjectSwagger = () =>
         ApiResponse({ status: 200, description: 'Проект удален', type: ActionResponse.Output }),
         ApiNotFound(),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const ArchiveProjectSwagger = () =>
@@ -91,14 +105,18 @@ export const ArchiveProjectSwagger = () =>
         }),
         ApiResponse({ status: 200, description: 'Статус обновлен', type: ActionResponse.Output }),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const GetProjectByTokenSwagger = () =>
     applyDecorators(
         ApiOperation({ summary: 'Получить проект по публичному токену' }),
         ApiParam({ name: 'token', description: 'Токен доступа', type: 'string' }),
-        ApiResponse({ status: 200, type: Object }),
+        ApiResponse({ status: 200, type: ProjectDetailResponse.Output }),
         ApiNotFound('Токен недействителен'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ProjectDetailResponse),
     );
 
 export const CreateShareTokenSwagger = () =>
@@ -126,10 +144,12 @@ export const CreateShareTokenSwagger = () =>
         ApiResponse({
             status: 201,
             description: 'Токен успешно создан',
-            type: ActionResponse.Output,
+            type: CreateShareTokenResponse.Output,
         }),
         ApiNotFound('Проект не найден в этой команде'),
         ApiValidationError('Некорректная дата или параметры'),
         ApiUnauthorized(),
         ApiForbidden('У вас нет прав для создания ссылки для этого проекта'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, CreateShareTokenResponse),
     );

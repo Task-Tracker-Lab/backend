@@ -1,4 +1,4 @@
-import { applyDecorators } from '@nestjs/common';
+import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ActionResponse } from '@shared/dtos';
 import {
@@ -8,7 +8,8 @@ import {
     ApiUnauthorized,
     ApiValidationError,
 } from '@shared/error';
-import { CreateTeamDto, UpdateTeamDto, CheckSlugResponse } from '../../dtos';
+import { CreateTeamDto, UpdateTeamDto, CheckSlugResponse, TeamResponse } from '../../dtos';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
 
 export const CreateTeamSwagger = () =>
     applyDecorators(
@@ -22,6 +23,8 @@ export const CreateTeamSwagger = () =>
         ApiConflict('Команда с таким slug уже существует'),
         ApiValidationError(),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const CheckSlugSwagger = () =>
@@ -41,6 +44,8 @@ export const CheckSlugSwagger = () =>
             type: CheckSlugResponse.Output,
         }),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, CheckSlugResponse),
     );
 
 export const FindOneTeamSwagger = () =>
@@ -50,10 +55,12 @@ export const FindOneTeamSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Данные команды получены',
-            type: Object,
+            type: TeamResponse.Output,
         }),
         ApiNotFound('Команда не найдена'),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, TeamResponse),
     );
 
 export const UpdateTeamSwagger = () =>
@@ -70,6 +77,8 @@ export const UpdateTeamSwagger = () =>
         ApiNotFound(),
         ApiValidationError(),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const RemoveTeamSwagger = () =>
@@ -84,4 +93,6 @@ export const RemoveTeamSwagger = () =>
         ApiForbidden(),
         ApiNotFound(),
         ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );

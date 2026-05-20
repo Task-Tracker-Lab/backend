@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
 import { createZodDto } from 'nestjs-zod';
-import { createPaginationSchema } from '../../../shared/schemas';
+import { AvatarResponseSchema, createPaginationSchema } from '@shared/schemas';
 
 export const CreateTeamSchema = z.object({
     name: z.string().min(2).max(100).describe('Название команды, отображаемое в интерфейсе'),
@@ -98,14 +98,58 @@ export const TeamPermissionsSchema = z.object({
 });
 
 export const UserTeamSchema = z.object({
-    id: z.string().uuid().describe('Уникальный ID команды'),
+    id: z.string().describe('Уникальный ID команды'),
     name: z.string().describe('Название команды'),
     slug: z.string().describe('Уникальный URL-путь команды'),
     description: z.string().nullable().describe('Краткое описание команды'),
-    avatarUrl: z.string().nullable().describe('URL изображения профиля команды'),
+    avatar: AvatarResponseSchema,
     role: z.string().describe('Системное название роли пользователя'),
-    joinedAt: z.string().datetime().describe('Дата, когда пользователь вступил в команду'),
+    joinedAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата, когда пользователь вступил в команду'),
     permissions: TeamPermissionsSchema.describe('Объект прав доступа текущего пользователя'),
 });
 
 export class UserTeamResponse extends createZodDto(UserTeamSchema) {}
+
+export class UserTeamsResponse extends createZodDto(createPaginationSchema(UserTeamSchema)) {}
+
+export const TeamResponseSchema = z.object({
+    id: z.string().describe('Уникальный ID команды'),
+    slug: z.string().describe('Слаг команды'),
+    name: z.string().describe('Название команды'),
+    description: z.string().nullable().describe('Описание команды'),
+    avatarUrl: z
+        .string()
+        .url()
+        .nullable()
+        .describe('URL аватара команды или null, если аватар отсутствует'),
+    //TODO: replace with schema
+    // avatar: AvatarResponseSchema,
+    coverUrl: z.string().nullable().describe('URL обложки команды'),
+    ownerId: z.string().nullable().describe('ID владельца команды'),
+    createdAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата создания команды'),
+    updatedAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата обновления команды'),
+    deletedAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .nullable()
+        .describe('Дата удаления (если удалена)'),
+});
+
+export class TeamResponse extends createZodDto(TeamResponseSchema) {}

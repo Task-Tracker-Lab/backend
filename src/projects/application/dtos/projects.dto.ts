@@ -1,7 +1,8 @@
 import { z } from 'zod/v4';
 import { createZodDto } from 'nestjs-zod';
 import { ActionResponseSchema } from '@shared/dtos';
-import { ProjectStatus } from '@core/projects/domain/entities';
+import { createPaginationSchema } from '@shared/schemas';
+import { ProjectStatus, ProjectVisibility } from '@core/projects/domain/entities';
 
 export const CreateProjectSchema = z.object({
     name: z
@@ -52,3 +53,85 @@ export const CreateShareTokenSchema = z.object({
 });
 
 export class CreateShareTokenDto extends createZodDto(CreateShareTokenSchema) {}
+
+export const CreateShareTokenResponseSchema = ActionResponseSchema.extend({
+    payload: z.object({
+        token: z.string().describe('Токен'),
+        isYourself: z
+            .boolean()
+            .describe('Флаг указывает, что ссылка была сгенерирована текущим пользователем'),
+        expiresAt: z
+            .string()
+            .refine((val) => !isNaN(Date.parse(val)), {
+                message: 'Строка не является валидной датой',
+            })
+            .describe("'Дата истечения ссылки. Если не была указана — ставится дефолт 3 месяца'"),
+    }),
+});
+
+export class CreateShareTokenResponse extends createZodDto(CreateShareTokenResponseSchema) {}
+
+const TeamShortSchema = z.object({
+    id: z.string().describe('ID команды'),
+    name: z.string().describe('Название команды'),
+    slug: z.string().describe('Слаг команды'),
+    role: z.string().describe('Роль пользователя в команде'),
+});
+
+export const ProjectListItemSchema = z.object({
+    id: z.string().describe('ID проекта'),
+    key: z.string().describe('Ключ проекта'),
+    name: z.string().describe('Название проекта'),
+    status: z.nativeEnum(ProjectStatus).describe('Статус проекта'),
+    color: z.string().describe('Цвет проекта'),
+    icon: z.string().nullable().optional().describe('Иконка проекта'),
+    createdAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата создания проекта'),
+    canEdit: z.boolean().describe('Флаг возможности редактировать проект'),
+});
+
+export const ProjectListResponseSchema = createPaginationSchema(ProjectListItemSchema).extend({
+    team: TeamShortSchema,
+});
+
+export class ProjectListResponse extends createZodDto(ProjectListResponseSchema) {}
+
+export const ProjectDetailResponseSchema = z.object({
+    id: z.string().describe('ID проекта'),
+    key: z.string().describe('Ключ проекта'),
+    name: z.string().describe('Название проекта'),
+    status: z.nativeEnum(ProjectStatus).describe('Статус проекта'),
+    description: z.string().nullable().describe('Описание проекта'),
+    visuals: z.object({
+        color: z.string().describe('Цвет проекта'),
+        icon: z.string().nullable().optional().describe('Иконка проекта'),
+    }),
+    meta: z.object({
+        taskSequence: z.number().int().nonnegative().describe('Счётчик задач'),
+        createdAt: z
+            .string()
+            .refine((val) => !isNaN(Date.parse(val)), {
+                message: 'Строка не является валидной датой',
+            })
+            .describe('Дата создания'),
+        updatedAt: z
+            .string()
+            .refine((val) => !isNaN(Date.parse(val)), {
+                message: 'Строка не является валидной датой',
+            })
+            .describe('Дата обновления'),
+    }),
+    access: z.object({
+        visibility: z.nativeEnum(ProjectVisibility).describe('Видимость проекта'),
+        canEdit: z.boolean().describe('Можно ли редактировать проект'),
+        canDelete: z.boolean().describe('Можно ли удалить проект'),
+        shareUrl: z.string().nullable().describe('Ссылка на шаринг проекта'),
+    }),
+    settings: z.record(z.string(), z.unknown()).describe('Настройки проекта'),
+});
+
+export class ProjectDetailResponse extends createZodDto(ProjectDetailResponseSchema) {}

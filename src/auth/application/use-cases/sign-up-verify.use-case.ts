@@ -83,7 +83,7 @@ export class SignUpVerifyUseCase {
             id: sessionId,
             userId: user.id,
             ...meta,
-            expiresAt,
+            expiresAt: expiresAt.toISOString(),
         });
 
         await this.cacheService.removeOne(redisKey);

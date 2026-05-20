@@ -1,5 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod/v4';
+import { AvatarResponseSchema, createPaginationSchema } from '@shared/schemas';
 
 const NotificationsSchema = z
     .object({
@@ -27,32 +28,35 @@ export class UpdateNotificationsDto extends createZodDto(UpdateNotificationsSche
 const SecuritySchema = z
     .object({
         is2faEnabled: z.boolean().describe('Статус двухфакторной аутентификации'),
-        lastPasswordChange: z.string().datetime().describe('Дата последнего изменения пароля'),
+        lastPasswordChange: z
+            .string()
+            .refine((val) => !isNaN(Date.parse(val)), {
+                message: 'Строка не является валидной датой',
+            })
+            .describe('Дата последнего изменения пароля'),
     })
     .describe('Данные безопасности аккаунта');
-
-const ProfileAvatarSchema = z
-    .object({
-        small: z.string().url(),
-        medium: z.string().url(),
-        large: z.string().url(),
-        original: z.string().url(),
-    })
-    .nullable()
-    .describe(
-        'Аватар пользователя: объект с размерами (sm, md, lg, original) или null, если аватар отсутствует',
-    );
 
 const ProfileSchema = z.object({
     firstName: z.string().describe('Имя пользователя'),
     lastName: z.string().describe('Фамилия'),
     middleName: z.string().nullable().describe('Отчество'),
     bio: z.string().nullable().describe('О себе'),
-    avatar: ProfileAvatarSchema,
+    avatar: AvatarResponseSchema,
     timezone: z.string().describe('Временная зона'),
     language: z.string().describe('Язык интерфейса'),
-    createdAt: z.string().datetime().describe('Дата регистрации'),
-    updatedAt: z.string().datetime().describe('Дата последнего обновления профиля'),
+    createdAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата регистрации'),
+    updatedAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата последнего обновления профиля'),
 });
 
 export const UserSchema = z.object({
@@ -92,3 +96,28 @@ export const UpdateProfileSchema = z
     .describe('Схема для частичного обновления данных профиля');
 
 export class UpdateProfileDto extends createZodDto(UpdateProfileSchema) {}
+
+const UserActivityItemSchema = z
+    .object({
+        id: z.string().describe('ID события активности'),
+        eventType: z.string().describe('Тип события активности'),
+        entityId: z.string().nullable().optional().describe('ID сущности, если применимо'),
+        metadata: z
+            .record(z.string(), z.unknown())
+            .nullable()
+            .optional()
+            .describe('Дополнительные данные'),
+        createdAt: z
+            .string()
+            .refine((val) => !isNaN(Date.parse(val)), {
+                message: 'Строка не является валидной датой',
+            })
+            .describe('Дата и время события (ISO 8601)'),
+    })
+    .describe('Элемент активности пользователя');
+
+export const UserActivityResponseSchema = createPaginationSchema(UserActivityItemSchema).describe(
+    'Ответ со списком активности пользователя',
+);
+
+export class UserActivityResponse extends createZodDto(UserActivityResponseSchema) {}

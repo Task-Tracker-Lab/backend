@@ -78,7 +78,7 @@ export class ApiClient {
     get(path, params = {}, options = {}) {
         const query = this._buildQuery(params);
         const res = http.get(`${this.baseUrl}${path}${query}`, this._buildOptions(options));
-        this._logError(res, 'GET', path);
+        this._logError(res, 'GET', path, options);
         return res;
     }
 
@@ -96,7 +96,7 @@ export class ApiClient {
             payload,
             this._buildOptions(options, useJsonDefault),
         );
-        this._logError(res, 'POST', path);
+        this._logError(res, 'POST', path, options);
         return res;
     }
 
@@ -114,7 +114,7 @@ export class ApiClient {
             payload,
             this._buildOptions(options, useJsonDefault),
         );
-        this._logError(res, 'PATCH', path);
+        this._logError(res, 'PATCH', path, options);
         return res;
     }
 
@@ -132,7 +132,7 @@ export class ApiClient {
             payload,
             this._buildOptions(options, useJsonDefault),
         );
-        this._logError(res, 'PUT', path);
+        this._logError(res, 'PUT', path, options);
         return res;
     }
 
@@ -143,7 +143,7 @@ export class ApiClient {
      */
     delete(path, options = {}) {
         const res = http.del(`${this.baseUrl}${path}`, null, this._buildOptions(options, false));
-        this._logError(res, 'DELETE', path);
+        this._logError(res, 'DELETE', path, options);
         return res;
     }
 
@@ -153,13 +153,24 @@ export class ApiClient {
      * @param {import('k6/http').RefinedResponse<any>} res - Объект ответа k6.
      * @param {string} method - Название HTTP метода для лога.
      * @param {string} path - Путь запроса для лога.
+     * @param {Object} [options] - Доп. параметры запроса.
      */
-    _logError(res, method, path) {
+    _logError(res, method, path, options = {}) {
+        const expectedStatuses = Array.isArray(options.expectedStatuses)
+            ? options.expectedStatuses
+            : null;
+        const isOk = expectedStatuses
+            ? (r) => expectedStatuses.includes(r.status)
+            : (r) => r.status >= 200 && r.status < 300;
+        const statusLabel = expectedStatuses
+            ? `statuses [${expectedStatuses.join(',')}]`
+            : 'statuses 2xx';
+
         check(res, {
-            [`${method} ${path} status is 2xx`]: (r) => r.status >= 200 && r.status < 300,
+            [`${method} ${path} ${statusLabel} is expected`]: isOk,
         });
 
-        if (res.status >= 400) {
+        if (!isOk(res)) {
             console.error(`Error on ${method} ${path}: [${res.status}] ${res.body}`);
         }
     }

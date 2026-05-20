@@ -23,7 +23,7 @@ export const paginationResponseSchema = z.object({
 
 export const createPaginationSchema = <T extends z.ZodTypeAny>(itemSchema: T) => {
     return z.object({
-        data: z.array(itemSchema),
+        items: z.array(itemSchema),
         meta: paginationResponseSchema,
     });
 };

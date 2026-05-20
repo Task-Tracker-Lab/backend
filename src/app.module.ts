@@ -3,7 +3,7 @@ import { ConfigModule } from '@libs/config';
 import { DatabaseModule } from '@libs/database';
 import { ConfigService } from '@nestjs/config';
 import * as schema from './shared/entities';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { HealthModule } from '@libs/health';
@@ -23,6 +23,7 @@ import { S3Service } from '@libs/s3';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { DatabaseHealthService } from '@libs/database';
+import { ZodValidationInterceptor } from '@shared/interceptors/zod-validation.interceptor';
 
 @Module({
     imports: [
@@ -100,6 +101,10 @@ import { DatabaseHealthService } from '@libs/database';
         {
             provide: APP_FILTER,
             useClass: GlobalExceptionFilter,
+        },
+        {
+            provide: APP_INTERCEPTOR,
+            useClass: ZodValidationInterceptor,
         },
     ],
 })

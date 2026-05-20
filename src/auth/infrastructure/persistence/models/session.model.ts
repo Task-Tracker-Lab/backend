@@ -17,8 +17,12 @@ export const sessions = baseSchema.table('sessions', {
     ip: varchar('ip', { length: 45 }).notNull(),
     city: varchar('city', { length: 100 }),
     countryCode: varchar('country_code', { length: 5 }),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+        .defaultNow()
+        .notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+        .defaultNow()
+        .notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'string' }).notNull(),
     isRevoked: boolean('is_revoked').default(false).notNull(),
 });

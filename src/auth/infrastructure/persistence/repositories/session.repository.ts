@@ -37,7 +37,7 @@ export class SessionRepository implements ISessionRepository {
     async revoke(id: string) {
         const result = await this.db
             .update(schema.sessions)
-            .set({ isRevoked: true, updatedAt: new Date() })
+            .set({ isRevoked: true, updatedAt: new Date().toISOString() })
             .where(eq(schema.sessions.id, id));
 
         return (result?.count ?? 0) > 0;
@@ -52,14 +52,14 @@ export class SessionRepository implements ISessionRepository {
 
         await this.db
             .update(schema.sessions)
-            .set({ isRevoked: true, updatedAt: new Date() })
+            .set({ isRevoked: true, updatedAt: new Date().toISOString() })
             .where(and(...filters));
     }
 
     async deleteExpired() {
         const result = await this.db
             .delete(schema.sessions)
-            .where(lt(schema.sessions.expiresAt, new Date()));
+            .where(lt(schema.sessions.expiresAt, new Date().toISOString()));
 
         return result?.count ?? 0;
     }

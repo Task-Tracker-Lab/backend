@@ -3,4 +3,6 @@ export {
     UpdateProjectDto,
     CreateProjectResponse,
     CreateShareTokenDto,
+    ProjectListResponse,
+    ProjectDetailResponse,
 } from './projects.dto';

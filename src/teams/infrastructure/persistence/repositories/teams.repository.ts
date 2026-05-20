@@ -63,7 +63,7 @@ export class TeamsRepository implements ITeamsRepository {
                 userId: ownerId,
                 role: 'owner',
                 status: 'active',
-                joinedAt: new Date(),
+                joinedAt: new Date().toISOString(),
             });
 
             return {
@@ -98,7 +98,7 @@ export class TeamsRepository implements ITeamsRepository {
         const result = await this.db
             .update(schema.teams)
             .set({
-                deletedAt: new Date(),
+                deletedAt: new Date().toISOString(),
                 slug: sql`${schema.teams.slug} || '-' || ${suffix}`,
             })
             .where(and(eq(schema.teams.id, teamId), eq(schema.teams.ownerId, userId)));
@@ -229,7 +229,7 @@ export class TeamsRepository implements ITeamsRepository {
 
         const data = {
             role,
-            ...(status === 'active' ? { joinedAt: new Date() } : {}),
+            ...(status === 'active' ? { joinedAt: new Date().toISOString() } : {}),
         };
 
         const result = await this.db
@@ -245,7 +245,7 @@ export class TeamsRepository implements ITeamsRepository {
     public async updateTeamAvatar(teamId: string, url: string): Promise<boolean> {
         const result = await this.db
             .update(schema.teams)
-            .set({ avatarUrl: url, updatedAt: new Date() })
+            .set({ avatarUrl: url, updatedAt: new Date().toISOString() })
             .where(eq(schema.teams.id, teamId));
         return (result?.count ?? 0) > 0;
     }
@@ -253,7 +253,7 @@ export class TeamsRepository implements ITeamsRepository {
     public async updateTeamBanner(teamId: string, url: string): Promise<boolean> {
         const result = await this.db
             .update(schema.teams)
-            .set({ coverUrl: url, updatedAt: new Date() })
+            .set({ coverUrl: url, updatedAt: new Date().toISOString() })
             .where(eq(schema.teams.id, teamId));
         return (result?.count ?? 0) > 0;
     }

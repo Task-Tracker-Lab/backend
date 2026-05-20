@@ -62,7 +62,7 @@ async function seed_db(db: PostgresJsDatabase<typeof sc>) {
             userId: userId,
             role: 'owner',
             status: 'active',
-            joinedAt: new Date(),
+            joinedAt: new Date().toISOString(),
         };
 
         usersToInsert.push(user);
@@ -91,7 +91,7 @@ async function seed_db(db: PostgresJsDatabase<typeof sc>) {
                     ip: '127.0.0.1',
                     userAgent: 'k6-test-agent',
                 },
-                createdAt: new Date(Date.now() - j * 1000 * 60 * 60),
+                createdAt: new Date(Date.now() - j * 1000 * 60 * 60).toISOString(),
             });
         }
     }

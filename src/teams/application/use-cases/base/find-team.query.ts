@@ -9,6 +9,7 @@ export class FindTeamQuery {
     ) {}
 
     async execute(slug: string) {
+        //TODO: add avatarURL handling
         return this.repository.findBySlug(slug);
     }
 }

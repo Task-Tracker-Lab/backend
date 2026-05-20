@@ -61,7 +61,7 @@ export class AcceptInvitationUseCase {
             userId,
             role: invite.role,
             status: 'active',
-            joinedAt: new Date(),
+            joinedAt: new Date().toISOString(),
         });
 
         await this.cacheService

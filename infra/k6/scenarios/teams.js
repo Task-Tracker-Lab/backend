@@ -1,7 +1,9 @@
 import { SharedArray } from 'k6/data';
 import { sleep } from 'k6';
+import http from 'k6/http';
 import { GET_OPTIONS } from '../common/config.js';
 import getAuthUser from '../shared/get-auth-user.js';
+import { FormData } from 'https://jslib.k6.io/formdata/0.0.2/index.js';
 
 const users = new SharedArray('test users', function () {
     return JSON.parse(open('../data/users.json'));
@@ -17,10 +19,13 @@ baseOptions.thresholds = Object.assign({}, baseOptions.thresholds, {
     'http_req_duration{name:teams-check-slug}': ['p(95)<333'],
     'http_req_duration{name:teams-find-one}': ['p(95)<333'],
     'http_req_duration{name:teams-update}': ['p(95)<333'],
+    'http_req_duration{name:teams-avatar}': ['p(95)<333'],
+    'http_req_duration{name:teams-banner}': ['p(95)<333'],
     'http_req_duration{name:teams-delete}': ['p(95)<333'],
 });
 
 export const options = baseOptions;
+const avatar = open('../data/user-avatar.png', 'b');
 
 export default function () {
     const user = users[(__VU - 1) % users.length];
@@ -55,6 +60,37 @@ export default function () {
     };
     client.patch(`/teams/${slug}`, updatedTeam, {
         tags: { name: 'teams-update' },
+    });
+
+    sleep(1);
+
+    // --- Update team avatar ---
+    const fdAvatar = new FormData();
+    fdAvatar.append('file', http.file(avatar, 'avatar.png', 'image/png'));
+    fdAvatar.append('slug', slug);
+    fdAvatar.append('context', 'team.avatar');
+
+    client.post('/upload', fdAvatar.body(), {
+        rawBody: true,
+        headers: {
+            'Content-Type': `multipart/form-data; boundary=${fdAvatar.boundary}`,
+        },
+        tags: { name: 'teams-avatar' },
+    });
+
+    sleep(1);
+
+    // --- Update team banner ---
+    const fdBanner = new FormData();
+    fdBanner.append('file', http.file(avatar, 'avatar.png', 'image/png'));
+    fdBanner.append('slug', slug);
+    fdBanner.append('context', 'team.banner');
+    client.post('/upload', fdBanner.body(), {
+        rawBody: true,
+        headers: {
+            'Content-Type': `multipart/form-data; boundary=${fdBanner.boundary}`,
+        },
+        tags: { name: 'teams-banner' },
     });
 
     sleep(1);

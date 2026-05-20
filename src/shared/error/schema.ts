@@ -15,7 +15,12 @@ const ErrorMetaSchema = z.object({
         method: z.string().describe('HTTP метод'),
         ip: z.string().optional().describe('IP клиента'),
     }),
-    timestamp: z.string().datetime().describe('Время ошибки ISO 8601'),
+    timestamp: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Время ошибки ISO 8601'),
     debug: z
         .object({
             stack: z.string().optional().describe('Стек вызовов (только в Dev)'),

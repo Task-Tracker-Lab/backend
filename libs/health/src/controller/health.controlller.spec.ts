@@ -45,7 +45,7 @@ describe('HealthController', () => {
 
         const result = await controller.checkHealth();
 
-        expect(result).toBe('healthy');
+        expect(result.status).toBe('healthy');
     });
 
     describe('ping', () => {
