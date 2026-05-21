@@ -23,6 +23,9 @@ import {
     CreateBoardViewDto,
     CreateBoardViewResponse,
     CreateBoardResponse,
+    BoardColumnsResponse,
+    BoardListResponse,
+    BoardViewsResponse,
     UpdateBoardColumnDto,
     UpdateBoardDto,
     UpdateBoardViewDto,
@@ -81,7 +84,7 @@ export class BoardsFacade {
         return this.getBoardQ.execute(id, projectId, userId);
     }
 
-    public async getAll(projectId: string, userId: string): Promise<BoardWithRelations[]> {
+    public async getAll(projectId: string, userId: string): Promise<BoardListResponse> {
         return this.getBoardsQ.execute(projectId, userId);
     }
 
@@ -118,7 +121,7 @@ export class BoardsFacade {
         return this.getBoardColumnQ.execute(id, boardId, userId);
     }
 
-    public async getColumns(boardId: string, userId: string): Promise<BoardColumn[]> {
+    public async getColumns(boardId: string, userId: string): Promise<BoardColumnsResponse> {
         return this.getBoardColumnsQ.execute(boardId, userId);
     }
 
@@ -147,7 +150,7 @@ export class BoardsFacade {
         return this.getBoardViewQ.execute(id, boardId, userId);
     }
 
-    public async getViews(boardId: string, userId: string): Promise<BoardView[]> {
+    public async getViews(boardId: string, userId: string): Promise<BoardViewsResponse> {
         return this.getBoardViewsQ.execute(boardId, userId);
     }
 }

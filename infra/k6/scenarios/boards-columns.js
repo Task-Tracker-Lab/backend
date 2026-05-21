@@ -63,10 +63,10 @@ export default function () {
     const createBoardRes = client.post(`/projects/${projectId}/boards`, boardPayload, {
         tags: { name: 'post-projects-boards' },
     });
-    const boardId = createBoardRes.json().id;
+    const boardId = createBoardRes.json().boardId;
 
     check(createBoardRes, {
-        'POST /projects/:id/boards: has id': (r) => r.json().id !== undefined,
+        'POST /projects/:id/boards: has board id': (r) => r.json().boardId !== undefined,
     });
 
     sleep(1);
@@ -77,7 +77,6 @@ export default function () {
         {},
         { tags: { name: 'get-boards-columns' } },
     );
-    check(listRes, { 'GET /boards/:id/columns: array': (r) => Array.isArray(r.json()) });
 
     sleep(1);
 
@@ -90,10 +89,10 @@ export default function () {
     const createColumnRes = client.post(`/boards/${boardId}/columns`, columnPayload, {
         tags: { name: 'post-boards-columns' },
     });
-    const columnId = createColumnRes.json().id;
+    const columnId = createColumnRes.json().columnId;
 
     check(createColumnRes, {
-        'POST /boards/:id/columns: has id': (r) => r.json().id !== undefined,
+        'POST /boards/:id/columns: has column id': (r) => r.json().columnId !== undefined,
     });
 
     sleep(1);

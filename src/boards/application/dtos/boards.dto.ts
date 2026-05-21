@@ -2,6 +2,7 @@ import { z } from 'zod/v4';
 import { createZodDto } from 'nestjs-zod';
 import { boardTypeEnum, columnStatusEnum } from '@core/boards/infrastructure/persistence/models';
 import { ActionResponseSchema } from '@shared/dtos';
+import { createPaginationSchema } from '@shared/schemas';
 
 export const CreateBoardSchema = z.object({
     name: z
@@ -95,8 +96,18 @@ export const BoardColumnResponseSchema = z.object({
     position: z.number().describe('Позиция колонки'),
     status: z.enum(columnStatusEnum.enumValues),
     color: z.string().describe('Цвет колонки в HEX'),
-    createdAt: z.string().datetime().describe('Дата создания'),
-    updatedAt: z.string().datetime().describe('Дата обновления'),
+    createdAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата создания'),
+    updatedAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата обновления'),
 });
 
 export class BoardColumnResponse extends createZodDto(BoardColumnResponseSchema) {}
@@ -108,8 +119,18 @@ export const BoardViewResponseSchema = z.object({
     name: z.string().describe('Название представления'),
     settings: z.record(z.string(), z.unknown()).describe('Настройки представления'),
     position: z.number().describe('Позиция представления'),
-    createdAt: z.string().datetime().describe('Дата создания'),
-    updatedAt: z.string().datetime().describe('Дата обновления'),
+    createdAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата создания'),
+    updatedAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата обновления'),
 });
 
 export class BoardViewResponse extends createZodDto(BoardViewResponseSchema) {}
@@ -121,10 +142,30 @@ export const BoardResponseSchema = z.object({
     settings: z.record(z.string(), z.unknown()).describe('Настройки доски'),
     position: z.number().describe('Позиция доски'),
     ownerId: z.string().nullable().describe('ID владельца доски'),
-    createdAt: z.string().datetime().describe('Дата создания'),
-    updatedAt: z.string().datetime().describe('Дата обновления'),
+    createdAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата создания'),
+    updatedAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Дата обновления'),
     boardColumns: z.array(BoardColumnResponseSchema).describe('Колонки доски'),
     boardViews: z.array(BoardViewResponseSchema).describe('Представления доски'),
 });
 
 export class BoardResponse extends createZodDto(BoardResponseSchema) {}
+
+export class BoardColumnsResponse extends createZodDto(
+    createPaginationSchema(BoardColumnResponseSchema),
+) {}
+
+export class BoardViewsResponse extends createZodDto(
+    createPaginationSchema(BoardViewResponseSchema),
+) {}
+
+export class BoardListResponse extends createZodDto(createPaginationSchema(BoardResponseSchema)) {}

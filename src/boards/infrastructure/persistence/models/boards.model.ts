@@ -11,6 +11,10 @@ import { baseSchema, projects, users } from '@shared/entities';
 import { columnStatusEnum, boardTypeEnum } from './enums';
 import { createId } from '@paralleldrive/cuid2';
 
+interface ISettings {
+    [key: string]: unknown;
+}
+
 export const boards = baseSchema.table(
     'boards',
     {
@@ -21,7 +25,7 @@ export const boards = baseSchema.table(
         projectId: text('project_id')
             .references(() => projects.id, { onDelete: 'cascade' })
             .notNull(),
-        settings: jsonb('settings').default({}).notNull(),
+        settings: jsonb('settings').$type<ISettings>().default({}).notNull(),
         position: doublePrecision('position').notNull(),
         ownerId: text('owner_id').references(() => users.id, { onDelete: 'set null' }),
         createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
@@ -67,7 +71,7 @@ export const boardViews = baseSchema.table('boards_views', {
         .notNull(),
     type: boardTypeEnum('type').default('kanban').notNull(),
     name: varchar('name', { length: 100 }).notNull(),
-    settings: jsonb('settings').default({}).notNull(),
+    settings: jsonb('settings').$type<ISettings>().default({}).notNull(),
     position: doublePrecision('position').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
         .defaultNow()

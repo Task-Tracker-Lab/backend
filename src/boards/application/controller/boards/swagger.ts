@@ -1,8 +1,15 @@
-import { applyDecorators } from '@nestjs/common';
+import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ApiForbidden, ApiNotFound, ApiUnauthorized, ApiValidationError } from '@shared/error';
 import { ActionResponse } from '@shared/dtos';
-import { BoardResponse, CreateBoardDto, CreateBoardResponse, UpdateBoardDto } from '../../dtos';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
+import {
+    BoardListResponse,
+    BoardResponse,
+    CreateBoardDto,
+    CreateBoardResponse,
+    UpdateBoardDto,
+} from '../../dtos';
 
 export const FindAllBoardsSwagger = () =>
     applyDecorators(
@@ -11,10 +18,11 @@ export const FindAllBoardsSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Список досок получен',
-            type: [BoardResponse.Output],
+            type: BoardListResponse.Output,
         }),
         ApiUnauthorized(),
         ApiForbidden(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, BoardListResponse),
     );
 
 export const FindOneBoardSwagger = () =>
@@ -30,6 +38,7 @@ export const FindOneBoardSwagger = () =>
         ApiNotFound('Доска не найдена'),
         ApiUnauthorized(),
         ApiForbidden(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, BoardResponse),
     );
 
 export const CreateBoardSwagger = () =>
@@ -45,6 +54,7 @@ export const CreateBoardSwagger = () =>
         ApiValidationError(),
         ApiUnauthorized(),
         ApiForbidden(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, CreateBoardResponse),
     );
 
 export const UpdateBoardSwagger = () =>
@@ -62,6 +72,7 @@ export const UpdateBoardSwagger = () =>
         ApiNotFound('Доска не найдена'),
         ApiUnauthorized(),
         ApiForbidden(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const RemoveBoardSwagger = () =>
@@ -77,4 +88,5 @@ export const RemoveBoardSwagger = () =>
         ApiNotFound('Доска не найдена'),
         ApiUnauthorized(),
         ApiForbidden(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );

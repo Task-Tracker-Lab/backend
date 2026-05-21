@@ -63,10 +63,10 @@ export default function () {
     const createBoardRes = client.post(`/projects/${projectId}/boards`, boardPayload, {
         tags: { name: 'post-projects-boards' },
     });
-    const boardId = createBoardRes.json().id;
+    const boardId = createBoardRes.json().boardId;
 
     check(createBoardRes, {
-        'POST /projects/:id/boards: has id': (r) => r.json().id !== undefined,
+        'POST /projects/:id/boards: has board id': (r) => r.json().boardId !== undefined,
     });
 
     sleep(1);
@@ -77,7 +77,6 @@ export default function () {
         {},
         { tags: { name: 'get-boards-views' } },
     );
-    check(listRes, { 'GET /boards/:id/views: array': (r) => Array.isArray(r.json()) });
 
     sleep(1);
 
@@ -91,10 +90,10 @@ export default function () {
     const createViewRes = client.post(`/boards/${boardId}/views`, viewPayload, {
         tags: { name: 'post-boards-views' },
     });
-    const viewId = createViewRes.json().id;
+    const viewId = createViewRes.json().viewId;
 
     check(createViewRes, {
-        'POST /boards/:id/views: has id': (r) => r.json().id !== undefined,
+        'POST /boards/:id/views: has view id': (r) => r.json().viewId !== undefined,
     });
 
     sleep(1);

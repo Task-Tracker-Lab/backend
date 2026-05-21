@@ -1,9 +1,11 @@
-import { applyDecorators } from '@nestjs/common';
+import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ApiForbidden, ApiNotFound, ApiUnauthorized, ApiValidationError } from '@shared/error';
 import { ActionResponse } from '@shared/dtos';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
 import {
     BoardViewResponse,
+    BoardViewsResponse,
     CreateBoardViewDto,
     CreateBoardViewResponse,
     UpdateBoardViewDto,
@@ -17,10 +19,11 @@ export const FindAllBoardViewsSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Список представлений получен',
-            type: [BoardViewResponse.Output],
+            type: BoardViewsResponse.Output,
         }),
         ApiUnauthorized(),
         ApiForbidden(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, BoardViewsResponse),
     );
 
 export const FindOneBoardViewSwagger = () =>
@@ -37,6 +40,7 @@ export const FindOneBoardViewSwagger = () =>
         ApiNotFound('Представление не найдено'),
         ApiUnauthorized(),
         ApiForbidden(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, BoardViewResponse),
     );
 
 export const CreateBoardViewSwagger = () =>
@@ -53,6 +57,7 @@ export const CreateBoardViewSwagger = () =>
         ApiValidationError(),
         ApiUnauthorized(),
         ApiForbidden(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, CreateBoardViewResponse),
     );
 
 export const UpdateBoardViewSwagger = () =>
@@ -71,6 +76,7 @@ export const UpdateBoardViewSwagger = () =>
         ApiNotFound('Представление не найдено'),
         ApiUnauthorized(),
         ApiForbidden(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const RemoveBoardViewSwagger = () =>
@@ -87,4 +93,5 @@ export const RemoveBoardViewSwagger = () =>
         ApiNotFound('Представление не найдено'),
         ApiUnauthorized(),
         ApiForbidden(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );

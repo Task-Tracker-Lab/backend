@@ -1,9 +1,11 @@
-import { applyDecorators } from '@nestjs/common';
+import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ApiForbidden, ApiNotFound, ApiUnauthorized, ApiValidationError } from '@shared/error';
 import { ActionResponse } from '@shared/dtos';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
 import {
     BoardColumnResponse,
+    BoardColumnsResponse,
     CreateBoardColumnDto,
     CreateBoardColumnResponse,
     UpdateBoardColumnDto,
@@ -17,10 +19,11 @@ export const FindAllBoardColumnsSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Список колонок получен',
-            type: [BoardColumnResponse.Output],
+            type: BoardColumnsResponse.Output,
         }),
         ApiUnauthorized(),
         ApiForbidden(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, BoardColumnsResponse),
     );
 
 export const FindOneBoardColumnSwagger = () =>
@@ -37,6 +40,7 @@ export const FindOneBoardColumnSwagger = () =>
         ApiNotFound('Колонка не найдена'),
         ApiUnauthorized(),
         ApiForbidden(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, BoardColumnResponse),
     );
 
 export const CreateBoardColumnSwagger = () =>
@@ -53,6 +57,7 @@ export const CreateBoardColumnSwagger = () =>
         ApiValidationError(),
         ApiUnauthorized(),
         ApiForbidden(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, CreateBoardColumnResponse),
     );
 
 export const UpdateBoardColumnSwagger = () =>
@@ -71,6 +76,7 @@ export const UpdateBoardColumnSwagger = () =>
         ApiNotFound('Колонка не найдена'),
         ApiUnauthorized(),
         ApiForbidden(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const RemoveBoardColumnSwagger = () =>
@@ -87,4 +93,5 @@ export const RemoveBoardColumnSwagger = () =>
         ApiNotFound('Колонка не найдена'),
         ApiUnauthorized(),
         ApiForbidden(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );

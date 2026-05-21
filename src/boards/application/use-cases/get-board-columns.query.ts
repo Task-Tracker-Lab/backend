@@ -13,6 +13,19 @@ export class GetBoardColumnsQuery {
     public async execute(boardId: string, userId: string) {
         await this.policyAccess.validateBoardAccess(boardId, userId);
 
-        return this.boardsRepo.findColumns(boardId);
+        const items = await this.boardsRepo.findColumns(boardId);
+
+        return {
+            // TODO: реализовать полноценную пагинацию для колонок доски.
+            items,
+            meta: {
+                total: items.length,
+                totalPages: items.length ? 1 : 0,
+                page: 1,
+                limit: 10,
+                hasPrevPage: false,
+                hasNextPage: false,
+            },
+        };
     }
 }

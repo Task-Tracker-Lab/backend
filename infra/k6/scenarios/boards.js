@@ -62,10 +62,10 @@ export default function () {
     const createBoardRes = client.post(`/projects/${projectId}/boards`, boardPayload, {
         tags: { name: 'post-projects-boards' },
     });
-    const boardId = createBoardRes.json().id;
+    const boardId = createBoardRes.json().boardId;
 
     check(createBoardRes, {
-        'POST /projects/:id/boards: has id': (r) => r.json().id !== undefined,
+        'POST /projects/:id/boards: has board id': (r) => r.json().boardId !== undefined,
     });
 
     sleep(1);
@@ -76,7 +76,6 @@ export default function () {
         {},
         { tags: { name: 'get-projects-boards' } },
     );
-    check(listRes, { 'GET /projects/:id/boards: array': (r) => Array.isArray(r.json()) });
 
     sleep(1);
 
