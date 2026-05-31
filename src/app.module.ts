@@ -10,8 +10,6 @@ import { HealthModule } from '@libs/health';
 import { UserModule } from './user';
 import { GlobalExceptionFilter } from '@shared/error';
 import { AuthModule } from './auth/auth.module';
-import { BullBoardModule } from '@bull-board/nestjs';
-import { FastifyAdapter } from '@bull-board/fastify';
 import { BullModule } from '@nestjs/bullmq';
 import { MailModule } from '@shared/adapters/mail';
 import { TeamsModule } from './teams';
@@ -65,17 +63,6 @@ import { ZodValidationInterceptor } from '@shared/interceptors/zod-validation.in
         UserModule,
         TeamsModule,
         ProjectsModule,
-        BullBoardModule.forRoot({
-            route: '/queues',
-            boardOptions: {
-                uiConfig: {
-                    sortQueues: true,
-                    pollingInterval: { forceInterval: 10, showSetting: false },
-                    hideRedisDetails: true,
-                },
-            },
-            adapter: FastifyAdapter,
-        }),
         HealthModule.registerAsync({
             inject: [DatabaseHealthService, S3Service, CACHE_SERVICE],
             useFactory: (db: DatabaseHealthService, s3: S3Service, cache: ICacheService) => {

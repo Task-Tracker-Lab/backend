@@ -7,8 +7,6 @@ import {
     MeController,
 } from './application/controller';
 import { BullModule } from '@nestjs/bullmq';
-import { BullBoardModule } from '@bull-board/nestjs';
-import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { TeamsRepository } from './infrastructure/persistence/repositories';
 import { TeamQueues } from './domain/enums';
 import { TeamsFacade } from './application/team.facade';
@@ -23,10 +21,6 @@ const REPOSITORY = { provide: 'ITeamsRepository', useClass: TeamsRepository };
     imports: [
         BullModule.registerQueue({
             name: TeamQueues.TEAM_MAIL,
-        }),
-        BullBoardModule.forFeature({
-            name: TeamQueues.TEAM_MAIL,
-            adapter: BullMQAdapter,
         }),
     ],
     controllers: [
