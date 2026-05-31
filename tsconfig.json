@@ -30,6 +30,8 @@
             "@libs/health/*": ["./libs/health/src/*"],
             "@libs/imagor": ["./libs/imagor/src"],
             "@libs/imagor/*": ["./libs/imagor/src/*"],
+            "@libs/metrics": ["./libs/metrics/src"],
+            "@libs/metrics/*": ["./libs/metrics/src/*"],
             "@libs/s3": ["./libs/s3/src"],
             "@libs/s3/*": ["./libs/s3/src/*"],
             "@shared/*": ["./src/shared/*"],

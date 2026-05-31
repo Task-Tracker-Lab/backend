@@ -22,13 +22,12 @@ import { S3Service } from '@libs/s3';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { DatabaseHealthService } from '@libs/database';
-import { ZodValidationInterceptor } from '@shared/interceptors/zod-validation.interceptor';
-import { MetricsModule } from '../libs/metrics/metrics.module';
+import { ZodValidationInterceptor } from '@shared/interceptors';
+import { MetricsModule } from '@libs/metrics';
 
 @Module({
     imports: [
         ConfigModule,
-        MetricsModule,
         DatabaseModule.registerAsync({
             global: true,
             inject: [ConfigService],
@@ -58,6 +57,7 @@ import { MetricsModule } from '../libs/metrics/metrics.module';
         UserModule,
         TeamsModule,
         ProjectsModule,
+        MetricsModule,
         BullBoardModule.forRoot({
             route: '/queues',
             boardOptions: {

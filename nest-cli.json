@@ -60,6 +60,15 @@
             "compilerOptions": {
                 "tsConfigPath": "libs/imagor/tsconfig.lib.json"
             }
+        },
+        "metrics": {
+            "type": "library",
+            "root": "libs/metrics",
+            "entryFile": "index",
+            "sourceRoot": "libs/metrics/src",
+            "compilerOptions": {
+                "tsConfigPath": "libs/metrics/tsconfig.lib.json"
+            }
         }
     }
 }
