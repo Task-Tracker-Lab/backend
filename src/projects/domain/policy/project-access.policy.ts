@@ -75,4 +75,51 @@ export class ProjectAccessPolicy {
 
         return { project, member, team };
     }
+
+    /**
+     * Проверка доступа к проекту по projectId (без slug)
+     */
+    public async validateProjectAccessById(
+        projectId: string,
+        userId: string,
+        minRole: keyof typeof ROLE_PRIORITY = 'viewer',
+    ) {
+        const project = await this.projectsRepo.findOne(projectId);
+        if (!project) {
+            throw new BaseException(
+                { code: 'PROJECT_NOT_FOUND', message: 'Проект не найден' },
+                HttpStatus.NOT_FOUND,
+            );
+        }
+
+        const member = await this.findTeamMemberQ.execute(project.teamId, userId);
+        if (!member) {
+            throw new BaseException(
+                { code: 'NOT_TEAM_MEMBER', message: 'Вы не участник команды' },
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
+        // TODO: replace with project members query
+        const isProjectMember = true;
+        if (!isProjectMember) {
+            throw new BaseException(
+                { code: 'ACCESS_DENIED', message: 'Вы не являетесь участником этого проекта' },
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
+        if (ROLE_PRIORITY[member.role] < ROLE_PRIORITY[minRole]) {
+            throw new BaseException(
+                {
+                    code: 'INSUFFICIENT_PERMISSIONS',
+                    message: `Требуется роль ${minRole} или выше`,
+                    details: [{ target: 'role', current: member.role, required: minRole }],
+                },
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
+        return { project, member };
+    }
 }
