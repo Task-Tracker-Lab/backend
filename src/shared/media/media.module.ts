@@ -6,8 +6,6 @@ import { MediaController } from './controller';
 import { MEDIA_FLOW, MEDIA_QUEUES } from './media.constant';
 import { BullModule } from '@nestjs/bullmq';
 import { ImagorModule } from '@libs/imagor';
-import { BullBoardModule } from '@bull-board/nestjs';
-import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { MediaProcessor } from './workers/media.worker';
 
 @Module({
@@ -46,16 +44,6 @@ import { MediaProcessor } from './workers/media.worker';
         BullModule.registerFlowProducer({
             name: MEDIA_FLOW,
         }),
-        BullBoardModule.forFeature(
-            {
-                name: MEDIA_QUEUES.RESIZE,
-                adapter: BullMQAdapter,
-            },
-            {
-                name: MEDIA_QUEUES.SAVE_ENTITY,
-                adapter: BullMQAdapter,
-            },
-        ),
     ],
     controllers: [MediaController],
     providers: [MediaProcessor, MediaService],
