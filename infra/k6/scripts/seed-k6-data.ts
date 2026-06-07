@@ -45,7 +45,6 @@ async function seed_db(db: PostgresJsDatabase<typeof sc>) {
             id: teamId,
             ownerId: userId,
             name: `k6_team_${i}`,
-            slug: `k6_team_${i}`,
             description: `description team - ${i}`,
         };
         const teamMember = {
@@ -122,7 +121,6 @@ async function seed_redis(redis: Redis) {
         id: string;
         ownerId: string;
         name: string;
-        slug: string;
         description: string;
     }[];
 
@@ -158,7 +156,6 @@ async function seed_redis(redis: Redis) {
             invitesData.push({
                 code,
                 email: invitee.email,
-                teamSlug: team.slug,
             });
         }
     });

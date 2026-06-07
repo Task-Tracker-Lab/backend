@@ -44,13 +44,13 @@ export default function () {
         description: 'k6 columns scenario project',
         visibility: 'public',
     };
-    const createProjectRes = client.post(`/teams/${team.slug}/projects`, project, {
+    const createProjectRes = client.post(`/teams/${team.id}/projects`, project, {
         tags: { name: 'post-teams-projects' },
     });
     const projectId = createProjectRes.json().projectId;
 
     check(createProjectRes, {
-        'POST /teams/:slug/projects: has projectId': (r) => r.json().projectId !== undefined,
+        'POST /teams/:id/projects: has projectId': (r) => r.json().projectId !== undefined,
     });
 
     sleep(1);
@@ -125,7 +125,7 @@ export default function () {
     sleep(1);
 
     // --- delete project ---
-    client.delete(`/teams/${team.slug}/projects/${projectId}`, {
+    client.delete(`/teams/${team.id}/projects/${projectId}`, {
         tags: { name: 'delete-teams-projects' },
     });
 
