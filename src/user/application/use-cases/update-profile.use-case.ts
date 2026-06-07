@@ -21,7 +21,17 @@ export class UpdateProfileUseCase {
             );
         }
 
-        const isUpdated = await this.userRepo.updateProfile(entity.user.id, dto);
+        this.validatePronouns(dto);
+
+        const { timezone, theme, language, ...profile } = dto;
+
+        const preferences = {
+            timezone,
+            language,
+            theme,
+        };
+
+        const isUpdated = await this.userRepo.updateProfile(entity.user.id, profile, preferences);
 
         if (!isUpdated) {
             throw new BaseException(
@@ -37,5 +47,27 @@ export class UpdateProfileUseCase {
         });
 
         return { success: true, message: 'Профиль успешно обновлен' };
+    }
+
+    private validatePronouns(dto: UpdateProfileDto) {
+        if (dto.pronouns === 'other' && (!dto.pronounsCustom || dto.pronounsCustom.trim() === '')) {
+            throw new BaseException(
+                {
+                    code: 'PRONOUNS_CUSTOM_REQUIRED',
+                    message: 'Пожалуйста, укажите пользовательские местоимения',
+                },
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+
+        if (dto.pronounsCustom && dto.pronounsCustom.length > 50) {
+            throw new BaseException(
+                {
+                    code: 'PRONOUNS_CUSTOM_TOO_LONG',
+                    message: 'Пользовательские местоимения не могут превышать 50 символов',
+                },
+                HttpStatus.BAD_REQUEST,
+            );
+        }
     }
 }

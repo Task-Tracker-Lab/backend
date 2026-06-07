@@ -3,22 +3,17 @@ import { Module, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from '@core/user';
-import { AuthController, AuthRecoveryController } from './application/controller';
+import { CONTROLLERS } from './application/controller';
 import { AuthFacade } from './application/auth.facade';
 import { AuthUseCases } from './application/use-cases';
 import { AuthQueues } from './domain/enums';
-import { SessionRepository } from './infrastructure/persistence/repositories';
 import { TokenService } from './infrastructure/security';
-import { BearerStrategy, CookieStrategy } from './infrastructure/strategies';
 import { MailProcessor } from './infrastructure/workers';
 import { MailAdapter } from '@shared/adapters/mail';
+import { STRATEGIES } from './infrastructure/strategies';
+import { REPOSITORIES } from './infrastructure/persistence/repositories';
 
 const WORKERS = [MailProcessor];
-
-const REPOSITORY = {
-    provide: 'ISessionRepository',
-    useClass: SessionRepository,
-};
 
 @Module({
     imports: [
@@ -47,7 +42,7 @@ const REPOSITORY = {
         }),
         forwardRef(() => UserModule),
     ],
-    controllers: [AuthController, AuthRecoveryController],
+    controllers: CONTROLLERS,
     providers: [
         // TOOD: FIX PROVIDER
         {
@@ -56,10 +51,9 @@ const REPOSITORY = {
         },
         ...WORKERS,
         TokenService,
-        CookieStrategy,
         ...AuthUseCases,
-        BearerStrategy,
-        REPOSITORY,
+        ...STRATEGIES,
+        ...REPOSITORIES,
         AuthFacade,
     ],
     exports: [],

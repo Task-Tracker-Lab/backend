@@ -1,1 +1,7 @@
-export { userActivity, userNotifications, userSecurity, users } from './user.entity';
+export {
+    userActivity,
+    userNotifications,
+    userSecurity,
+    users,
+    userPreferences,
+} from './user.entity';

@@ -4,10 +4,14 @@ import {
     userSecurity,
     userNotifications,
     userActivity,
+    userPreferences,
 } from '../../infrastructure/persistence/models/user.entity';
 
 export type User = InferSelectModel<typeof users>;
 export type NewUser = InferInsertModel<typeof users>;
+
+export type UserPreferences = InferSelectModel<typeof userPreferences>;
+export type NewUserPreferences = InferInsertModel<typeof userPreferences>;
 
 export type UserSecurity = InferSelectModel<typeof userSecurity>;
 export type NewUserSecurity = InferInsertModel<typeof userSecurity>;
@@ -22,6 +26,7 @@ export type UserProfile = {
     user: User;
     security: Pick<UserSecurity, 'lastPasswordChange' | 'is2faEnabled'>;
     notifications: NotificationSettings['settings'];
+    preferences: UserPreferences;
 };
 
 export type UserWithSecurity = {

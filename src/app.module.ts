@@ -21,7 +21,7 @@ import { S3Service } from '@libs/s3';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { DatabaseHealthService } from '@libs/database';
-import { ZodValidationInterceptor } from '@shared/interceptors/zod-validation.interceptor';
+import { ZodValidationInterceptor } from '@shared/interceptors';
 import { BoardsModule } from '@core/boards';
 
 @Module({
