@@ -16,9 +16,7 @@ export class OAuthGuard implements CanActivate {
         const provider = request.params.provider;
         const query = request.query.state;
 
-        const GuardClass = this.guardClasses[provider];
-
-        if (!GuardClass) {
+        if (!this.isSupportedProvider(provider)) {
             throw new BaseException(
                 {
                     code: 'INVALID_OAUTH_PROVIDER',
@@ -27,6 +25,8 @@ export class OAuthGuard implements CanActivate {
                 HttpStatus.UNPROCESSABLE_ENTITY,
             );
         }
+
+        const GuardClass = this.guardClasses[provider];
 
         const passportOptions: Record<string, boolean | string> = { session: false };
 
@@ -55,5 +55,14 @@ export class OAuthGuard implements CanActivate {
                 HttpStatus.UNAUTHORIZED,
             );
         }
+    }
+
+    private isSupportedProvider(provider: string): provider is keyof OAuthGuard['guardClasses'] {
+        return (
+            provider === 'google' ||
+            provider === 'github' ||
+            provider === 'yandex' ||
+            provider === 'vkontakte'
+        );
     }
 }
