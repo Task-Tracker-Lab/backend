@@ -4,7 +4,13 @@ import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
 import { Inject, Injectable } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
 import { desc, eq, count } from 'drizzle-orm';
-import type { NewUser, NewUserActivity, User, UserNotifications } from '@core/user/domain/entities';
+import type {
+    NewUser,
+    NewUserActivity,
+    User,
+    UserNotifications,
+    UserPreferences,
+} from '@core/user/domain/entities';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -22,14 +28,22 @@ export class UserRepository implements IUserRepository {
     }
 
     async findProfile(id: string) {
-        const [rows] = await this.fullUserQuery.where(eq(sc.users.id, id));
-        if (!rows.users) return null;
+        const [rows] = await this.fullUserQuery
+            .leftJoin(sc.userPreferences, eq(sc.users.id, sc.userPreferences.userId))
+            .where(eq(sc.users.id, id));
+
+        if (!rows || !rows.users) {
+            return null;
+        }
+
         const { lastPasswordChange, is2faEnabled } = rows.user_security;
         const { settings } = rows.user_notifications;
+        const preferences = rows.user_preferences;
 
         return {
             user: rows.users,
             security: { lastPasswordChange, is2faEnabled },
+            preferences,
             notifications: settings,
         };
     }
@@ -76,12 +90,50 @@ export class UserRepository implements IUserRepository {
         });
     }
 
-    async updateProfile(id: string, data: Partial<User>) {
-        const result = await this.db
+    async updateProfile(id: string, user: Partial<User>, preferences?: Partial<UserPreferences>) {
+        const [userRes, preferencesRes] = await Promise.all([
+            this.updateUser(id, user),
+            this.upsertPreferences(id, preferences),
+        ]);
+
+        return userRes || preferencesRes;
+    }
+
+    private async updateUser(id: string, data: Partial<User>) {
+        if (Object.keys(data).length === 0) return null;
+
+        const [result] = await this.db
             .update(sc.users)
             .set({ ...data, updatedAt: new Date().toISOString() })
             .where(eq(sc.users.id, id));
-        return (result?.count ?? 0) > 0;
+
+        return result;
+    }
+
+    private async upsertPreferences(userId: string, data: Partial<UserPreferences>) {
+        if (Object.keys(data).length === 0) return null;
+
+        const existing = await this.db
+            .select({ id: sc.userPreferences.userId })
+            .from(sc.userPreferences)
+            .where(eq(sc.userPreferences.userId, userId))
+            .limit(1);
+
+        if (existing.length === 0) {
+            const result = await this.db.insert(sc.userPreferences).values({
+                userId,
+                ...data,
+            });
+
+            return result.count ?? 0 > 0;
+        } else {
+            const result = await this.db
+                .update(sc.userPreferences)
+                .set(data)
+                .where(eq(sc.userPreferences.userId, userId));
+
+            return result.count ?? 0 > 0;
+        }
     }
 
     async updateNotifications(id: string, settings: UserNotifications['settings']) {

@@ -1,0 +1,57 @@
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { PassportStrategy } from '@nestjs/passport';
+import { Strategy, type Profile } from 'passport-github';
+
+interface GitHubJsonProfile {
+    login: string;
+    id: number;
+    avatar_url: string;
+    name: string | null;
+    email: string | null;
+    bio: string | null;
+}
+
+@Injectable()
+export class GithubStrategy extends PassportStrategy(Strategy, 'github-oauth') {
+    constructor(cfg: ConfigService) {
+        const isProduction = cfg.get('NODE_ENV') === 'production';
+        const domain = cfg.get('DOMAIN');
+        const port = cfg.get('PORT');
+        const apiPath = 'v1/auth/oauth/github/callback';
+
+        const callbackURL = domain
+            ? `${isProduction ? 'https' : 'http'}://api.${domain}/${apiPath}`
+            : `http://localhost:${port || 3000}/${apiPath}`;
+
+        super({
+            clientID: cfg.getOrThrow('GITHUB_CLIENT_ID'),
+            clientSecret: cfg.getOrThrow('GITHUB_CLIENT_SECRET'),
+            callbackURL,
+            scope: ['user:email', 'read:user'],
+            passReqToCallback: true,
+        });
+    }
+
+    validate(
+        _r: never,
+        _at: string,
+        _rt: string,
+        profile: Profile,
+        done: (...args: unknown[]) => void,
+    ) {
+        const json = profile._json as unknown as GitHubJsonProfile;
+
+        const user = {
+            id: json.id.toString(),
+            email: json.email || `${json.login}@github.placeholder.internal`,
+            first_name: json.name || json.login,
+            last_name: null,
+            sex: null,
+            avatar_url: json.avatar_url || null,
+            bio: json.bio || null,
+        };
+
+        done(null, user);
+    }
+}

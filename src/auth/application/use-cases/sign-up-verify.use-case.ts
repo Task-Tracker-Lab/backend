@@ -70,6 +70,8 @@ export class SignUpVerifyUseCase {
 
         const user = await this.registerUserUseCase.execute({
             ...userData.user,
+            emailVerified: true,
+            emailVerifiedAt: new Date().toISOString(),
             password: userData.password,
         });
 

@@ -43,7 +43,7 @@ export async function bootstrapApp(options: BootstrapOptions) {
 
     const app = await NestFactory.create<NestFastifyApplication>(rootModule, adapter, {
         rawBody: true,
-        bufferLogs: true,
+        bufferLogs: false,
     });
 
     const logger = new Logger(serviceName[0].toUpperCase() + serviceName.slice(1));
@@ -58,6 +58,27 @@ export async function bootstrapApp(options: BootstrapOptions) {
         .addHook('onSend', async (request, reply, payload) => {
             reply.header('x-request-id', request.id);
             return payload;
+        })
+        /**
+         * НАЗНАЧЕНИЕ: Полифил совместимости Fastify с экосистемой Passport.js (Express-way).
+         * * ПОЧЕМУ ТУТ ТИП 'any':
+         * Объекты 'request' и 'reply' принадлежат типам 'FastifyRequest' и 'FastifyReply'.
+         * Библиотека 'passport' жестко ожидает архитектуру Express (в частности, наличие методов
+         * res.setHeader(), res.end() и прямой ссылки req.res).
+         * * Расширение интерфейсов Fastify через декларацию модулей (Module Augmentation) в данном
+         * контексте избыточно, так как мы мутируем объекты исключительно локально внутри инфраструктурного
+         * хука для Node.js HTTP-слоя (this.raw). Приведение к 'any' здесь является легитимным решением
+         * для динамического monkey-patching-а.
+         */
+        .addHook('onRequest', (request: any, reply: any, done) => {
+            reply.setHeader = function (key: string, value: string) {
+                return this.raw.setHeader(key, value);
+            };
+            reply.end = function () {
+                this.raw.end();
+            };
+            request.res = reply;
+            done();
         });
 
     await setupLogger(app, options.serviceName);

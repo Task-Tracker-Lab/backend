@@ -14,7 +14,7 @@ export class S3Service {
         private s3Client: S3Client,
         @Inject(MODULE_OPTIONS_TOKEN)
         private options: S3ModuleOptions,
-    ) { }
+    ) {}
 
     private get bucket(): string {
         return this.options.bucket;
@@ -57,11 +57,11 @@ export class S3Service {
             mimetype: string;
             cacheControl?: string;
             path?:
-            | {
-                folder: string;
-                key?: string;
-            }
-            | string;
+                | {
+                      folder: string;
+                      key?: string;
+                  }
+                | string;
         },
     ): Promise<string> {
         const { mimetype, original, path, cacheControl } = fileOptions;

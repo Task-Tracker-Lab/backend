@@ -4,6 +4,7 @@ import type {
     User,
     UserActivity,
     UserNotifications,
+    UserPreferences,
     UserProfile,
     UserWithSecurity,
 } from '../entities/user.domain';
@@ -21,7 +22,11 @@ export interface IUserRepository {
         total: number;
     }>;
     updateAvatar(id: string, url: string): Promise<boolean>;
-    updateProfile(id: string, data: Partial<User>): Promise<boolean>;
+    updateProfile(
+        id: string,
+        data: Partial<User>,
+        preferences?: Partial<UserPreferences>,
+    ): Promise<boolean>;
     updatePasswordHash(id: string, hash: string): Promise<boolean>;
     updateNotifications(id: string, settings: UserNotifications['settings']): Promise<boolean>;
     logActivity(data: NewUserActivity): Promise<boolean>;
