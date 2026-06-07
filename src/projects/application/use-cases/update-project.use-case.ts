@@ -14,11 +14,11 @@ export class UpdateProjectUseCase {
 
     public async execute(id: string, teamId: string, userId: string, dto: UpdateProjectDto) {
         const { project } = await this.policy.validateProjectAccess(id, teamId, userId);
-        const { isPublic, key, ...data } = dto;
+        const { isPublic, slug, ...data } = dto;
 
         const result = await this.projectsRepo.update(project.id, {
             ...data,
-            ...(key && { key: key.toUpperCase() }),
+            ...(slug && { slug: slug.toUpperCase() }),
             ...(typeof isPublic === 'boolean' && {
                 visibility: isPublic ? 'public' : 'private',
             }),

@@ -6,7 +6,7 @@ export class ProjectsMapper {
     public static toDetailResponse(project: Project, member?: RawMemberRow, token?: string) {
         const {
             id,
-            key,
+            slug,
             name,
             status,
             description,
@@ -23,7 +23,7 @@ export class ProjectsMapper {
 
         return {
             id,
-            key,
+            slug,
             name,
             status,
             description,
@@ -47,11 +47,11 @@ export class ProjectsMapper {
     }
 
     public static toListResponse(project: Project, member: RawMemberRow) {
-        const { id, key, name, status, color, icon, createdAt } = project;
+        const { id, slug, name, status, color, icon, createdAt } = project;
 
         return {
             id,
-            key,
+            slug,
             name,
             status,
             color: color ?? '#3b82f6',

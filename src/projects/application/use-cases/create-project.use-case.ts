@@ -19,7 +19,7 @@ export class CreateProjectUseCase {
             ...dto,
             teamId: team.id,
             ownerId: userId,
-            key: dto.key.toUpperCase(),
+            slug: dto.slug.toUpperCase(),
             status: ProjectStatus.Active,
         };
 

@@ -1,13 +1,8 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { ProjectsRepository } from './infrastructure/persistence/repositories';
 import { TeamsModule } from '@core/teams';
-import { ProjectsController } from './application/controller';
-import {
-    CreateProjectUseCase,
-    FindProjectQuery,
-    ProjectQueries,
-    ProjectUseCases,
-} from './application/use-cases';
+import { CONTROLLERS } from './application/controller';
+import { FindProjectQuery, ProjectQueries, ProjectUseCases } from './application/use-cases';
 import { POLICIES, ProjectAccessPolicy } from './domain/policy';
 import { ProjectsFacade } from './application/projects.facade';
 
@@ -18,8 +13,8 @@ const REPOSITORY = {
 
 @Module({
     imports: [forwardRef(() => TeamsModule)],
-    controllers: [ProjectsController],
+    controllers: CONTROLLERS,
     providers: [REPOSITORY, ...POLICIES, ...ProjectUseCases, ...ProjectQueries, ProjectsFacade],
-    exports: [FindProjectQuery, ProjectAccessPolicy, CreateProjectUseCase],
+    exports: [FindProjectQuery, ProjectAccessPolicy],
 })
 export class ProjectsModule {}

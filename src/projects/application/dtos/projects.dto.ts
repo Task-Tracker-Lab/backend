@@ -9,7 +9,7 @@ export const CreateProjectSchema = z.object({
         .string()
         .min(1, 'Название проекта не может быть пустым')
         .max(100, 'Название не должно превышать 100 символов'),
-    key: z
+    slug: z
         .string()
         .min(2, 'Ключ проекта должен быть от 2 до 10 символов')
         .max(10)
