@@ -16,7 +16,7 @@ import { CreateShareTokenResponse } from '@core/projects/application/dtos/projec
 export const CreateProjectSwagger = () =>
     applyDecorators(
         ApiOperation({ summary: 'Создать новый проект в команде' }),
-        ApiParam({ name: 'slug', type: 'string' }),
+        ApiParam({ name: 'teamId', type: 'string' }),
         ApiBody({ type: CreateProjectDto.Output }),
         ApiResponse({
             status: 201,
@@ -33,7 +33,7 @@ export const CreateProjectSwagger = () =>
 export const FindAllProjectsSwagger = () =>
     applyDecorators(
         ApiOperation({ summary: 'Получить список всех проектов команды' }),
-        ApiParam({ name: 'slug', type: 'string' }),
+        ApiParam({ name: 'teamId', type: 'string' }),
         ApiResponse({
             status: 200,
             description: 'Список проектов получен',
@@ -127,8 +127,8 @@ export const CreateShareTokenSwagger = () =>
                 'Создает защищенный токен доступа к проекту. Если expiresAt не указан, по умолчанию ставится доступ на 3 месяца.',
         }),
         ApiParam({
-            name: 'slug',
-            description: 'Slug команды',
+            name: 'teamId',
+            description: 'ID команды',
             type: 'string',
         }),
         ApiParam({

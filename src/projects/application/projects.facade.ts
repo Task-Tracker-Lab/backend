@@ -23,36 +23,36 @@ export class ProjectsFacade {
         private readonly findByTeamQ: FindProjectsByTeamQuery,
     ) {}
 
-    public async create(userId: string, slug: string, dto: CreateProjectDto) {
-        return this.createProjectUC.execute(userId, slug, dto);
+    public async create(userId: string, teamId: string, dto: CreateProjectDto) {
+        return this.createProjectUC.execute(userId, teamId, dto);
     }
 
-    public async update(id: string, slug: string, userId: string, dto: UpdateProjectDto) {
-        return this.updateProjectUC.execute(id, slug, userId, dto);
+    public async update(id: string, teamId: string, userId: string, dto: UpdateProjectDto) {
+        return this.updateProjectUC.execute(id, teamId, userId, dto);
     }
 
-    public async delete(id: string, slug: string, userId: string) {
-        return this.deleteProjectUC.execute(id, slug, userId);
+    public async delete(id: string, teamId: string, userId: string) {
+        return this.deleteProjectUC.execute(id, teamId, userId);
     }
 
-    public async setStatus(id: string, slug: string, userId: string, status: ProjectStatus) {
-        return this.setStatusUC.execute(id, slug, userId, status);
+    public async setStatus(id: string, teamId: string, userId: string, status: ProjectStatus) {
+        return this.setStatusUC.execute(id, teamId, userId, status);
     }
 
     public async generateShareToken(
         id: string,
-        slug: string,
+        teamId: string,
         userId: string,
         dto: CreateShareTokenDto,
     ) {
-        return this.generateTokenUC.execute(id, slug, userId, dto);
+        return this.generateTokenUC.execute(id, teamId, userId, dto);
     }
 
-    public async getDetail(id: string, slug: string, userId?: string, token?: string) {
-        return this.getDetailQ.execute(id, slug, userId, token);
+    public async getDetail(id: string, teamId: string, userId?: string, token?: string) {
+        return this.getDetailQ.execute(id, teamId, userId, token);
     }
 
-    public async getTeamProjects(slug: string, userId: string) {
-        return this.findByTeamQ.execute(slug, userId);
+    public async getTeamProjects(teamId: string, userId: string) {
+        return this.findByTeamQ.execute(teamId, userId);
     }
 }
