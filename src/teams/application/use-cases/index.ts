@@ -4,7 +4,6 @@ import { FindTeamMemberQuery } from './members/find-team-member.query';
 import { GetInvitationQuery } from './invitions/get-invitation.query';
 import { GetInvitationsQuery } from './invitions/get-invitations.query';
 import { GetTeamMembersQuery } from './members/get-team-members.query';
-import { GetAllTagsUseCase } from './base/get-all-tags.use-case';
 import { GetMyInvitesUseCase } from './invitions/get-my-invites.use-case';
 import { GetMyTeamsUseCase } from './base/get-my-teams.use-case';
 
@@ -13,7 +12,6 @@ import { CreateTeamUseCase } from './base/create-team.use-case';
 import { DeleteTeamUseCase } from './base/delete-team.use-case';
 import { RemoveTeamMemberUseCase } from './members/remove-team-member.use-case';
 import { SendInvitationUseCase } from './invitions/send-invitation.use-case';
-import { SyncTeamTagsUseCase } from './base/sync-team-tags.use-case';
 import { UpdateTeamUseCase } from './base/update-team.use-case';
 import { UpdateTeamMemberUseCase } from './members/update-team-member.use-case';
 import { UpdateInvitationUseCase } from './invitions/update-invitation.use-case';
@@ -26,7 +24,6 @@ export {
     GetInvitationQuery,
     GetInvitationsQuery,
     GetTeamMembersQuery,
-    GetAllTagsUseCase,
     GetMyInvitesUseCase,
     GetMyTeamsUseCase,
     AcceptInvitationUseCase,
@@ -34,7 +31,6 @@ export {
     DeleteTeamUseCase,
     RemoveTeamMemberUseCase,
     SendInvitationUseCase,
-    SyncTeamTagsUseCase,
     UpdateTeamUseCase,
     UpdateTeamMemberUseCase,
     UpdateInvitationUseCase,
@@ -48,7 +44,6 @@ export const TeamQueries = [
     GetInvitationQuery,
     GetInvitationsQuery,
     GetTeamMembersQuery,
-    GetAllTagsUseCase,
     GetMyInvitesUseCase,
     GetMyTeamsUseCase,
 ];
@@ -59,7 +54,6 @@ export const TeamUseCases = [
     DeleteTeamUseCase,
     RemoveTeamMemberUseCase,
     SendInvitationUseCase,
-    SyncTeamTagsUseCase,
     UpdateTeamUseCase,
     UpdateTeamMemberUseCase,
     UpdateInvitationUseCase,

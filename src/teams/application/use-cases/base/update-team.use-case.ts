@@ -37,10 +37,8 @@ export class UpdateTeamUseCase {
             );
         }
 
-        const { tags, ...data } = dto;
-
         try {
-            const result = await this.teamsRepo.update(team.id, data, tags);
+            const result = await this.teamsRepo.update(team.id, dto);
 
             return {
                 ...result,

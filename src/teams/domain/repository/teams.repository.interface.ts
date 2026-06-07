@@ -1,4 +1,4 @@
-import type { Team, NewTeam, NewTeamMember, Tag } from '../entities';
+import type { Team, NewTeam, NewTeamMember } from '../entities';
 
 type TResponse = { success: boolean; teamId: string };
 
@@ -25,8 +25,8 @@ export type RawMemberTeams = {
 };
 
 export interface ITeamsRepository {
-    create(ownerId: string, dto: NewTeam, tags?: string[]): Promise<TResponse>;
-    update(id: string, dto: Partial<NewTeam>, tags?: string[]): Promise<TResponse>;
+    create(ownerId: string, dto: NewTeam): Promise<TResponse>;
+    update(id: string, dto: Partial<NewTeam>): Promise<TResponse>;
     remove(id: string, userId: string): Promise<boolean>;
 
     isSlugAvailable(slug: string): Promise<boolean>;
@@ -39,13 +39,6 @@ export interface ITeamsRepository {
         // TODO: ADD ZOD QUERY
         pagination: { search?: string; limit?: number; offset?: number },
     ): Promise<RawMemberTeams[]>;
-
-    findAllTags(options: {
-        search?: string;
-        limit?: number;
-        offset?: number;
-    }): Promise<{ data: Tag[]; total: number }>;
-    syncTags(teamId: string, tagNames: string[]): Promise<boolean>;
 
     updateTeamAvatar(teamId: string, url: string): Promise<boolean>;
     updateTeamBanner(teamId: string, url: string): Promise<boolean>;

@@ -55,26 +55,3 @@ export const teamMembers = baseSchema.table(
         userRoleIdx: index('member_role_idx').on(t.userId, t.role),
     }),
 );
-
-export const tags = baseSchema.table('tags', {
-    id: text('id')
-        .primaryKey()
-        .$defaultFn(() => createId()),
-    name: varchar('name', { length: 50 }).unique().notNull(),
-});
-
-export const teamsToTags = baseSchema.table(
-    'teams_to_tags',
-    {
-        teamId: text('team_id')
-            .references(() => teams.id, { onDelete: 'cascade' })
-            .notNull(),
-        tagId: text('tag_id')
-            .references(() => tags.id, { onDelete: 'cascade' })
-            .notNull(),
-    },
-    (t) => ({
-        pk: primaryKey({ columns: [t.teamId, t.tagId] }),
-        tagIdx: index('teams_to_tags_tag_id_idx').on(t.tagId),
-    }),
-);

@@ -26,18 +26,11 @@ export class CreateTeamUseCase {
             );
         }
 
-        const { tags, ...teamData } = dto;
-        const uniqueTags = tags ? [...new Set(tags.map((tag) => tag.toLowerCase()))] : [];
-
         try {
-            const result = await this.teamsRepo.create(
-                userId,
-                {
-                    ...teamData,
-                    slug: baseSlug,
-                },
-                uniqueTags,
-            );
+            const result = await this.teamsRepo.create(userId, {
+                ...dto,
+                slug: baseSlug,
+            });
 
             return {
                 ...result,

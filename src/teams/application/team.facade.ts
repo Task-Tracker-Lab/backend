@@ -20,7 +20,6 @@ export class TeamsFacade {
         private readonly createTeamUc: UC.CreateTeamUseCase,
         private readonly deleteTeamUc: UC.DeleteTeamUseCase,
         private readonly updateTeamUc: UC.UpdateTeamUseCase,
-        private readonly syncTagsUc: UC.SyncTeamTagsUseCase,
 
         private readonly updateMemberUc: UC.UpdateTeamMemberUseCase,
         private readonly removeMemberUc: UC.RemoveTeamMemberUseCase,
@@ -74,8 +73,6 @@ export class TeamsFacade {
         userId: string,
         dto: UpdateInvitationDto,
     ) => this.updateInvitationUc.execute(slug, code, userId, dto);
-
-    public syncTags = (slug: string, tags: string[]) => this.syncTagsUc.execute(slug, tags);
 
     public getMyTeams = (userId: string, pagination: any) =>
         this.getMyTeamsUc.execute(userId, pagination);

@@ -10,22 +10,6 @@ export const CreateTeamSchema = z.object({
         .max(500)
         .describe('Краткое описание деятельности или целей команды'),
     slug: z.string().optional().describe('Уникальная ссылка на изображение команду'),
-    tags: z
-        .array(z.string())
-        .optional()
-        .superRefine((items, ctx) => {
-            if (!items) return;
-            const lowerItems = items.map((i) => i.toLowerCase());
-            const hasDuplicates = new Set(lowerItems).size !== items.length;
-
-            if (hasDuplicates) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: 'Теги в списке не должны повторяться (регистр не важен)',
-                });
-            }
-        })
-        .describe('Список строковых названий тегов для классификации'),
 });
 
 export class CreateTeamDto extends createZodDto(CreateTeamSchema) {}
@@ -35,49 +19,6 @@ export class UpdateTeamDto extends createZodDto(
         abort: true,
     }),
 ) {}
-
-export const TagSchema = z.object({
-    id: z.string().describe('Уникальный идентификатор тега (CUID2)'),
-    name: z.string().min(1).max(50).describe('Название тега (например, "Backend", "Design")'),
-});
-
-export const SyncTagsSchema = z.object({
-    tags: z
-        .array(z.string())
-        .min(1, 'Список тегов не может быть пустым')
-        .max(15, 'Нельзя добавить более 15 тегов за раз')
-        .superRefine((items, ctx) => {
-            if (!items) return;
-            const lowerItems = items.map((i) => i.toLowerCase());
-            const hasDuplicates = new Set(lowerItems).size !== items.length;
-
-            if (hasDuplicates) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: 'Теги в списке не должны повторяться (регистр не важен)',
-                });
-            }
-        })
-        .describe(
-            'Массив названий тегов для привязки к команде. Если тега нет в базе, он будет создан.',
-        ),
-});
-
-const FindTagsQuerySchema = z.object({
-    search: z.string().optional().describe('Поисковый запрос для фильтрации тегов по названию'),
-    page: z.coerce.number().int().min(1).default(1).describe('Номер страницы (от 1)'),
-    limit: z.coerce
-        .number()
-        .int()
-        .min(1)
-        .max(100)
-        .default(20)
-        .describe('Количество возвращаемых результатов (1-100)'),
-});
-
-export class TagResponse extends createZodDto(createPaginationSchema(TagSchema)) {}
-export class SyncTagsDto extends createZodDto(SyncTagsSchema) {}
-export class FindTagsQuery extends createZodDto(FindTagsQuerySchema) {}
 
 export const CheckSlugResponseSchema = z.object({
     available: z

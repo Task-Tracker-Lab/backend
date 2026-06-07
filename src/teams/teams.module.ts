@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import {
     TeamsInvitationsController,
-    TeamsSettingsController,
     TeamsMembersController,
     TeamsController,
     MeController,
@@ -25,7 +24,6 @@ const REPOSITORY = { provide: 'ITeamsRepository', useClass: TeamsRepository };
     ],
     controllers: [
         TeamsInvitationsController,
-        TeamsSettingsController,
         TeamsMembersController,
         TeamsController,
         MeController,
