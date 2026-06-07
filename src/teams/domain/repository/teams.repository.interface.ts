@@ -17,7 +17,6 @@ export type RawMemberRow = {
 export type RawMemberTeams = {
     id: string;
     name: string;
-    slug: string;
     description: string | null;
     avatarUrl: string | null;
     role: string;
@@ -29,11 +28,9 @@ export interface ITeamsRepository {
     update(id: string, dto: Partial<NewTeam>): Promise<TResponse>;
     remove(id: string, userId: string): Promise<boolean>;
 
-    isSlugAvailable(slug: string): Promise<boolean>;
-
     findMember(teamId: string, userId: string): Promise<RawMemberRow | null>;
     findMembers(teamId: string): Promise<RawMemberRow[]>;
-    findBySlug(slug: string): Promise<Team | null>;
+    findById(teamId: string): Promise<Team | null>;
     findByUser(
         userId: string,
         // TODO: ADD ZOD QUERY

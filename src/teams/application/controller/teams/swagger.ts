@@ -1,15 +1,10 @@
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ActionResponse } from '@shared/dtos';
-import {
-    ApiConflict,
-    ApiForbidden,
-    ApiNotFound,
-    ApiUnauthorized,
-    ApiValidationError,
-} from '@shared/error';
-import { CreateTeamDto, UpdateTeamDto, CheckSlugResponse, TeamResponse } from '../../dtos';
+import { ApiForbidden, ApiNotFound, ApiUnauthorized, ApiValidationError } from '@shared/error';
+import { CreateTeamDto, UpdateTeamDto, TeamResponse } from '../../dtos';
 import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
+import { CreateTeamResponse } from '@core/teams/application/dtos/team.dto';
 
 export const CreateTeamSwagger = () =>
     applyDecorators(
@@ -18,40 +13,18 @@ export const CreateTeamSwagger = () =>
         ApiResponse({
             status: 201,
             description: 'Команда успешно создана',
-            type: ActionResponse.Output,
+            type: CreateTeamResponse.Output,
         }),
-        ApiConflict('Команда с таким slug уже существует'),
         ApiValidationError(),
         ApiUnauthorized(),
 
-        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
-    );
-
-export const CheckSlugSwagger = () =>
-    applyDecorators(
-        ApiOperation({
-            summary: 'Проверить доступность слага',
-            description: 'Проверяет, свободен ли уникальный адрес команды для использования.',
-        }),
-        ApiParam({
-            name: 'slug',
-            description: 'Желаемый слаг команды',
-            example: 'my-super-team',
-        }),
-        ApiResponse({
-            status: 200,
-            description: 'Результат проверки доступности',
-            type: CheckSlugResponse.Output,
-        }),
-        ApiUnauthorized(),
-
-        SetMetadata(ZOD_RESPONSE_TOKEN, CheckSlugResponse),
+        SetMetadata(ZOD_RESPONSE_TOKEN, CreateTeamResponse),
     );
 
 export const FindOneTeamSwagger = () =>
     applyDecorators(
-        ApiOperation({ summary: 'Получить детальную информацию о команде по slug' }),
-        ApiParam({ name: 'slug', description: 'Уникальный идентификатор (слаг) команды' }),
+        ApiOperation({ summary: 'Получить детальную информацию о команде' }),
+        ApiParam({ name: 'id', description: 'Уникальный идентификатор команды' }),
         ApiResponse({
             status: 200,
             description: 'Данные команды получены',
@@ -67,7 +40,10 @@ export const UpdateTeamSwagger = () =>
     applyDecorators(
         ApiOperation({ summary: 'Обновить данные команды' }),
         ApiBody({ type: UpdateTeamDto.Output }),
-        ApiParam({ name: 'slug', description: 'Слаг команды для редактирования' }),
+        ApiParam({
+            name: 'id',
+            description: 'Уникальный идентификатор команды для редактирования',
+        }),
         ApiResponse({
             status: 200,
             description: 'Команда успешно обновлена',
@@ -84,7 +60,7 @@ export const UpdateTeamSwagger = () =>
 export const RemoveTeamSwagger = () =>
     applyDecorators(
         ApiOperation({ summary: 'Удалить команду' }),
-        ApiParam({ name: 'slug', description: 'Слаг команды для удаления' }),
+        ApiParam({ name: 'id', description: 'Уникальный идентификатор команды для удаления' }),
         ApiResponse({
             status: 200,
             description: 'Команда успешно удалена',

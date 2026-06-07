@@ -12,11 +12,11 @@ export class RemoveTeamMemberUseCase {
         private readonly policy: TeamMemberPolicy,
     ) {}
 
-    async execute(slug: string, currentUserId: string, targetUserId: string) {
-        const team = await this.teamsRepo.findBySlug(slug);
+    async execute(teamId: string, currentUserId: string, targetUserId: string) {
+        const team = await this.teamsRepo.findById(teamId);
         if (!team) {
             throw new BaseException(
-                { code: 'TEAM_NOT_FOUND', message: `Команда ${slug} не найдена` },
+                { code: 'TEAM_NOT_FOUND', message: `Команда ${teamId} не найдена` },
                 HttpStatus.NOT_FOUND,
             );
         }

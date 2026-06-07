@@ -2,8 +2,6 @@ import { primaryKey, timestamp, text, varchar, index } from 'drizzle-orm/pg-core
 import { createId } from '@paralleldrive/cuid2';
 import { roleEnum, statusEnum } from './enums';
 import { baseSchema, users } from '@shared/entities';
-import { uniqueIndex } from 'drizzle-orm/pg-core';
-import { isNull } from 'drizzle-orm';
 
 export const teams = baseSchema.table(
     'teams',
@@ -11,7 +9,6 @@ export const teams = baseSchema.table(
         id: text('id')
             .primaryKey()
             .$defaultFn(() => createId()),
-        slug: varchar('slug', { length: 120 }).unique().notNull(),
         name: varchar('name', { length: 100 }).notNull(),
         description: text('description'),
         avatarUrl: text('avatar_url'),
@@ -26,8 +23,6 @@ export const teams = baseSchema.table(
         deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'string' }),
     },
     (t) => ({
-        uniqueActiveSlug: uniqueIndex('team_active_slug_idx').on(t.slug).where(isNull(t.deletedAt)),
-        slugIdx: index('team_slug_idx').on(t.slug),
         ownerIdx: index('team_owner_idx').on(t.ownerId),
         softDeleteIdx: index('team_deleted_at_idx').on(t.deletedAt),
     }),

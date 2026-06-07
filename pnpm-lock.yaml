@@ -128,9 +128,6 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
-      transliteration:
-        specifier: ^2.6.1
-        version: 2.6.1
       ua-parser-js:
         specifier: ^2.0.9
         version: 2.0.9
@@ -4218,11 +4215,6 @@ packages:
   token-types@6.1.2:
     resolution: {integrity: sha512-dRXchy+C0IgK8WPC6xvCHFRIWYUbqqdEIKPaKo/AcTUNzwLTK6AH7RjdLWsEZcAN/TBdtfUw3PYEgPr5VPr6ww==}
     engines: {node: '>=14.16'}
-
-  transliteration@2.6.1:
-    resolution: {integrity: sha512-hJ9BhrQAOnNTbpOr1MxsNjZISkn7ppvF5TKUeFmTE1mG4ZPD/XVxF0L0LUoIUCWmQyxH0gJpVtfYLAWf298U9w==}
-    engines: {node: '>=20.0.0'}
-    hasBin: true
 
   triple-beam@1.4.1:
     resolution: {integrity: sha512-aZbgViZrg1QNcG+LULa7nhZpJTZSLm/mXnHXnbAbjmN5aSa0y7V+wvv6+4WaBtpISJzThKy+PIPxc1Nq1EJ9mg==}
@@ -8733,8 +8725,6 @@ snapshots:
       '@borewit/text-codec': 0.2.2
       '@tokenizer/token': 0.3.0
       ieee754: 1.2.1
-
-  transliteration@2.6.1: {}
 
   triple-beam@1.4.1: {}
 

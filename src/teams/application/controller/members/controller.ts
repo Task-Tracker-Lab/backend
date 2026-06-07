@@ -4,34 +4,34 @@ import { GetMembersSwagger, RemoveMemberSwagger, UpdateMemberSwagger } from './s
 import type { UpdateMemberDto } from '../../dtos/member.dto';
 import { TeamsFacade } from '../../team.facade';
 
-@ApiBaseController('teams/:slug', 'Teams Members', true)
+@ApiBaseController('teams/:teamId', 'Teams Members', true)
 export class TeamsMembersController {
     constructor(private readonly facade: TeamsFacade) {}
 
     @Get('members')
     @GetMembersSwagger()
-    async getMembers(@Param('slug') slug: string) {
-        return this.facade.getMembers(slug);
+    async getMembers(@Param('teamId') teamId: string) {
+        return this.facade.getMembers(teamId);
     }
 
     @Patch('members/:userId')
     @UpdateMemberSwagger()
     async updateMember(
-        @Param('slug') slug: string,
+        @Param('teamId') teamId: string,
         @Param('userId') targetUserId: string,
         @GetUserId() currentUserId: string,
         @Body() dto: UpdateMemberDto,
     ) {
-        return this.facade.updateMember(slug, currentUserId, targetUserId, dto);
+        return this.facade.updateMember(teamId, currentUserId, targetUserId, dto);
     }
 
     @Delete('members/:userId')
     @RemoveMemberSwagger()
     async removeMember(
-        @Param('slug') slug: string,
-        @Param('userId') targerUserId: string,
+        @Param('teamId') teamId: string,
+        @Param('userId') targetUserId: string,
         @GetUserId() currentUserId: string,
     ) {
-        return this.facade.removeMember(slug, currentUserId, targerUserId);
+        return this.facade.removeMember(teamId, currentUserId, targetUserId);
     }
 }

@@ -14,8 +14,8 @@ export class GetInvitationQuery {
         @Inject(CACHE_SERVICE) private readonly cacheService: ICacheService,
     ) {}
 
-    async execute(slug: string, code: string, userId: string, userEmail: string) {
-        const team = await this.getTeamOrThrow(slug);
+    async execute(teamId: string, code: string, userId: string, userEmail: string) {
+        const team = await this.getTeamOrThrow(teamId);
         const invite = await this.getInviteOrThrow(code);
 
         this.validateInviteOwnership(invite, team.id);
@@ -24,8 +24,8 @@ export class GetInvitationQuery {
         return { code, ...invite };
     }
 
-    private async getTeamOrThrow(slug: string) {
-        const team = await this.teamsRepo.findBySlug(slug);
+    private async getTeamOrThrow(teamId: string) {
+        const team = await this.teamsRepo.findById(teamId);
         if (!team)
             throw new BaseException(
                 { code: 'TEAM_NOT_FOUND', message: 'Команда не найдена' },

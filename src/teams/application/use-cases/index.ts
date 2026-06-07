@@ -1,4 +1,3 @@
-import { CheckTeamSlugQuery } from './base/check-team-slug.query';
 import { FindTeamQuery } from './base/find-team.query';
 import { FindTeamMemberQuery } from './members/find-team-member.query';
 import { GetInvitationQuery } from './invitions/get-invitation.query';
@@ -18,7 +17,6 @@ import { UpdateInvitationUseCase } from './invitions/update-invitation.use-case'
 import { DeclineInvitationUseCase } from './invitions/decline-invitation.use-case';
 
 export {
-    CheckTeamSlugQuery,
     FindTeamQuery,
     FindTeamMemberQuery,
     GetInvitationQuery,
@@ -38,7 +36,6 @@ export {
 };
 
 export const TeamQueries = [
-    CheckTeamSlugQuery,
     FindTeamQuery,
     FindTeamMemberQuery,
     GetInvitationQuery,

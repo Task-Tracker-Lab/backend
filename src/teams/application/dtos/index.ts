@@ -15,7 +15,6 @@ export {
     CreateTeamDto,
     UpdateTeamDto,
     UserTeamResponse,
-    CheckSlugResponse,
     UserTeamsResponse,
     TeamResponse,
 } from './team.dto';

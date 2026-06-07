@@ -12,34 +12,34 @@ import type { JwtPayload } from '@shared/types';
 import { InviteMemberDto, UpdateInvitationDto } from '../../dtos';
 import { TeamsFacade } from '../../team.facade';
 
-@ApiBaseController('teams/:slug/invitations', 'Teams Invitations', true)
+@ApiBaseController('teams/:teamId/invitations', 'Teams Invitations', true)
 export class TeamsInvitationsController {
     constructor(private readonly facade: TeamsFacade) {}
 
     @Get()
     @GetTeamInvitationsSwagger()
-    async getAll(@Param('slug') slug: string, @GetUserId() userId: string) {
-        return this.facade.getInvitations(slug, userId);
+    async getAll(@Param('teamId') teamId: string, @GetUserId() userId: string) {
+        return this.facade.getInvitations(teamId, userId);
     }
 
     @Get(':code')
     @GetTeamInvitationSwagger()
     async getOne(
-        @Param('slug') slug: string,
+        @Param('teamId') teamId: string,
         @Param('code') code: string,
         @GetUser() user: JwtPayload,
     ) {
-        return this.facade.getInvitation(slug, code, user.sub, user.email);
+        return this.facade.getInvitation(teamId, code, user.sub, user.email);
     }
 
     @Post()
     @InviteMemberSwagger()
     async invite(
-        @Param('slug') slug: string,
+        @Param('teamId') teamId: string,
         @GetUserId() inviterId: string,
         @Body() dto: InviteMemberDto,
     ) {
-        return this.facade.invite(slug, inviterId, dto);
+        return this.facade.invite(teamId, inviterId, dto);
     }
 
     @Post(':code/accept')
@@ -51,21 +51,21 @@ export class TeamsInvitationsController {
     @Patch(':code')
     @UpdateTeamInvitationSwagger()
     async update(
-        @Param('slug') slug: string,
+        @Param('teamId') teamId: string,
         @Param('code') code: string,
         @GetUserId() userId: string,
         @Body() dto: UpdateInvitationDto,
     ) {
-        return this.facade.updateInvitation(slug, code, userId, dto);
+        return this.facade.updateInvitation(teamId, code, userId, dto);
     }
 
     @Delete(':code')
     @DeleteTeamInvitationSwagger()
     async decline(
-        @Param('slug') slug: string,
+        @Param('teamId') teamId: string,
         @Param('code') code: string,
         @GetUser() user: JwtPayload,
     ) {
-        return this.facade.declineInvitation(slug, code, user.sub, user.email);
+        return this.facade.declineInvitation(teamId, code, user.sub, user.email);
     }
 }

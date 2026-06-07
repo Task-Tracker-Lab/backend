@@ -2,7 +2,7 @@ import { Inject } from '@nestjs/common';
 import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
 import * as schema from '../models';
 import * as scUsers from '@core/user/infrastructure/persistence/models';
-import { and, desc, eq, ilike, isNull, sql } from 'drizzle-orm';
+import { and, desc, eq, ilike, isNull } from 'drizzle-orm';
 import type { NewTeam, NewTeamMember, Team, TeamMember } from '@core/teams/domain/entities';
 import { ITeamsRepository } from '@core/teams/domain/repository';
 
@@ -11,15 +11,6 @@ export class TeamsRepository implements ITeamsRepository {
         @Inject(DATABASE_SERVICE)
         private readonly db: DatabaseService<typeof schema>,
     ) {}
-
-    public isSlugAvailable = async (slug: string) => {
-        const result = await this.db
-            .select({ id: schema.teams.id })
-            .from(schema.teams)
-            .where(eq(schema.teams.slug, slug));
-
-        return result.length === 0;
-    };
 
     public addMember = async (dto: NewTeamMember) => {
         const result = await this.db
@@ -69,14 +60,11 @@ export class TeamsRepository implements ITeamsRepository {
         });
     };
 
-    public remove = async (teamId: string, userId) => {
-        const suffix = Date.now().toString();
-
+    public remove = async (teamId: string, userId: string) => {
         const result = await this.db
             .update(schema.teams)
             .set({
                 deletedAt: new Date().toISOString(),
-                slug: sql`${schema.teams.slug} || '-' || ${suffix}`,
             })
             .where(and(eq(schema.teams.id, teamId), eq(schema.teams.ownerId, userId)));
 
@@ -117,7 +105,6 @@ export class TeamsRepository implements ITeamsRepository {
             .select({
                 id: schema.teams.id,
                 name: schema.teams.name,
-                slug: schema.teams.slug,
                 description: schema.teams.description,
                 avatarUrl: schema.teams.avatarUrl,
                 role: schema.teamMembers.role,
@@ -133,8 +120,8 @@ export class TeamsRepository implements ITeamsRepository {
         return query;
     };
 
-    public findBySlug = async (slug: string) => {
-        const [team] = await this.db.select().from(schema.teams).where(eq(schema.teams.slug, slug));
+    public findById = async (teamId: string) => {
+        const [team] = await this.db.select().from(schema.teams).where(eq(schema.teams.id, teamId));
         if (!team) return null;
         return team;
     };
