@@ -22,7 +22,6 @@ import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { DatabaseHealthService } from '@libs/database';
 import { ZodValidationInterceptor } from '@shared/interceptors';
-import { BoardsModule } from '@core/boards';
 
 @Module({
     imports: [
@@ -64,7 +63,6 @@ import { BoardsModule } from '@core/boards';
         UserModule,
         TeamsModule,
         ProjectsModule,
-        BoardsModule,
         HealthModule.registerAsync({
             inject: [DatabaseHealthService, S3Service, CACHE_SERVICE],
             useFactory: (db: DatabaseHealthService, s3: S3Service, cache: ICacheService) => {
