@@ -74,7 +74,6 @@ export class CreateShareTokenResponse extends createZodDto(CreateShareTokenRespo
 const TeamShortSchema = z.object({
     id: z.string().describe('ID команды'),
     name: z.string().describe('Название команды'),
-    slug: z.string().describe('Слаг команды'),
     role: z.string().describe('Роль пользователя в команде'),
 });
 

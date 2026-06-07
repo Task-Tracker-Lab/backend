@@ -5,7 +5,6 @@ import {
     FindOneTeamSwagger,
     RemoveTeamSwagger,
     UpdateTeamSwagger,
-    CheckSlugSwagger,
 } from './swagger';
 import { CreateTeamDto, UpdateTeamDto } from '../../dtos';
 import { TeamsFacade } from '../../team.facade';
@@ -20,32 +19,22 @@ export class TeamsController {
         return this.facade.createTeam(userId, dto);
     }
 
-    @Get('check-slug/:slug')
-    @CheckSlugSwagger()
-    async checkSlug(@Param('slug') slug: string) {
-        return this.facade.checkSlug(slug);
-    }
-
-    @Get(':slug')
+    @Get(':id')
     @FindOneTeamSwagger()
-    async findOne(@Param('slug') slug: string) {
-        return this.facade.getTeamBySlug(slug);
+    async findOne(@Param('id') id: string) {
+        return this.facade.getTeamById(id);
     }
 
-    @Patch(':slug')
+    @Patch(':id')
     @UpdateTeamSwagger()
-    async update(
-        @Param('slug') slug: string,
-        @GetUserId() userId: string,
-        @Body() dto: UpdateTeamDto,
-    ) {
-        return this.facade.updateTeam(slug, userId, dto);
+    async update(@Param('id') id: string, @GetUserId() userId: string, @Body() dto: UpdateTeamDto) {
+        return this.facade.updateTeam(id, userId, dto);
     }
 
-    @Delete(':slug')
+    @Delete(':id')
     @RemoveTeamSwagger()
     @HttpCode(HttpStatus.OK)
-    async remove(@Param('slug') slug: string, @GetUserId() userId: string) {
-        return this.facade.deleteTeam(slug, userId);
+    async remove(@Param('id') id: string, @GetUserId() userId: string) {
+        return this.facade.deleteTeam(id, userId);
     }
 }

@@ -8,8 +8,8 @@ export class FindTeamQuery {
         private readonly repository: ITeamsRepository,
     ) {}
 
-    async execute(slug: string) {
+    async execute(teamId: string) {
         //TODO: add avatarURL handling
-        return this.repository.findBySlug(slug);
+        return this.repository.findById(teamId);
     }
 }

@@ -13,7 +13,6 @@ async function seed_db(db: PostgresJsDatabase<typeof sc>) {
     const COUNT = 1000;
     const OUT_USERS_FILE = resolve(process.cwd(), 'infra/k6/data/users.json');
     const OUT_TEAMS_FILE = resolve(process.cwd(), 'infra/k6/data/teams.json');
-    const OUT_TAGS_FILE = resolve(process.cwd(), 'infra/k6/data/tags.json');
 
     console.log(`Start seeding using pg driver...`);
 
@@ -26,16 +25,12 @@ async function seed_db(db: PostgresJsDatabase<typeof sc>) {
     const activitiesToInsert = [];
     const usersData = [];
     const teamsData = [];
-    const tagsData = [];
     const teamsToInsert = [];
-    const tagsToInsert = [];
-    const teamsToTagsToInsert = [];
     const teamMembersToInsert = [];
 
     for (let i = 0; i < COUNT; i++) {
         const userId = createId();
         const teamId = createId();
-        const tagId = createId();
         const email = `k6_user_${i}@tasktracker.com`;
 
         const user = {
@@ -50,12 +45,7 @@ async function seed_db(db: PostgresJsDatabase<typeof sc>) {
             id: teamId,
             ownerId: userId,
             name: `k6_team_${i}`,
-            slug: `k6_team_${i}`,
             description: `description team - ${i}`,
-        };
-        const tag = {
-            id: tagId,
-            name: `k6_tag_${i}`,
         };
         const teamMember = {
             teamId: teamId,
@@ -67,18 +57,12 @@ async function seed_db(db: PostgresJsDatabase<typeof sc>) {
 
         usersToInsert.push(user);
         teamsToInsert.push(team);
-        tagsToInsert.push(tag);
-        teamsToTagsToInsert.push({
-            teamId,
-            tagId,
-        });
         teamMembersToInsert.push(teamMember);
         securityToInsert.push({ userId, passwordHash });
         notificationsToInsert.push({ userId });
 
         usersData.push({ email, password });
         teamsData.push(team);
-        tagsData.push(tag);
 
         for (let j = 0; j < 10; j++) {
             activitiesToInsert.push({
@@ -107,15 +91,12 @@ async function seed_db(db: PostgresJsDatabase<typeof sc>) {
             await tx.insert(sc.userActivity).values(chunk);
         }
         await tx.insert(sc.teams).values(teamsToInsert);
-        await tx.insert(sc.tags).values(tagsToInsert);
-        await tx.insert(sc.teamsToTags).values(teamsToTagsToInsert);
         await tx.insert(sc.teamMembers).values(teamMembersToInsert);
     });
 
     const filesToSave = [
         { path: OUT_USERS_FILE, data: usersData },
         { path: OUT_TEAMS_FILE, data: teamsData },
-        { path: OUT_TAGS_FILE, data: tagsData },
     ];
 
     for (const { path, data } of filesToSave) {
@@ -126,7 +107,6 @@ async function seed_db(db: PostgresJsDatabase<typeof sc>) {
     console.log(`Success! Created ${COUNT} entries for each entity`);
     console.log(`User data saved to: ${OUT_USERS_FILE}`);
     console.log(`Teams data saved to: ${OUT_TEAMS_FILE}`);
-    console.log(`Tags data saved to: ${OUT_TAGS_FILE}`);
 }
 
 async function seed_redis(redis: Redis) {
@@ -141,7 +121,6 @@ async function seed_redis(redis: Redis) {
         id: string;
         ownerId: string;
         name: string;
-        slug: string;
         description: string;
     }[];
 
@@ -177,7 +156,6 @@ async function seed_redis(redis: Redis) {
             invitesData.push({
                 code,
                 email: invitee.email,
-                teamSlug: team.slug,
             });
         }
     });

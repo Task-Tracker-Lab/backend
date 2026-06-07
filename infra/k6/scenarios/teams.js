@@ -34,31 +34,25 @@ export default function () {
     sleep(1);
 
     // --- POST /teams ---
-    const slug = randomStr(10);
     const team = {
-        name: 'k6_team_' + slug,
+        name: 'k6_team_' + randomStr(10),
         description: randomStr(15),
-        slug: slug,
     };
-    client.post('/teams', team, { tags: { name: 'teams-create' } });
+    const teamRes = client.post('/teams', team, { tags: { name: 'teams-create' } });
+    console.log(teamRes);
+    const teamId = teamRes.json().teamId;
+    sleep(1);
+
+    // --- GET /:teamId ---
+    client.get(`/teams/${teamId}`, {}, { tags: { name: 'teams-find-one' } });
 
     sleep(1);
 
-    // --- GET /check-slug/:slug ---
-    client.get(`/teams/check-slug/${slug}`, {}, { tags: { name: 'teams-check-slug' } });
-
-    sleep(1);
-
-    // --- GET /:slug ---
-    client.get(`/teams/${slug}`, {}, { tags: { name: 'teams-find-one' } });
-
-    sleep(1);
-
-    // --- PATCH /:slug ---
+    // --- PATCH /:teamId ---
     const updatedTeam = {
         description: randomStr(25),
     };
-    client.patch(`/teams/${slug}`, updatedTeam, {
+    client.patch(`/teams/${teamId}`, updatedTeam, {
         tags: { name: 'teams-update' },
     });
 
@@ -67,7 +61,7 @@ export default function () {
     // --- Update team avatar ---
     const fdAvatar = new FormData();
     fdAvatar.append('file', http.file(avatar, 'avatar.png', 'image/png'));
-    fdAvatar.append('slug', slug);
+    fdAvatar.append('teamId', teamId);
     fdAvatar.append('context', 'team.avatar');
 
     client.post('/upload', fdAvatar.body(), {
@@ -83,7 +77,7 @@ export default function () {
     // --- Update team banner ---
     const fdBanner = new FormData();
     fdBanner.append('file', http.file(avatar, 'avatar.png', 'image/png'));
-    fdBanner.append('slug', slug);
+    fdBanner.append('teamId', teamId);
     fdBanner.append('context', 'team.banner');
     client.post('/upload', fdBanner.body(), {
         rawBody: true,
@@ -95,8 +89,8 @@ export default function () {
 
     sleep(1);
 
-    // --- DELETE /:slug ---
-    client.delete(`/teams/${slug}`, {
+    // --- DELETE /:teamId ---
+    client.delete(`/teams/${teamId}`, {
         tags: { name: 'teams-delete' },
     });
 

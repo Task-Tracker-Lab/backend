@@ -14,8 +14,8 @@ export class GetInvitationsQuery {
         @Inject(CACHE_SERVICE) private readonly cacheService: ICacheService,
     ) {}
 
-    async execute(slug: string, userId: string) {
-        const team = await this.getTeamOrThrow(slug);
+    async execute(teamId: string, userId: string) {
+        const team = await this.getTeamOrThrow(teamId);
         await this.ensureAdminPermissions(team.id, userId);
 
         const teamKey = this.TEAM_INVITES_KEY(team.id);
@@ -68,8 +68,8 @@ export class GetInvitationsQuery {
         };
     }
 
-    private async getTeamOrThrow(slug: string) {
-        const team = await this.teamsRepo.findBySlug(slug);
+    private async getTeamOrThrow(teamId: string) {
+        const team = await this.teamsRepo.findById(teamId);
         if (!team)
             throw new BaseException(
                 { code: 'TEAM_NOT_FOUND', message: 'Команда не найдена' },

@@ -42,7 +42,7 @@ export default function () {
         description: 'description for k6_test_project',
         visibility: 'public',
     };
-    const createRes = client.post(`/teams/${team.slug}/projects`, project, {
+    const createRes = client.post(`/teams/${team.id}/projects`, project, {
         tags: { name: 'post-teams-projects' },
     });
     const projectId = createRes.json().projectId;
@@ -54,7 +54,7 @@ export default function () {
     const updatedProject = {
         name: newProjectName,
     };
-    client.patch(`/teams/${team.slug}/projects/${projectId}`, updatedProject, {
+    client.patch(`/teams/${team.id}/projects/${projectId}`, updatedProject, {
         tags: { name: 'patch-teams-projects' },
     });
 
@@ -63,7 +63,7 @@ export default function () {
     // --- get all teams projects ---
 
     const getAllRes = client.get(
-        `/teams/${team.slug}/projects`,
+        `/teams/${team.id}/projects`,
         {},
         { tags: { name: 'get-teams-projects' } },
     );
@@ -74,7 +74,7 @@ export default function () {
 
     // --- get one team project ---
     client.get(
-        `/teams/${team.slug}/projects/${projectId}`,
+        `/teams/${team.id}/projects/${projectId}`,
         {},
         { tags: { name: 'teams-projects-id' } },
     );
@@ -83,13 +83,13 @@ export default function () {
 
     // --- generate share token ---
     const shareTokenRes = client.post(
-        `/teams/${team.slug}/projects/${projectId}/share`,
+        `/teams/${team.id}/projects/${projectId}/share`,
         {},
         { tags: { name: 'teams-projects-generate-token' } },
     );
 
     check(shareTokenRes, {
-        'POST /teams/:slug/projects/:id/share: has token': (r) =>
+        'POST /teams/:id/projects/:id/share: has token': (r) =>
             r.json().payload.token !== undefined,
     });
 
@@ -98,7 +98,7 @@ export default function () {
     // --- archive project ---
 
     client.post(
-        `/teams/${team.slug}/projects/${projectId}/archive`,
+        `/teams/${team.id}/projects/${projectId}/archive`,
         {},
         { tags: { name: 'teams-projects-archive' } },
     );
@@ -108,7 +108,7 @@ export default function () {
     // --- delete project ---
 
     client.delete(
-        `/teams/${team.slug}/projects/${projectId}`,
+        `/teams/${team.id}/projects/${projectId}`,
         {},
         { tags: { name: 'delete-teams-projects' } },
     );

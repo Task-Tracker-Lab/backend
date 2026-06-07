@@ -15,7 +15,7 @@ import { S3Client } from '@aws-sdk/client-s3';
 
                 return new S3Client({
                     ...connection,
-                    ...config
+                    ...config,
                 });
             },
         },
@@ -24,9 +24,7 @@ import { S3Client } from '@aws-sdk/client-s3';
     exports: [S3Service],
 })
 export class S3Module extends ConfigurableModuleClass implements OnApplicationShutdown {
-    constructor(
-        @Inject(S3_CLIENT) private readonly client: S3Client
-    ) {
+    constructor(@Inject(S3_CLIENT) private readonly client: S3Client) {
         super();
     }
 

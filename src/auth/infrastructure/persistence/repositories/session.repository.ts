@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { eq, and, ne, lt, desc } from 'drizzle-orm';
-import * as schema from '../models';
+import * as schema from '../models/session.model';
 import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
 import { ISessionRepository, type SessionInsert } from '../../../domain/repository';
 

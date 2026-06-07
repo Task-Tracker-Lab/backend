@@ -9,7 +9,7 @@ import { Reflector } from '@nestjs/core';
 import { map, Observable } from 'rxjs';
 import { BaseException } from '@shared/error';
 import { z } from 'zod/v4';
-import { SKIP_RESPONSE_VALIDATION_KEY } from '@shared/decorators/skip-response-validation.decorator';
+import { SKIP_ZOD_VALIDATION } from '@shared/decorators';
 
 export const ZOD_RESPONSE_TOKEN = 'ZOD_RESPONSE_TOKEN';
 
@@ -34,6 +34,12 @@ export class ZodValidationInterceptor implements NestInterceptor<unknown, unknow
             ZOD_RESPONSE_TOKEN,
             handler,
         );
+
+        const skipValidation = this.reflector.get<boolean>(SKIP_ZOD_VALIDATION, handler);
+
+        if (skipValidation) {
+            return next.handle();
+        }
 
         const schema = metadata ? metadata.schema : undefined;
 

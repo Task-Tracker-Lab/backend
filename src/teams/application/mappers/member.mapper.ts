@@ -34,7 +34,6 @@ export class TeamMemberMapper {
         return {
             id: row.id,
             name: row.name,
-            slug: row.slug,
             description: row.description,
             avatar,
             role: role,

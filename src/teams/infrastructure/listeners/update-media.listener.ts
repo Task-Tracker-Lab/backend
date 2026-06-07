@@ -11,7 +11,7 @@ export class UpdateTeamMediaListener extends WorkerHost {
     constructor(
         @Inject('ITeamsRepository')
         private readonly repository: ITeamsRepository,
-        private readonly poilcy: TeamMemberPolicy,
+        private readonly policy: TeamMemberPolicy,
     ) {
         super();
     }
@@ -22,21 +22,21 @@ export class UpdateTeamMediaListener extends WorkerHost {
         const { initiatorId, entity, type, path } = job.data;
 
         try {
-            const teamId = await this.validatePermissionsAndGetTeamId(entity.slug, initiatorId);
+            const teamId = await this.validatePermissionsAndGetTeamId(entity.id, initiatorId);
 
             await this.executeMediaUpdate(teamId, type, path);
 
-            await job.log(`Successfully updated ${type} for team ${entity.slug}`);
+            await job.log(`Successfully updated ${type} for team ${entity.id}`);
         } catch (error) {
             await job.log(
-                `Failed to update ${type} for team ${entity.slug}: ${error instanceof Error ? error.message : String(error)}`,
+                `Failed to update ${type} for team ${entity.id}: ${error instanceof Error ? error.message : String(error)}`,
             );
             throw error;
         }
     }
 
-    private async validatePermissionsAndGetTeamId(slug: string, userId: string): Promise<string> {
-        const team = await this.repository.findBySlug(slug);
+    private async validatePermissionsAndGetTeamId(teamId: string, userId: string): Promise<string> {
+        const team = await this.repository.findById(teamId);
         if (!team) {
             throw new UnrecoverableError('Команда не найдена');
         }
@@ -47,7 +47,7 @@ export class UpdateTeamMediaListener extends WorkerHost {
             throw new UnrecoverableError('Не состоит в этой команде');
         }
 
-        const hasAccess = this.poilcy.canUpdateMedia(member.role as TeamRole);
+        const hasAccess = this.policy.canUpdateMedia(member.role as TeamRole);
 
         if (!hasAccess) {
             throw new UnrecoverableError('Недостаточно прав для обновления медиа');

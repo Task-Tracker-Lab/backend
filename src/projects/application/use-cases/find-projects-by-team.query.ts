@@ -11,8 +11,8 @@ export class FindProjectsByTeamQuery {
         private readonly policy: ProjectAccessPolicy,
     ) {}
 
-    public async execute(slug: string, userId: string) {
-        const { team, member } = await this.policy.ensureTeamAccess(slug, userId, 'viewer');
+    public async execute(teamId: string, userId: string) {
+        const { team, member } = await this.policy.ensureTeamAccess(teamId, userId, 'viewer');
         const projects = await this.projectsRepo.findByTeam(team.id);
         const items = projects.map((p) => ProjectsMapper.toListResponse(p, member));
 
@@ -20,7 +20,6 @@ export class FindProjectsByTeamQuery {
             team: {
                 id: team.id,
                 name: team.name,
-                slug: team.slug,
                 role: member.role,
             },
             // TODO: реализовать полноценную пагинацию для проектов команды.

@@ -2,95 +2,221 @@ import { z } from 'zod/v4';
 import { jwtSecretValidation } from './helpers/jwt-secren-validation';
 
 const timeStringSchema = z.string().regex(/^[0-9]+[smhdw]$/, {
-    message: 'Invalid time format. Use: s, m, h, d, w (e.g., 15m, 24h, 30d)',
+    message:
+        'Неверный формат времени. Используйте суффиксы: s, m, h, d, w (например: 15m, 24h, 30d)',
 });
 
+const domainRegex = /^[a-z0-9.-]+\.[a-z]{2,}$/;
+
 export const ConfigSchema = z.object({
-    PORT: z.coerce.number().default(3000),
-    NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-    COOKIE_SECRET: z.string({ error: 'COOKIE_SECRET is missing' }),
-    DB_SCHEMA: z.string({ error: 'DB_SCHEMA is missing' }),
-    DATABASE_URL: z.string().nonempty('DATABASE_URL must be a valid connection string'),
+    PORT: z.coerce.number().int({ error: 'Порт (PORT) должен быть числом' }).default(3000),
+
+    NODE_ENV: z
+        .enum(['development', 'production', 'test'], {
+            error: 'NODE_ENV должен быть одним из значений: development, production, test',
+        })
+        .default('development'),
+
+    COOKIE_SECRET: z
+        .string({
+            error: 'Критическая ошибка: COOKIE_SECRET не задан в окружении',
+        })
+        .min(10, 'COOKIE_SECRET слишком короткий, должен быть не менее 10 символов'),
+
+    DB_SCHEMA: z
+        .string({
+            error: 'Не указана схема базы данных (DB_SCHEMA)',
+        })
+        .min(1, 'Имя схемы DB_SCHEMA не может быть пустым'),
+
+    DATABASE_URL: z
+        .string({
+            error: 'Отсутствует строка подключения DATABASE_URL',
+        })
+        .url(
+            'DATABASE_URL должен быть валидным URL-адресом подключения (например, postgresql://...)',
+        ),
+
     REDIS_HOST: z.string().default('redis'),
-    REDIS_PORT: z.coerce.number().optional().default(6379),
+    REDIS_PORT: z.coerce.number().default(6379),
     REDIS_PASSWORD: z.string().optional(),
+
     IMAGOR_SECRET: z.string().optional(),
-    IMAGOR_URL: z.string().nonempty('Укажите адрес сервера Imagor'),
+    IMAGOR_URL: z
+        .string({
+            error: 'Адрес сервера Imagor (IMAGOR_URL) обязателен',
+        })
+        .url('IMAGOR_URL должен быть корректным URL-адресом'),
+
     DOMAIN: z
         .string()
         .toLowerCase()
-        .refine((val) => !val || /^[a-z0-9.-]+\.[a-z]{2,}$/.test(val), {
-            message: 'DOMAIN must be a valid hostname (e.g., example.com)',
+        .regex(domainRegex, {
+            message: 'DOMAIN должен быть валидным именем хоста (например, example.com)',
         })
         .optional(),
+
     STAGE_DOMAIN: z
         .string()
         .toLowerCase()
-        .refine((val) => !val || /^[a-z0-9.-]+\.[a-z]{2,}$/.test(val), {
-            message: 'STAGE_DOMAIN must be a valid hostname',
-        })
+        .regex(domainRegex, { message: 'STAGE_DOMAIN должен быть валидным именем хоста' })
         .optional(),
+
     CORS_ALLOWED_ORIGINS: z
-        .string()
-        .min(1, "CORS_ALLOWED_ORIGINS can't be empty")
+        .string({
+            error: 'Необходимо указать разрешенные CORS_ALLOWED_ORIGINS (через запятую)',
+        })
+        .min(1, 'Список CORS_ALLOWED_ORIGINS не может быть пустым')
         .transform((val) => val.split(',').map((s) => s.trim()))
-        .pipe(z.array(z.string().url('Each origin must be a valid URL'))),
+        .pipe(
+            z.array(
+                z.string().url('Каждая ссылка в CORS_ALLOWED_ORIGINS должна быть валидным URL'),
+            ),
+        ),
+
     JWT_AUDIENCE: z
         .string({
-            error: 'JWT_AUDIENCE is required',
+            error: 'Параметр JWT_AUDIENCE обязателен для проверки токенов',
         })
-        .min(1),
-    JWT_ACCESS_SECRET: z.string().refine(jwtSecretValidation, {
-        message:
-            'JWT_ACCESS_SECRET must be at least 32 characters long OR contain at least 5 words separated by hyphens',
-    }),
-    JWT_REFRESH_SECRET: z.string().refine(jwtSecretValidation, {
-        message:
-            'JWT_REFRESH_SECRET must be at least 32 characters long OR contain at least 5 words separated by hyphens',
-    }),
+        .min(1, 'JWT_AUDIENCE не может быть пустым'),
+
+    JWT_ACCESS_SECRET: z
+        .string({ error: 'Ключ JWT_ACCESS_SECRET обязателен для безопасности' })
+        .refine(jwtSecretValidation, {
+            message:
+                'JWT_ACCESS_SECRET должен быть не менее 32 символов ИЛИ содержать минимум 5 слов через дефис',
+        }),
+
+    JWT_REFRESH_SECRET: z
+        .string({ error: 'Ключ JWT_REFRESH_SECRET обязателен для безопасности' })
+        .refine(jwtSecretValidation, {
+            message:
+                'JWT_REFRESH_SECRET должен быть не менее 32 символов ИЛИ содержать минимум 5 слов через дефис',
+        }),
+
     JWT_ACCESS_EXPIRES_IN: timeStringSchema.default('15m'),
     JWT_REFRESH_EXPIRES_IN: timeStringSchema.default('30d'),
+
     MAIL_HOST: z
         .string({
-            error: 'Mail server host (MAIL_HOST) is not specified',
+            error: 'Адрес почтового сервера (MAIL_HOST) не указан',
         })
-        .min(1, 'MAIL_HOST cannot be empty'),
-    MAIL_PORT: z.coerce.number({
-        error: 'Mail port (MAIL_PORT) is not specified',
-    }),
+        .min(1, 'MAIL_HOST не может быть пустым'),
+
+    MAIL_PORT: z.coerce
+        .number({
+            error: 'Порт почтового сервера (MAIL_PORT) не указан',
+        })
+        .int({ error: 'MAIL_PORT должен быть числом' }),
+
     MAIL_USER: z
         .string({
-            error: 'Sender email (MAIL_USER) is not specified',
+            error: 'Имя пользователя почты (MAIL_USER) не указано',
         })
-        .email('MAIL_USER must be a valid email address'),
+        .email('MAIL_USER должен быть валидным email-адресом'),
+
     MAIL_PASSWORD: z
         .string({
-            error: 'Mail password (MAIL_PASSWORD) is required',
+            error: 'Пароль от почты (MAIL_PASSWORD) обязателен',
         })
-        .min(1, 'Mail password cannot be empty'),
+        .min(1, 'Пароль от почты не может быть пустым'),
+
     MAIL_FROM_NAME: z
         .string({
-            error: 'Sender name (MAIL_FROM_NAME) is not specified',
+            error: 'Имя отправителя (MAIL_FROM_NAME) не указано',
         })
-        .min(1, 'Sender name cannot be empty'),
-    MAIL_FROM_EMAIL: z.string().email('Invalid MAIL_FROM_EMAIL format').optional(),
+        .min(1, 'Имя отправителя не может быть пустым'),
+
+    MAIL_FROM_EMAIL: z.string().email('Неверный формат email в MAIL_FROM_EMAIL').optional(),
+
     S3_BUCKET_NAME: z
         .string({
-            error: "S3_BUCKET_NAME is required. Example: 'avatars'",
+            error: "Имя бакета S3_BUCKET_NAME обязательно. Пример: 'avatars'",
         })
-        .min(1),
+        .min(1, 'Имя бакета не может быть пустым'),
+
     S3_ENDPOINT: z
         .string({
-            error: "S3_ENDPOINT is required. Example: 'http://localhost:9000'",
+            error: "S3_ENDPOINT обязателен. Пример: 'http://localhost:9000'",
         })
-        .url('S3_ENDPOINT must be a valid URL'),
+        .url('S3_ENDPOINT должен быть валидным URL-адресом'),
+
     S3_REGION: z.string().default('us-east-1'),
-    S3_ACCESS_KEY: z.string({
-        error: 'S3_ACCESS_KEY is missing (MinIO root user or IAM user)',
-    }),
-    S3_SECRET_KEY: z.string({
-        error: 'S3_SECRET_KEY is missing (MinIO root password or IAM secret)',
-    }),
+
+    S3_ACCESS_KEY: z
+        .string({
+            error: 'S3_ACCESS_KEY отсутствует (MinIO root user или IAM access key)',
+        })
+        .min(1, 'S3_ACCESS_KEY не может быть пустым'),
+
+    S3_SECRET_KEY: z
+        .string({
+            error: 'S3_SECRET_KEY отсутствует (MinIO root password или IAM secret key)',
+        })
+        .min(1, 'S3_SECRET_KEY не может быть пустым'),
+
+    GOOGLE_CLIENT_ID: z
+        .string({
+            error: 'Идентификатор клиента Google (GOOGLE_CLIENT_ID) отсутствует в переменных окружения',
+        })
+        .min(1, 'GOOGLE_CLIENT_ID не может быть пустым. Получите его в Google Cloud Console'),
+
+    GOOGLE_CLIENT_SECRET: z
+        .string({
+            error: 'Секретный ключ Google (GOOGLE_CLIENT_SECRET) отсутствует в переменных окружения',
+        })
+        .min(1, 'GOOGLE_CLIENT_SECRET не может быть пустым. Защитите им свои OAuth-запросы'),
+
+    GITHUB_CLIENT_ID: z
+        .string({
+            error: 'Идентификатор клиента GitHub (GITHUB_CLIENT_ID) отсутствует в переменных окружения',
+        })
+        .min(
+            1,
+            'GITHUB_CLIENT_ID не может быть пустым. Получите его в настройках Developer Settings на GitHub',
+        )
+        .optional(),
+
+    GITHUB_CLIENT_SECRET: z
+        .string({
+            error: 'Секретный ключ GitHub (GITHUB_CLIENT_SECRET) отсутствует в переменных окружения',
+        })
+        .min(1, 'GITHUB_CLIENT_SECRET не может быть пустым')
+        .optional(),
+
+    YANDEX_CLIENT_ID: z
+        .string({
+            error: 'Идентификатор приложения Яндекс (YANDEX_CLIENT_ID) отсутствует в переменных окружения',
+        })
+        .min(
+            1,
+            'YANDEX_CLIENT_ID не может быть пустым. Создайте приложение на Яндекс ID для разработчиков',
+        )
+        .optional(),
+
+    YANDEX_CLIENT_SECRET: z
+        .string({
+            error: 'Секретный ключ Яндекса (YANDEX_CLIENT_SECRET) отсутствует в переменных окружения',
+        })
+        .min(1, 'YANDEX_CLIENT_SECRET не может быть пустым')
+        .optional(),
+
+    VKONTAKTE_CLIENT_ID: z
+        .string({
+            error: 'Идентификатор приложения Вконтакте (VKONTAKTE_CLIENT_ID) отсутствует в переменных окружения',
+        })
+        .min(
+            1,
+            'VKONTAKTE_CLIENT_ID не может быть пустым. Создайте приложение на Вконтакте ID для разработчиков',
+        )
+        .optional(),
+
+    VKONTAKTE_CLIENT_SECRET: z
+        .string({
+            error: 'Секретный ключ Вконтакте (VKONTAKTE_CLIENT_SECRET) отсутствует в переменных окружения',
+        })
+        .min(1, 'VKONTAKTE_CLIENT_SECRET не может быть пустым')
+        .optional(),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;

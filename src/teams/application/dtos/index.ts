@@ -14,11 +14,7 @@ export {
 export {
     CreateTeamDto,
     UpdateTeamDto,
-    FindTagsQuery,
-    SyncTagsDto,
     UserTeamResponse,
-    TagResponse,
-    CheckSlugResponse,
     UserTeamsResponse,
     TeamResponse,
 } from './team.dto';

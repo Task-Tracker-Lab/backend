@@ -10,14 +10,14 @@ export class UpdateTeamUseCase {
         private readonly teamsRepo: ITeamsRepository,
     ) {}
 
-    async execute(slug: string, userId: string, dto: UpdateTeamDto) {
-        const team = await this.teamsRepo.findBySlug(slug);
+    async execute(teamId: string, userId: string, dto: UpdateTeamDto) {
+        const team = await this.teamsRepo.findById(teamId);
 
         if (!team?.id) {
             throw new BaseException(
                 {
                     code: 'TEAM_NOT_FOUND',
-                    message: `Команда ${slug} не найдена`,
+                    message: `Команда ${teamId} не найдена`,
                 },
                 HttpStatus.NOT_FOUND,
             );
@@ -37,10 +37,8 @@ export class UpdateTeamUseCase {
             );
         }
 
-        const { tags, ...data } = dto;
-
         try {
-            const result = await this.teamsRepo.update(team.id, data, tags);
+            const result = await this.teamsRepo.update(team.id, dto);
 
             return {
                 ...result,

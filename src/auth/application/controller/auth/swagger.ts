@@ -136,6 +136,5 @@ export const DeleteSessionSwagger = () =>
         ApiUnauthorized(),
         ApiForbidden(),
         ApiNotFound('Сессия не найдена или уже истекла'),
-
         SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );

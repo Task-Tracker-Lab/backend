@@ -11,7 +11,6 @@ async function clearDB(db: PostgresJsDatabase<typeof sc>) {
     return await db.transaction(async (tx) => {
         await tx.delete(sc.users).where(sql`${sc.users.email} LIKE 'k6_user_%'`);
         await tx.delete(sc.teams).where(sql`${sc.teams.name} LIKE 'k6_team_%'`);
-        await tx.delete(sc.tags).where(sql`${sc.tags.name} LIKE 'k6_tag_%'`);
     });
 }
 

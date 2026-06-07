@@ -33,9 +33,9 @@ export default function () {
 
     sleep(1);
 
-    // --- GET /teams/:slug/members ---
+    // --- GET /teams/:id/members ---
     const membersRes = client.get(
-        `/teams/${team.slug}/members`,
+        `/teams/${team.id}/members`,
         {},
         {
             tags: { name: 'teams-members-list' },
@@ -50,7 +50,7 @@ export default function () {
     // --- PATCH /teams/:slug/members/:userId ---
     if (target && target.id) {
         client.patch(
-            `/teams/${team.slug}/members/${target.id}`,
+            `/teams/${team.id}/members/${target.id}`,
             { role: 'member' },
             { tags: { name: 'teams-members-update' } },
         );

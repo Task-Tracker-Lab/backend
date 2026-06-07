@@ -18,8 +18,8 @@ export class UpdateInvitationUseCase {
         private readonly policy: TeamMemberPolicy,
     ) {}
 
-    async execute(slug: string, code: string, userId: string, dto: UpdateInvitationDto) {
-        const team = await this.getTeamOrThrow(slug);
+    async execute(teamId: string, code: string, userId: string, dto: UpdateInvitationDto) {
+        const team = await this.getTeamOrThrow(teamId);
         const member = await this.getMemberOrThrow(team.id, userId);
 
         const key = this.INVITES_KEY(code);
@@ -37,8 +37,8 @@ export class UpdateInvitationUseCase {
         };
     }
 
-    private async getTeamOrThrow(slug: string) {
-        const team = await this.teamsRepo.findBySlug(slug);
+    private async getTeamOrThrow(teamId: string) {
+        const team = await this.teamsRepo.findById(teamId);
         if (!team) {
             throw new BaseException(
                 { code: 'TEAM_NOT_FOUND', message: 'Команда не найдена' },

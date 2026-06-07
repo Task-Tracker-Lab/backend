@@ -11,8 +11,8 @@ export class DeleteProjectUseCase {
         private readonly policy: ProjectAccessPolicy,
     ) {}
 
-    public async execute(id: string, slug: string, userId: string) {
-        const { project } = await this.policy.validateProjectAccess(id, slug, userId, 'admin');
+    public async execute(id: string, teamId: string, userId: string) {
+        const { project } = await this.policy.validateProjectAccess(id, teamId, userId, 'admin');
         const result = await this.projectsRepo.delete(project.id);
 
         if (!result) {
