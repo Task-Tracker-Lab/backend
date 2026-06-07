@@ -20,7 +20,7 @@ export class FindProjectQuery {
      */
     public async execute(
         projectId: string,
-        slug: string,
+        teamId: string,
         userId?: string,
         shareToken?: string,
         minRole: keyof typeof ROLE_PRIORITY = 'viewer',
@@ -42,12 +42,12 @@ export class FindProjectQuery {
             return this.findPublic(project, shareToken);
         }
 
-        return this.findPrivate(project, slug, userId, minRole);
+        return this.findPrivate(project, teamId, userId, minRole);
     }
 
     private findPrivate = async (
         project: Project,
-        slug: string,
+        teamId: string,
         userId?: string,
         minRole: keyof typeof ROLE_PRIORITY = 'viewer',
     ) => {
@@ -61,7 +61,7 @@ export class FindProjectQuery {
             );
         }
 
-        const team = await this.findTeamQ.execute(slug);
+        const team = await this.findTeamQ.execute(teamId);
         if (!team || team.id !== project.teamId) {
             throw new BaseException(
                 {

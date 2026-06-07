@@ -45,7 +45,10 @@ export const InviteMemberSwagger = () =>
                 ' Если нет — ему уйдет письмо на указанный Email.',
         }),
         ApiBody({ type: InviteMemberDto.Output }),
-        ApiParam({ name: 'slug', description: 'Слаг команды, в которую приглашаем' }),
+        ApiParam({
+            name: 'teamId',
+            description: 'Уникальный идентификатор команды, в которую приглашаем',
+        }),
         ApiResponse({
             status: 201,
             description: 'Инвайт создан и отправлен',
@@ -91,7 +94,7 @@ export const GetTeamInvitationsSwagger = () =>
             summary: 'Получить список всех приглашений в команду',
             description: 'Возвращает все активные инвайты команды. Доступно только owner/admin.',
         }),
-        ApiParam({ name: 'slug', description: 'Слаг команды' }),
+        ApiParam({ name: 'teamId', description: 'Уникальный идентификатор команды' }),
         ApiResponse({
             status: 200,
             description: 'Список приглашений команды',
@@ -111,7 +114,7 @@ export const GetTeamInvitationSwagger = () =>
             description:
                 'Возвращает данные инвайта по коду в рамках команды. Доступно только owner/admin.',
         }),
-        ApiParam({ name: 'slug', description: 'Слаг команды' }),
+        ApiParam({ name: 'teamId', description: 'Уникальный идентификатор команды' }),
         ApiParam({ name: 'code', description: 'Код инвайта' }),
         ApiResponse({
             status: 200,
@@ -132,7 +135,7 @@ export const UpdateTeamInvitationSwagger = () =>
             description:
                 'Позволяет изменить только поле role у существующего инвайта. TTL сохраняется.',
         }),
-        ApiParam({ name: 'slug', description: 'Слаг команды' }),
+        ApiParam({ name: 'teamId', description: 'Уникальный идентификатор команды' }),
         ApiParam({ name: 'code', description: 'Код инвайта' }),
         ApiBody({ type: UpdateInvitationDto.Output }),
         ApiResponse({
@@ -154,7 +157,7 @@ export const DeleteTeamInvitationSwagger = () =>
             description:
                 'Удаляет инвайт и чистит индексы в Redis (team:invites и user:invites). Доступно только owner/admin.',
         }),
-        ApiParam({ name: 'slug', description: 'Слаг команды' }),
+        ApiParam({ name: 'teamId', description: 'Уникальный идентификатор команды' }),
         ApiParam({ name: 'code', description: 'Код инвайта' }),
         ApiResponse({
             status: 200,

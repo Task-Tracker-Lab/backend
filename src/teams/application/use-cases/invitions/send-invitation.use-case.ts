@@ -29,8 +29,8 @@ export class SendInvitationUseCase {
         private readonly policy: TeamMemberPolicy,
     ) {}
 
-    async execute(slug: string, inviterId: string, dto: InviteMemberDto) {
-        const team = await this.getTeamOrThrow(slug);
+    async execute(teamId: string, inviterId: string, dto: InviteMemberDto) {
+        const team = await this.getTeamOrThrow(teamId);
         const inviter = await this.getInviterOrThrow(team.id, inviterId);
 
         this.validatePermissions(inviter.role as TeamRole, dto.role as TeamRole);
@@ -47,8 +47,8 @@ export class SendInvitationUseCase {
         return { success: true, message: `Приглашение отправлено на ${dto.email.toLowerCase()}` };
     }
 
-    private async getTeamOrThrow(slug: string) {
-        const team = await this.teamsRepo.findBySlug(slug);
+    private async getTeamOrThrow(teamId: string) {
+        const team = await this.teamsRepo.findById(teamId);
         if (!team)
             throw new BaseException(
                 { code: 'TEAM_NOT_FOUND', message: 'Команда не найдена' },

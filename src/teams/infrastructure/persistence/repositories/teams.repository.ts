@@ -2,7 +2,7 @@ import { Inject } from '@nestjs/common';
 import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
 import * as schema from '../models';
 import * as scUsers from '@core/user/infrastructure/persistence/models';
-import { and, asc, count, desc, eq, ilike, inArray, isNull, sql } from 'drizzle-orm';
+import { and, desc, eq, ilike, isNull } from 'drizzle-orm';
 import type { NewTeam, NewTeamMember, Team, TeamMember } from '@core/teams/domain/entities';
 import { ITeamsRepository } from '@core/teams/domain/repository';
 
@@ -11,15 +11,6 @@ export class TeamsRepository implements ITeamsRepository {
         @Inject(DATABASE_SERVICE)
         private readonly db: DatabaseService<typeof schema>,
     ) {}
-
-    public isSlugAvailable = async (slug: string) => {
-        const result = await this.db
-            .select({ id: schema.teams.id })
-            .from(schema.teams)
-            .where(eq(schema.teams.slug, slug));
-
-        return result.length === 0;
-    };
 
     public addMember = async (dto: NewTeamMember) => {
         const result = await this.db
@@ -32,31 +23,12 @@ export class TeamsRepository implements ITeamsRepository {
         return (result?.count ?? 0) > 0;
     };
 
-    public create = async (ownerId: string, dto: NewTeam, tags?: string[]) => {
+    public create = async (ownerId: string, dto: NewTeam) => {
         return this.db.transaction(async (tx) => {
             const [{ teamId }] = await tx
                 .insert(schema.teams)
                 .values({ ...dto, ownerId })
                 .returning({ teamId: schema.teams.id });
-
-            if (tags?.length) {
-                const names = tags.map((n) => ({ name: n }));
-
-                const insertedTags = await tx
-                    .insert(schema.tags)
-                    .values(names)
-                    .onConflictDoUpdate({
-                        target: schema.tags.name,
-                        set: { name: sql`${schema.tags.name}` },
-                    })
-                    .returning({ id: schema.tags.id });
-
-                if (insertedTags.length > 0) {
-                    const tags = insertedTags.map((t) => ({ teamId, tagId: t.id }));
-
-                    await tx.insert(schema.teamsToTags).values(tags);
-                }
-            }
 
             await tx.insert(schema.teamMembers).values({
                 teamId,
@@ -73,17 +45,13 @@ export class TeamsRepository implements ITeamsRepository {
         });
     };
 
-    public update = async (id: string, dto: Partial<Team>, tags?: string[]) => {
+    public update = async (id: string, dto: Partial<Team>) => {
         return this.db.transaction(async (tx) => {
             const [{ teamId }] = await tx
                 .update(schema.teams)
                 .set(dto)
                 .where(eq(schema.teams.id, id))
                 .returning({ teamId: schema.teams.id });
-
-            if (tags?.length) {
-                // TODO: FEAT AT FEATURE
-            }
 
             return {
                 success: true,
@@ -92,14 +60,11 @@ export class TeamsRepository implements ITeamsRepository {
         });
     };
 
-    public remove = async (teamId: string, userId) => {
-        const suffix = Date.now().toString();
-
+    public remove = async (teamId: string, userId: string) => {
         const result = await this.db
             .update(schema.teams)
             .set({
                 deletedAt: new Date().toISOString(),
-                slug: sql`${schema.teams.slug} || '-' || ${suffix}`,
             })
             .where(and(eq(schema.teams.id, teamId), eq(schema.teams.ownerId, userId)));
 
@@ -140,7 +105,6 @@ export class TeamsRepository implements ITeamsRepository {
             .select({
                 id: schema.teams.id,
                 name: schema.teams.name,
-                slug: schema.teams.slug,
                 description: schema.teams.description,
                 avatarUrl: schema.teams.avatarUrl,
                 role: schema.teamMembers.role,
@@ -156,34 +120,8 @@ export class TeamsRepository implements ITeamsRepository {
         return query;
     };
 
-    public findAllTags = async (options: { search?: string; limit?: number; offset?: number }) => {
-        const cleanSearch = options.search?.trim();
-        const escapedSearch = cleanSearch?.replace(/([%_\\])/g, '\\$1');
-
-        const whereCondition = escapedSearch
-            ? ilike(schema.tags.name, `%${escapedSearch}%`)
-            : undefined;
-
-        const [data, [{ total }]] = await Promise.all([
-            this.db
-                .select()
-                .from(schema.tags)
-                .where(whereCondition)
-                .limit(options.limit)
-                .offset(options.offset)
-                .orderBy(asc(schema.tags.name)),
-
-            this.db.select({ total: count() }).from(schema.tags).where(whereCondition),
-        ]);
-
-        return {
-            data,
-            total: Number(total ?? 0),
-        };
-    };
-
-    public findBySlug = async (slug: string) => {
-        const [team] = await this.db.select().from(schema.teams).where(eq(schema.teams.slug, slug));
+    public findById = async (teamId: string) => {
+        const [team] = await this.db.select().from(schema.teams).where(eq(schema.teams.id, teamId));
         if (!team) return null;
         return team;
     };
@@ -196,32 +134,6 @@ export class TeamsRepository implements ITeamsRepository {
             );
 
         return (result?.count ?? 0) > 0;
-    };
-
-    public syncTags = async (teamId: string, tagNames: string[]) => {
-        await this.db.transaction(async (tx) => {
-            await tx.delete(schema.teamsToTags).where(eq(schema.teamsToTags.teamId, teamId));
-
-            if (tagNames.length === 0) {
-                return;
-            }
-
-            await tx
-                .insert(schema.tags)
-                .values(tagNames.map((name) => ({ name })))
-                .onConflictDoNothing({ target: schema.tags.name });
-
-            const existingTags = await tx
-                .select({ id: schema.tags.id })
-                .from(schema.tags)
-                .where(inArray(schema.tags.name, tagNames));
-
-            await tx
-                .insert(schema.teamsToTags)
-                .values(existingTags.map((tag) => ({ teamId, tagId: tag.id })));
-        });
-
-        return true;
     };
 
     public updateMember = async (teamId: string, userId: string, dto: Partial<TeamMember>) => {

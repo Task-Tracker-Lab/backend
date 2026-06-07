@@ -47,7 +47,7 @@ export const FindInvitesSwagger = () =>
 export const GetMembersSwagger = () =>
     applyDecorators(
         ApiOperation({ summary: 'Получить список всех участников команды' }),
-        ApiParam({ name: 'slug', description: 'Слаг команды' }),
+        ApiParam({ name: 'teamId', description: 'Уникальный идентификатор команды' }),
         ApiResponse({
             status: 200,
             description: 'Список участников получен',
@@ -68,7 +68,7 @@ export const UpdateMemberSwagger = () =>
                 ' Владелец команды (Owner) не может понизить свою роль через этот эндпоинт.',
         }),
         ApiBody({ type: UpdateMemberDto.Output }),
-        ApiParam({ name: 'slug', description: 'Слаг команды' }),
+        ApiParam({ name: 'teamId', description: 'Уникальный идентификатор команды' }),
         ApiParam({ name: 'userId', description: 'ID пользователя, чьи права редактируются' }),
         ApiResponse({
             status: 200,
@@ -85,7 +85,7 @@ export const UpdateMemberSwagger = () =>
 export const RemoveMemberSwagger = () =>
     applyDecorators(
         ApiOperation({ summary: 'Удалить участника из команды' }),
-        ApiParam({ name: 'slug', description: 'Слаг команды' }),
+        ApiParam({ name: 'teamId', description: 'Уникальный идентификатор команды' }),
         ApiParam({ name: 'userId', description: 'ID пользователя' }),
         ApiResponse({
             status: 200,

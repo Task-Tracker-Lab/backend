@@ -11,7 +11,7 @@ export interface UpdateMediaUser {
 export interface UpdateMediaTeam {
     entity: {
         type: 'team';
-        slug: string;
+        id: string;
     };
     path: string;
     type: 'avatar' | 'banner';

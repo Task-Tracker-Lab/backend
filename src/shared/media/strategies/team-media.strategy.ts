@@ -8,7 +8,7 @@ export class TeamMediaStrategy implements MediaDispatchStrategy {
 
     createPayload(dto: UploadMediaDto, userId: string, path: string): UpdateMediaTeam {
         return {
-            entity: { type: 'team', slug: dto.slug! },
+            entity: { type: 'team', id: dto.teamId! },
             type: dto.context.split('.').pop() as 'avatar' | 'banner',
             initiatorId: userId,
             path,

@@ -8,7 +8,6 @@
         "test:teams": "k6 run scenarios/teams.js",
         "test:teams-members": "k6 run scenarios/teams-members.js",
         "test:teams-invitations": "k6 run scenarios/teams-invitations.js",
-        "test:teams-settings": "k6 run scenarios/teams-settings.js",
         "test:teams-me": "k6 run scenarios/teams-me.js",
         "test:projects": "k6 run scenarios/projects.js",
         "test:users": "k6 run scenarios/users.js",

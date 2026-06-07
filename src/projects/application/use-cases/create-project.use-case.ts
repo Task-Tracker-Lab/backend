@@ -12,8 +12,8 @@ export class CreateProjectUseCase {
         private readonly policy: ProjectAccessPolicy,
     ) {}
 
-    public async execute(userId: string, slug: string, dto: CreateProjectDto) {
-        const { team } = await this.policy.ensureTeamAccess(slug, userId, 'admin');
+    public async execute(userId: string, teamId: string, dto: CreateProjectDto) {
+        const { team } = await this.policy.ensureTeamAccess(teamId, userId, 'admin');
 
         const data = {
             ...dto,

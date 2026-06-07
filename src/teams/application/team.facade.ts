@@ -15,12 +15,10 @@ export class TeamsFacade {
         private readonly getInvitationQ: UC.GetInvitationQuery,
         private readonly getInvitationsQ: UC.GetInvitationsQuery,
         private readonly getTeamMembersQ: UC.GetTeamMembersQuery,
-        private readonly checkSlugQ: UC.CheckTeamSlugQuery,
 
         private readonly createTeamUc: UC.CreateTeamUseCase,
         private readonly deleteTeamUc: UC.DeleteTeamUseCase,
         private readonly updateTeamUc: UC.UpdateTeamUseCase,
-        private readonly syncTagsUc: UC.SyncTeamTagsUseCase,
 
         private readonly updateMemberUc: UC.UpdateTeamMemberUseCase,
         private readonly removeMemberUc: UC.RemoveTeamMemberUseCase,
@@ -33,49 +31,46 @@ export class TeamsFacade {
         private readonly getMyInvitesUc: UC.GetMyInvitesUseCase,
     ) {}
 
-    public checkSlug = (slug: string) => this.checkSlugQ.execute(slug);
+    public getTeamById = (teamId: string) => this.findTeamQ.execute(teamId);
 
-    public getTeamBySlug = (slug: string) => this.findTeamQ.execute(slug);
-
-    public getInvitation = (slug: string, code: string, userId: string, userEmail: string) =>
-        this.getInvitationQ.execute(slug, code, userId, userEmail);
+    public getInvitation = (teamId: string, code: string, userId: string, userEmail: string) =>
+        this.getInvitationQ.execute(teamId, code, userId, userEmail);
 
     public createTeam = (ownerId: string, dto: CreateTeamDto) =>
         this.createTeamUc.execute(ownerId, dto);
 
-    public updateTeam = (slug: string, userId: string, dto: UpdateTeamDto) =>
-        this.updateTeamUc.execute(slug, userId, dto);
+    public updateTeam = (teamId: string, userId: string, dto: UpdateTeamDto) =>
+        this.updateTeamUc.execute(teamId, userId, dto);
 
-    public deleteTeam = (slug: string, userId: string) => this.deleteTeamUc.execute(slug, userId);
+    public deleteTeam = (teamId: string, userId: string) =>
+        this.deleteTeamUc.execute(teamId, userId);
 
-    public getMembers = (slug: string) => this.getTeamMembersQ.execute(slug);
+    public getMembers = (teamId: string) => this.getTeamMembersQ.execute(teamId);
 
-    public updateMember = (slug: string, curr: string, target: string, dto: UpdateMemberDto) =>
-        this.updateMemberUc.execute(slug, curr, target, dto);
+    public updateMember = (teamId: string, curr: string, target: string, dto: UpdateMemberDto) =>
+        this.updateMemberUc.execute(teamId, curr, target, dto);
 
-    public removeMember = (slug: string, curr: string, target: string) =>
-        this.removeMemberUc.execute(slug, curr, target);
+    public removeMember = (teamId: string, curr: string, target: string) =>
+        this.removeMemberUc.execute(teamId, curr, target);
 
-    public getInvitations = (slug: string, userId?: string) =>
-        this.getInvitationsQ.execute(slug, userId);
+    public getInvitations = (teamId: string, userId?: string) =>
+        this.getInvitationsQ.execute(teamId, userId);
 
-    public invite = (slug: string, inviterId: string, dto: InviteMemberDto) =>
-        this.sendInviteUc.execute(slug, inviterId, dto);
+    public invite = (teamId: string, inviterId: string, dto: InviteMemberDto) =>
+        this.sendInviteUc.execute(teamId, inviterId, dto);
 
     public acceptInvite = (code: string, userId: string, email: string) =>
         this.acceptInviteUc.execute(code, userId, email);
 
-    public declineInvitation = (slug: string, code: string, userId: string, userEmail: string) =>
-        this.declineInvitationUc.execute(slug, code, userId, userEmail);
+    public declineInvitation = (teamId: string, code: string, userId: string, userEmail: string) =>
+        this.declineInvitationUc.execute(teamId, code, userId, userEmail);
 
     public updateInvitation = (
-        slug: string,
+        teamId: string,
         code: string,
         userId: string,
         dto: UpdateInvitationDto,
-    ) => this.updateInvitationUc.execute(slug, code, userId, dto);
-
-    public syncTags = (slug: string, tags: string[]) => this.syncTagsUc.execute(slug, tags);
+    ) => this.updateInvitationUc.execute(teamId, code, userId, dto);
 
     public getMyTeams = (userId: string, pagination: any) =>
         this.getMyTeamsUc.execute(userId, pagination);

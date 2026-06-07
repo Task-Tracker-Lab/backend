@@ -26,7 +26,6 @@
         "k6:projects": "pnpm --filter @project/performance-tests test:projects",
         "k6:teams-members": "pnpm --filter @project/performance-tests test:teams-members",
         "k6:teams-invitations": "pnpm --filter @project/performance-tests test:teams-invitations",
-        "k6:teams-settings": "pnpm --filter @project/performance-tests test:teams-settings",
         "k6:teams-me": "pnpm --filter @project/performance-tests test:teams-me",
         "k6:users": "pnpm --filter @project/performance-tests test:users",
         "k6:boards": "pnpm --filter @project/performance-tests test:boards:all",
@@ -79,7 +78,6 @@
         "postgres": "^3.4.9",
         "reflect-metadata": "^0.2.0",
         "rxjs": "^7.8.1",
-        "transliteration": "^2.6.1",
         "ua-parser-js": "^2.0.9",
         "winston": "^3.19.0",
         "zod": "^4.3.6"

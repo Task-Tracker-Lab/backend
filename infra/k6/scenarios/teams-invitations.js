@@ -39,9 +39,9 @@ export default function () {
 
     sleep(1);
 
-    // --- GET /teams/:slug/invitations ---
+    // --- GET /teams/:id/invitations ---
     const listRes = client.get(
-        `/teams/${team.slug}/invitations`,
+        `/teams/${team.id}/invitations`,
         {},
         {
             tags: { name: 'teams-invitations-list' },
@@ -56,9 +56,9 @@ export default function () {
     const invite = items.length ? items[0] : null;
 
     if (invite && invite.code) {
-        // --- GET /teams/:slug/invitations/:code ---
+        // --- GET /teams/:id/invitations/:code ---
         client.get(
-            `/teams/${team.slug}/invitations/${invite.code}`,
+            `/teams/${team.id}/invitations/${invite.code}`,
             {},
             {
                 tags: { name: 'teams-invitations-get' },
@@ -67,16 +67,16 @@ export default function () {
 
         sleep(1);
 
-        // --- PATCH /teams/:slug/invitations/:code ---
+        // --- PATCH /teams/:id/invitations/:code ---
         client.patch(
-            `/teams/${team.slug}/invitations/${invite.code}`,
+            `/teams/${team.id}/invitations/${invite.code}`,
             { role: 'member' },
             { tags: { name: 'teams-invitations-update' } },
         );
 
         sleep(1);
 
-        // --- POST /teams/:slug/invitations/:code/accept ---
+        // --- POST /teams/:id/invitations/:code/accept ---
         if (__ITER === 0 && invite.email && userByEmail[invite.email]) {
             const invitedUser = userByEmail[invite.email];
             const { client: invitedClient } = getAuthUser(invitedUser, {
@@ -84,7 +84,7 @@ export default function () {
             });
 
             invitedClient.post(
-                `/teams/${team.slug}/invitations/${invite.code}/accept`,
+                `/teams/${team.id}/invitations/${invite.code}/accept`,
                 {},
                 { tags: { name: 'teams-invitations-accept' } },
             );
@@ -93,10 +93,10 @@ export default function () {
 
     sleep(1);
 
-    // --- POST /teams/:slug/invitations ---
+    // --- POST /teams/:id/invitations ---
     const randomEmail = `k6_invite_${__VU}_${__ITER}@tasktracker.local`;
     client.post(
-        `/teams/${team.slug}/invitations`,
+        `/teams/${team.id}/invitations`,
         { email: randomEmail, role: 'member' },
         {
             tags: { name: 'teams-invitations-create' },
@@ -105,9 +105,9 @@ export default function () {
 
     sleep(1);
 
-    // --- POST /teams/:slug/invitations (duplicate) ---
+    // --- POST /teams/:id/invitations (duplicate) ---
     client.post(
-        `/teams/${team.slug}/invitations`,
+        `/teams/${team.id}/invitations`,
         { email: randomEmail, role: 'member' },
         {
             tags: { name: 'teams-invitations-create-duplicate' },

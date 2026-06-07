@@ -17,11 +17,11 @@ export class ProjectAccessPolicy {
      * Проверка доступа к команде (используется, например, при создании проекта)
      */
     public async ensureTeamAccess(
-        slug: string,
+        teamId: string,
         userId: string,
         minRole: keyof typeof ROLE_PRIORITY = 'viewer',
     ) {
-        const team = await this.findTeamQ.execute(slug);
+        const team = await this.findTeamQ.execute(teamId);
         if (!team) {
             throw new BaseException(
                 { code: 'TEAM_NOT_FOUND', message: 'Команда не найдена' },
@@ -56,11 +56,11 @@ export class ProjectAccessPolicy {
      */
     public async validateProjectAccess(
         projectId: string,
-        slug: string,
+        teamId: string,
         userId: string,
         minRole: keyof typeof ROLE_PRIORITY = 'admin',
     ) {
-        const { team, member } = await this.ensureTeamAccess(slug, userId, minRole);
+        const { team, member } = await this.ensureTeamAccess(teamId, userId, minRole);
 
         const project = await this.projectsRepo.findOne(projectId);
         if (!project || project.teamId !== team.id) {
@@ -77,7 +77,7 @@ export class ProjectAccessPolicy {
     }
 
     /**
-     * Проверка доступа к проекту по projectId (без slug)
+     * Проверка доступа к проекту по projectId
      */
     public async validateProjectAccessById(
         projectId: string,
