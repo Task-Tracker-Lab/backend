@@ -19,13 +19,13 @@ export const UploadMediaSchema = z.object({
         })
         .describe('Контекст загрузки (тип сущности и тип медиа)'),
     file: FileSchema,
-    slug: z
+    teamId: z
         .string({
-            error: 'Slug должен быть строкой',
+            error: 'Team ID должен быть строкой',
         })
-        .min(1, 'Slug не может быть пустым')
+        .min(1, 'Team ID не может быть пустым')
         .optional()
-        .describe('Уникальный идентификатор (slug) команды. Обязателен для контекстов team.*'),
+        .describe('Уникальный идентификатор команды. Обязателен для контекстов team.*'),
 });
 
 export class UploadMediaDto extends createZodDto(UploadMediaSchema) {}
