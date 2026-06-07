@@ -10,7 +10,7 @@ import { SignInDto, SignUpDto, VerifyDto } from '../../dtos';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { BearerAuthGuard, CookieAuthGuard } from '@shared/guards';
 import { AuthFacade } from '../../auth.facade';
-import { getDeviceMeta } from '@core/auth/infrastructure/utils/get-device-meta';
+import { getDeviceMeta } from '@core/auth/infrastructure/utils';
 import { ApiBaseController } from '@shared/decorators';
 import { ConfigService } from '@nestjs/config';
 
