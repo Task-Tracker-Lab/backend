@@ -5,7 +5,6 @@ import { ConfigService } from '@nestjs/config';
 import * as schema from './shared/entities';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
-import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { HealthModule } from '@libs/health';
 import { UserModule } from './user';
 import { GlobalExceptionFilter } from '@shared/error';
@@ -22,18 +21,11 @@ import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { DatabaseHealthService } from '@libs/database';
 import { ZodValidationInterceptor } from '@shared/interceptors';
+import { MetricsModule } from '@libs/metrics';
 
 @Module({
     imports: [
         ConfigModule,
-        PrometheusModule.registerAsync({
-            useFactory: () => ({
-                path: 'dump',
-                defaultMetrics: {
-                    enabled: process.env.NODE_ENV !== 'test',
-                },
-            }),
-        }),
         DatabaseModule.registerAsync({
             global: true,
             inject: [ConfigService],
@@ -63,6 +55,7 @@ import { ZodValidationInterceptor } from '@shared/interceptors';
         UserModule,
         TeamsModule,
         ProjectsModule,
+        MetricsModule,
         HealthModule.registerAsync({
             inject: [DatabaseHealthService, S3Service, CACHE_SERVICE],
             useFactory: (db: DatabaseHealthService, s3: S3Service, cache: ICacheService) => {

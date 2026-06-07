@@ -6,7 +6,7 @@ services:
     api:
         hostname: api
         container_name: api
-        image: ghcr.io/task-tracker-lab/task-tracker-backend:dev
+        image: ghcr.io/task-tracker-lab/backend:dev
         env_file:
             - .env
         ports:
