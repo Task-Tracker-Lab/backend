@@ -14,20 +14,8 @@ export class GetMyTeamsUseCase {
     async execute(userId: string, pagination: Record<string, string>) {
         const teams = await this.teamsRepo.findByUser(userId, pagination);
         const cdn = this.getCdnBaseUrl();
-        const data = teams.map((t) => TeamMemberMapper.toUserTeam(t, cdn));
 
-        return {
-            // TODO: реализовать полноценную пагинацию (total/limit/page/hasNextPage) для команд пользователя.
-            items: data,
-            meta: {
-                total: data.length,
-                totalPages: data.length ? 1 : 0,
-                page: 1,
-                limit: data.length,
-                hasPrevPage: false,
-                hasNextPage: false,
-            },
-        };
+        return teams.map((t) => TeamMemberMapper.toUserTeam(t, cdn));
     }
 
     private getCdnBaseUrl(): string {
