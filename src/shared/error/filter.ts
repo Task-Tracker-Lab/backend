@@ -36,6 +36,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
             return this.parseDatabase(exception, host);
         }
 
+        if (
+            exception instanceof Error &&
+            'code' in exception &&
+            typeof (exception as any).code === 'string'
+        ) {
+            return this.parseFastifyError(
+                exception as Error & { code: string; statusCode?: number },
+                host,
+            );
+        }
+
         return this.handleUnknownError(exception, host);
     }
 
@@ -148,6 +159,45 @@ export class GlobalExceptionFilter implements ExceptionFilter {
                 message,
                 stack: exception.stack,
                 details: [],
+            }),
+        );
+    };
+
+    private parseFastifyError = async (
+        exception: Error & { code: string; statusCode?: number },
+        host: ArgumentsHost,
+    ) => {
+        const { request, response } = this.getCtxBase(host);
+
+        let status = exception.statusCode || HttpStatus.BAD_REQUEST;
+        let code = exception.code;
+        let message = exception.message || 'Fastify execution error';
+
+        switch (exception.code) {
+            case 'FST_ERR_MULTIPART_REACHED_LIMIT':
+                status = HttpStatus.PAYLOAD_TOO_LARGE;
+                code = 'FILE_TOO_LARGE';
+                message = 'Размер загружаемого файла превышает допустимый лимит (5 MB)';
+                break;
+
+            default:
+                if (!exception.statusCode || exception.statusCode >= 500) {
+                    return this.handleUnknownError(exception, host);
+                }
+                break;
+        }
+
+        this.log(exception, host, status, {
+            fastifyCode: exception.code,
+            type: 'FASTIFY_EXCEPTION',
+        });
+
+        return response.status(status).send(
+            this.formatErrorResponse(request, status, {
+                code,
+                message,
+                details: [],
+                stack: exception.stack,
             }),
         );
     };
