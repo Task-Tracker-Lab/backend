@@ -11,10 +11,17 @@ import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { SIGNUP_CACHE_KEY } from '@core/auth/infrastructure/constants';
 import { SignUpCacheData } from '@core/auth/application/interfaces';
+import { InjectQueue } from '@nestjs/bullmq';
+import { AuthQueues } from '@core/auth/domain/enums';
+import { Queue } from 'bullmq';
+import { CreateUserWorkspaceEvent } from '@core/auth/domain/events/create-user-workspace.event';
+import { AuthUserJobs } from '@core/auth/domain/enums/auth-jobs.enum';
 
 @Injectable()
 export class SignUpVerifyUseCase {
     constructor(
+        @InjectQueue(AuthQueues.AUTH_USER)
+        private readonly queue: Queue,
         @Inject(CACHE_SERVICE)
         private readonly cacheService: ICacheService,
         @Inject('ISessionRepository')
@@ -101,6 +108,9 @@ export class SignUpVerifyUseCase {
         });
 
         await this.cacheService.removeOne(SIGNUP_CACHE_KEY(dto.email));
+
+        const event = new CreateUserWorkspaceEvent(user.id, user.firstName);
+        await this.queue.add(AuthUserJobs.CREATE_WORKSPACE, event);
 
         return {
             success: true,

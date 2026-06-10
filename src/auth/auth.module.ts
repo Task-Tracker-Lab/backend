@@ -1,5 +1,5 @@
 import { BullModule } from '@nestjs/bullmq';
-import { Module, forwardRef } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from '@core/user';
@@ -8,12 +8,14 @@ import { AuthFacade } from './application/auth.facade';
 import { AuthUseCases } from './application/use-cases';
 import { AuthQueues } from './domain/enums';
 import { TokenService } from './infrastructure/security';
-import { MailProcessor } from './infrastructure/workers';
+import { MailProcessor, UserProcessor } from './infrastructure/workers';
 import { MailAdapter } from '@shared/adapters/mail';
 import { STRATEGIES } from './infrastructure/strategies';
 import { REPOSITORIES } from './infrastructure/persistence/repositories';
+import { TeamsModule } from '@core/teams';
+import { ProjectsModule } from '@core/projects';
 
-const WORKERS = [MailProcessor];
+const WORKERS = [MailProcessor, UserProcessor];
 
 @Module({
     imports: [
@@ -37,10 +39,10 @@ const WORKERS = [MailProcessor];
                 },
             }),
         }),
-        BullModule.registerQueue({
-            name: AuthQueues.AUTH_MAIL,
-        }),
+        BullModule.registerQueue({ name: AuthQueues.AUTH_MAIL }, { name: AuthQueues.AUTH_USER }),
         forwardRef(() => UserModule),
+        TeamsModule,
+        ProjectsModule,
     ],
     controllers: CONTROLLERS,
     providers: [
