@@ -31,13 +31,7 @@ export class UserProcessor extends WorkerHost {
 
             await job.log(`[DONE] Job ${job.id} processed`);
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            const errorStack = error instanceof Error ? error.stack : '';
-
-            await job.log(`[FAIL] ${errorMessage}`);
-            if (errorStack) {
-                await job.log(errorStack);
-            }
+            await job.log(error);
 
             throw error;
         }
