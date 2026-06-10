@@ -147,7 +147,7 @@ export const ResendCodeSwagger = () =>
         ApiOperation({
             summary: 'Повторная отправка кода подтверждения',
             description:
-                'Отправляет новый код подтверждения на email. Ограничение: не чаще 1 раза в минуту.',
+                'Отправляет новый код подтверждения на email, связанный с текущей сессией регистрации или сброса пароля.',
         }),
         ApiBody({ type: ResendCodeDto.Output }),
         ApiResponse({
@@ -157,7 +157,7 @@ export const ResendCodeSwagger = () =>
         }),
         ApiBadRequest('Неверный формат email'),
         ApiNotFound('Сессия регистрации или сброса пароля не найдена или истекла'),
-        ApiTooManyRequests('Повторная отправка доступна не чаще 1 раза в минуту'),
+        ApiTooManyRequests('Превышено количество попыток запроса нового кода на email'),
 
         SetMetadata(ZOD_RESPONSE_TOKEN, ResendCodeResponse),
     );
