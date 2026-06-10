@@ -1,20 +1,15 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { ProjectsRepository } from './infrastructure/persistence/repositories';
 import { TeamsModule } from '@core/teams';
 import { CONTROLLERS } from './application/controller';
-import { FindProjectQuery, ProjectQueries, ProjectUseCases } from './application/use-cases';
+import { FindProjectQuery, USE_CASES } from './application/use-cases';
 import { POLICIES, ProjectAccessPolicy } from './domain/policy';
 import { ProjectsFacade } from './application/projects.facade';
-
-const REPOSITORY = {
-    provide: 'IProjectsRepository',
-    useClass: ProjectsRepository,
-};
+import { REPOSITORIES } from './infrastructure/persistence/repositories';
 
 @Module({
     imports: [forwardRef(() => TeamsModule)],
     controllers: CONTROLLERS,
-    providers: [REPOSITORY, ...POLICIES, ...ProjectUseCases, ...ProjectQueries, ProjectsFacade],
+    providers: [...REPOSITORIES, ...POLICIES, ...USE_CASES, ProjectsFacade],
     exports: [FindProjectQuery, ProjectAccessPolicy],
 })
 export class ProjectsModule {}

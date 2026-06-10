@@ -13,7 +13,7 @@ import { CreateProjectDto, CreateShareTokenDto, UpdateProjectDto } from '../../d
 import { ProjectStatus } from '@core/projects/domain/entities';
 import { ProjectsFacade } from '../../projects.facade';
 
-@ApiBaseController('teams/:teamId/projects', 'Team Projects', true)
+@ApiBaseController('teams/:teamId/projects', 'Projects', true)
 export class ProjectsController {
     constructor(private readonly facade: ProjectsFacade) {}
 
@@ -23,37 +23,37 @@ export class ProjectsController {
         return this.facade.getTeamProjects(teamId, userId);
     }
 
-    @Get(':id')
+    @Get(':slug')
     @Public()
     @FindOneProjectSwagger()
     async getOne(
-        @Param('id') id: string,
+        @Param('slug') slug: string,
         @Param('teamId') teamId: string,
         @GetUserId() userId?: string,
         @Query('token') token?: string,
     ) {
-        return this.facade.getDetail(id, teamId, userId, token);
+        return this.facade.getDetail(slug, teamId, userId, token);
     }
 
-    @Post(':id/share')
+    @Post(':slug/share')
     @CreateShareTokenSwagger()
     async generateShareToken(
-        @Param('id') id: string,
+        @Param('slug') slug: string,
         @Param('teamId') teamId: string,
         @GetUserId() userId: string,
         @Body() dto: CreateShareTokenDto,
     ) {
-        return this.facade.generateShareToken(id, teamId, userId, dto);
+        return this.facade.generateShareToken(slug, teamId, userId, dto);
     }
 
-    @Post(':id/archive')
+    @Post(':slug/archive')
     @ArchiveProjectSwagger()
     async archive(
-        @Param('id') id: string,
+        @Param('slug') slug: string,
         @Param('teamId') teamId: string,
         @GetUserId() userId: string,
     ) {
-        return this.facade.setStatus(id, teamId, userId, ProjectStatus.Archived);
+        return this.facade.setStatus(slug, teamId, userId, ProjectStatus.Archived);
     }
 
     @Post()
@@ -66,24 +66,24 @@ export class ProjectsController {
         return this.facade.create(userId, teamId, dto);
     }
 
-    @Patch(':id')
+    @Patch(':slug')
     @UpdateProjectSwagger()
     async update(
-        @Param('id') id: string,
+        @Param('slug') slug: string,
         @Param('teamId') teamId: string,
         @GetUserId() userId: string,
         @Body() dto: UpdateProjectDto,
     ) {
-        return this.facade.update(id, teamId, userId, dto);
+        return this.facade.update(slug, teamId, userId, dto);
     }
 
-    @Delete(':id')
+    @Delete(':slug')
     @RemoveProjectSwagger()
     async remove(
-        @Param('id') id: string,
+        @Param('slug') slug: string,
         @Param('teamId') teamId: string,
         @GetUserId() userId: string,
     ) {
-        return this.facade.delete(id, teamId, userId);
+        return this.facade.delete(slug, teamId, userId);
     }
 }

@@ -6,9 +6,9 @@ import { FindProjectQuery } from './find-project.query';
 export class GetProjectDetailQuery {
     constructor(private readonly findProjectQuery: FindProjectQuery) {}
 
-    public async execute(id: string, teamId: string, userId?: string, token?: string) {
+    public async execute(slug: string, teamId: string, userId?: string, token?: string) {
         const { project, member } = await this.findProjectQuery.execute(
-            id,
+            slug,
             teamId,
             userId,
             token,

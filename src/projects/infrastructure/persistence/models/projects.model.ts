@@ -10,7 +10,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { baseSchema, teams, users } from '@shared/entities';
 import { createId } from '@paralleldrive/cuid2';
-import { isNull, sql } from 'drizzle-orm';
+import { and, eq, isNotNull, isNull, not } from 'drizzle-orm';
 import {
     projectStatusEnum,
     projectVisibilityEnum,
@@ -27,8 +27,8 @@ export const projects = baseSchema.table(
         teamId: text('team_id')
             .references(() => teams.id, { onDelete: 'cascade' })
             .notNull(),
-        slug: varchar('slug', { length: 100 }).notNull(),
-        name: varchar('name', { length: 100 }).notNull(),
+        slug: varchar('slug', { length: 100 }).notNull().unique(),
+        name: varchar('name', { length: 100 }).notNull().unique(),
         description: text('description'),
         icon: varchar('icon', { length: 255 }),
         color: varchar('color', { length: 7 }),
@@ -64,47 +64,39 @@ export const projectStates = baseSchema.table(
             .primaryKey()
             .$defaultFn(() => createId()),
         projectId: text('project_id').references(() => projects.id, { onDelete: 'cascade' }),
-
         title: text('title').notNull(),
         description: text('description'),
-
-        slug: varchar('slug', { length: 50 }),
-
         stateType: stateTypeEnum('state_type').notNull().default('custom'),
         category: stateCategoryEnum('category').notNull().default('active'),
-
         color: varchar('color', { length: 10 }),
         icon: varchar('icon', { length: 20 }),
-
         orderIndex: integer('order_index').notNull().default(0),
         isVisible: boolean('is_visible').notNull().default(true),
         maxTasksLimit: integer('max_tasks_limit'),
         autoTransitionTo: text('auto_transition_to'),
-
         notifyOnEnter: boolean('notify_on_enter').default(false),
         notifyOnExit: boolean('notify_on_exit').default(false),
         isLocked: boolean('is_locked').default(false),
-        version: integer('version').default(0),
-
-        createdAt: timestamp('created_at').notNull().defaultNow(),
-        updatedAt: timestamp('updated_at').notNull().defaultNow(),
+        createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
+            .notNull()
+            .defaultNow(),
+        updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+            .notNull()
+            .defaultNow(),
         createdBy: text('created_by').references(() => users.id),
-        deletedAt: timestamp('deleted_at'),
+        deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'string' }),
     },
     (t) => ({
         projectOrderIdx: index('idx_project_states_project_order').on(t.projectId, t.orderIndex),
-
         uniqueProjectStateType: uniqueIndex('idx_project_states_unique_type')
             .on(t.projectId, t.stateType)
-            .where(sql`deleted_at IS NULL AND state_type != 'custom'`),
-
+            .where(and(isNull(t.deletedAt), not(eq(t.stateType, 'custom')))),
         uniqueProjectStateTitle: uniqueIndex('idx_project_states_unique_title')
             .on(t.projectId, t.title)
-            .where(sql`deleted_at IS NULL`),
-
+            .where(isNull(t.deletedAt)),
         deletedAtIdx: index('idx_project_states_deleted_at')
             .on(t.deletedAt)
-            .where(sql`deleted_at IS NOT NULL`),
+            .where(isNotNull(t.deletedAt)),
     }),
 );
 
@@ -119,7 +111,7 @@ export const projectShares = baseSchema.table(
             .references(() => projects.id, { onDelete: 'cascade' }),
         token: text('token').notNull().unique(),
         expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'string' }),
-        createdBy: text('created_by').notNull(),
+        createdBy: text('created_by').references(() => users.id),
         createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
             .defaultNow()
             .notNull(),

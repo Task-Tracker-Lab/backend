@@ -1,1 +1,2 @@
-export * from './entities.domain';
+export * from './project.domain';
+export * from './state.domain';

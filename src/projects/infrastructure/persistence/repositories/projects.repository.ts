@@ -16,9 +16,9 @@ export class ProjectsRepository implements IProjectsRepository {
         const result = await this.db
             .insert(schema.projects)
             .values(data)
-            .returning({ id: schema.projects.id });
+            .returning({ slug: schema.projects.slug });
 
-        return { result: result.length > 0, id: result[0].id };
+        return { result: result.length > 0, slug: result[0].slug };
     };
 
     public update = async (id: string, data: Partial<NewProject>) => {

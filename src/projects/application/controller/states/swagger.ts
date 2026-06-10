@@ -9,6 +9,13 @@ import {
     ApiConflict,
 } from '@shared/error';
 import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
+import {
+    CreateProjectStateDto,
+    CreateProjectStateResponse,
+    ProjectStateResponse,
+    ReorderProjectsStatesDto,
+    UpdateProjectStateDto,
+} from '../../dtos';
 
 export const FindAllProjectStatesSwagger = () =>
     applyDecorators(
@@ -17,10 +24,10 @@ export const FindAllProjectStatesSwagger = () =>
             description: 'Возвращает список всех статусов (колонок) проекта с их настройками',
         }),
         ApiParam({
-            name: 'projectId',
+            name: 'slug',
             type: 'string',
-            description: 'CUID проекта',
-            example: 'clv123456',
+            description: 'Slug проекта',
+            example: 'super-project',
         }),
         ApiQuery({
             name: 'hidden',
@@ -61,12 +68,12 @@ export const FindAllProjectStatesSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Список состояний получен',
-            // type: ProjectStateListResponse.Output,
+            type: [ProjectStateResponse.Output],
         }),
         ApiUnauthorized(),
         ApiNotFound('Проект не найден'),
 
-        // SetMetadata(ZOD_RESPONSE_TOKEN, ProjectStateListResponse),
+        SetMetadata(ZOD_RESPONSE_TOKEN, ProjectStateResponse),
     );
 
 export const FindOneProjectStateSwagger = () =>
@@ -76,26 +83,26 @@ export const FindOneProjectStateSwagger = () =>
             description: 'Возвращает полную информацию о статусе проекта',
         }),
         ApiParam({
-            name: 'projectId',
+            name: 'slug',
             type: 'string',
-            description: 'CUID проекта',
-            example: 'clv123456',
+            description: 'Slug проекта',
+            example: 'super-project',
         }),
         ApiParam({
             name: 'stateId',
             type: 'string',
-            description: 'CUID состояния',
-            example: 'clv789012',
+            description: 'State id состояния',
+            example: 'clv123456',
         }),
         ApiResponse({
             status: 200,
             description: 'Информация о состоянии получена',
-            // type: ProjectStateDetailResponse.Output,
+            type: ProjectStateResponse.Output,
         }),
         ApiNotFound('Состояние не найдено'),
         ApiUnauthorized(),
 
-        // SetMetadata(ZOD_RESPONSE_TOKEN, ProjectStateDetailResponse),
+        SetMetadata(ZOD_RESPONSE_TOKEN, ProjectStateResponse),
     );
 
 export const CreateProjectStateSwagger = () =>
@@ -106,26 +113,26 @@ export const CreateProjectStateSwagger = () =>
                 'Создаёт новый статус (колонку) для проекта. Можно указать тип, иконку, цвет и WIP лимит.',
         }),
         ApiParam({
-            name: 'projectId',
+            name: 'slug',
             type: 'string',
-            description: 'CUID проекта',
-            example: 'clv123456',
+            description: 'Slug проекта',
+            example: 'super-project',
         }),
         ApiBody({
-            // type: CreateProjectStateDto.Output,
+            type: CreateProjectStateDto.Output,
             description: 'Данные для создания состояния',
         }),
         ApiResponse({
             status: 201,
             description: 'Состояние успешно создано',
-            // type: CreateProjectStateResponse.Output,
+            type: CreateProjectStateResponse.Output,
         }),
         ApiValidationError(),
         ApiUnauthorized(),
         ApiForbidden('Нет прав для создания состояния в этом проекте'),
         ApiConflict('Состояние с таким названием или типом уже существует'),
 
-        // SetMetadata(ZOD_RESPONSE_TOKEN, CreateProjectStateResponse),
+        SetMetadata(ZOD_RESPONSE_TOKEN, CreateProjectStateResponse),
     );
 
 export const UpdateProjectStateSwagger = () =>
@@ -136,25 +143,25 @@ export const UpdateProjectStateSwagger = () =>
                 'Обновляет параметры статуса. Системные статусы (isLocked=true) нельзя переименовать, но можно изменить визуал.',
         }),
         ApiParam({
-            name: 'projectId',
+            name: 'slug',
             type: 'string',
-            description: 'CUID проекта',
-            example: 'clv123456',
+            description: 'Slug проекта',
+            example: 'super-project',
         }),
         ApiParam({
             name: 'stateId',
             type: 'string',
-            description: 'CUID состояния',
-            example: 'clv789012',
+            description: 'State id состояния',
+            example: 'clv123456',
         }),
         ApiBody({
-            // type: UpdateProjectStateDto.Output,
+            type: UpdateProjectStateDto.Output,
             description: 'Обновляемые поля',
         }),
         ApiResponse({
             status: 200,
             description: 'Состояние обновлено',
-            // type: UpdateProjectStateResponse.Output,
+            type: ActionResponse.Output,
         }),
         ApiValidationError(),
         ApiNotFound('Состояние не найдено'),
@@ -162,7 +169,7 @@ export const UpdateProjectStateSwagger = () =>
         ApiForbidden('Нельзя изменить системный статус'),
         ApiConflict('Состояние с таким названием уже существует'),
 
-        // SetMetadata(ZOD_RESPONSE_TOKEN, UpdateProjectStateResponse),
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const ReorderProjectStatesSwagger = () =>
@@ -173,26 +180,26 @@ export const ReorderProjectStatesSwagger = () =>
                 'Меняет порядок колонок на доске. Принимает массив ID состояний в новом порядке.',
         }),
         ApiParam({
-            name: 'projectId',
+            name: 'slug',
             type: 'string',
-            description: 'CUID проекта',
-            example: 'clv123456',
+            description: 'Slug проекта',
+            example: 'super-project',
         }),
         ApiBody({
-            // type: ReorderStatesDto.Output,
+            type: ReorderProjectsStatesDto.Output,
             description: 'Массив ID состояний в правильном порядке',
         }),
         ApiResponse({
             status: 200,
             description: 'Порядок обновлён',
-            // type: ReorderStatesResponse.Output,
+            type: ActionResponse.Output,
         }),
         ApiValidationError(),
         ApiNotFound('Одно или несколько состояний не найдены'),
         ApiUnauthorized(),
         ApiForbidden('Нет прав для изменения порядка'),
 
-        // SetMetadata(ZOD_RESPONSE_TOKEN, ReorderStatesResponse),
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
     );
 
 export const RemoveProjectStateSwagger = () =>
@@ -203,16 +210,16 @@ export const RemoveProjectStateSwagger = () =>
                 'Мягкое удаление статуса. Статус можно удалить только если в нём нет задач.',
         }),
         ApiParam({
-            name: 'projectId',
+            name: 'slug',
             type: 'string',
-            description: 'CUID проекта',
-            example: 'clv123456',
+            description: 'Slug проекта',
+            example: 'super-project',
         }),
         ApiParam({
             name: 'stateId',
             type: 'string',
-            description: 'CUID состояния',
-            example: 'clv789012',
+            description: 'State id состояния',
+            example: 'clv123456',
         }),
         ApiResponse({
             status: 200,
@@ -234,16 +241,16 @@ export const RestoreProjectStateSwagger = () =>
             description: 'Восстанавливает мягко удалённый статус',
         }),
         ApiParam({
-            name: 'projectId',
+            name: 'slug',
             type: 'string',
-            description: 'CUID проекта',
-            example: 'clv123456',
+            description: 'Slug проекта',
+            example: 'super-project',
         }),
         ApiParam({
             name: 'stateId',
             type: 'string',
-            description: 'CUID состояния',
-            example: 'clv789012',
+            description: 'State id состояния',
+            example: 'clv123456',
         }),
         ApiResponse({
             status: 200,
@@ -255,44 +262,4 @@ export const RestoreProjectStateSwagger = () =>
         ApiForbidden('Нет прав для восстановления'),
 
         SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
-    );
-
-export const GetProjectStatesStatsSwagger = () =>
-    applyDecorators(
-        ApiOperation({
-            summary: 'Получить статистику по состояниям',
-            description: 'Возвращает количество задач в каждом статусе и метрики WIP',
-        }),
-        ApiParam({
-            name: 'projectId',
-            type: 'string',
-            description: 'CUID проекта',
-            example: 'clv123456',
-        }),
-        ApiResponse({
-            status: 200,
-            description: 'Статистика получена',
-            schema: {
-                type: 'object',
-                properties: {
-                    data: {
-                        type: 'array',
-                        items: {
-                            type: 'object',
-                            properties: {
-                                stateId: { type: 'string' },
-                                title: { type: 'string' },
-                                stateType: { type: 'string' },
-                                tasksCount: { type: 'integer' },
-                                maxTasksLimit: { type: 'integer', nullable: true },
-                                isOverLimit: { type: 'boolean' },
-                                averageTimeInState: { type: 'integer', nullable: true },
-                            },
-                        },
-                    },
-                },
-            },
-        }),
-        ApiUnauthorized(),
-        ApiNotFound('Проект не найден'),
     );

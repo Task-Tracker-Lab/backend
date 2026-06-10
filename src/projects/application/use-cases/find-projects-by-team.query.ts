@@ -26,7 +26,7 @@ export class FindProjectsByTeamQuery {
             items,
             meta: {
                 total: items.length,
-                totalPages: items.length ? 1 : 0,
+                totalPages: items.length ? items.length : 1,
                 page: 1,
                 limit: 10,
                 hasPrevPage: false,

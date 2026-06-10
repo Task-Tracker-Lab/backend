@@ -4,23 +4,51 @@ import { ActionResponseSchema } from '@shared/dtos';
 import { createPaginationSchema } from '@shared/schemas';
 import { ProjectStatus, ProjectVisibility } from '@core/projects/domain/entities';
 
+export const ProjectVisibilitySchema = z.enum(['public', 'private']).default('private');
+
 export const CreateProjectSchema = z.object({
     name: z
         .string()
         .min(1, 'Название проекта не может быть пустым')
-        .max(100, 'Название не должно превышать 100 символов'),
+        .max(100, 'Название не должно превышать 100 символов')
+        .describe('Название проекта'),
     slug: z
         .string()
         .min(2, 'Ключ проекта должен быть от 2 до 10 символов')
         .max(10)
-        .regex(/^[A-Z0-9]+$/, 'Ключ должен содержать только заглавные латинские буквы и цифры'),
-    description: z.string().max(2000, 'Описание слишком длинное').optional().nullable(),
-    icon: z.string().optional().nullable(),
+        .regex(/^[a-z0-9]+$/, 'Ключ должен содержать только строчные латинские буквы и цифры')
+        .describe('Уникальный ключ проекта в URL (2-10 символов, a-z0-9)'),
+    description: z
+        .string()
+        .max(2000, 'Описание слишком длинное')
+        .nullable()
+        .optional()
+        .default(null)
+        .describe('Описание проекта'),
+    icon: z
+        .string()
+        .max(255, 'URL иконки слишком длинный')
+        .nullable()
+        .optional()
+        .default(null)
+        .describe('Иконка проекта (эмодзи, URL или id шрифта)'),
     color: z
         .string()
-        .regex(/^#[A-Fa-f0-9]{6}$/, 'Цвет должен быть в формате HEX (например, #FFFFFF)')
-        .optional(),
-    visibility: z.enum(['public', 'private']).default('public'),
+        .regex(/^#[A-Fa-f0-9]{6}$/, 'Цвет должен быть в формате HEX')
+        .nullable()
+        .optional()
+        .default('#3B82F6')
+        .describe('Цвет проекта в HEX (#RRGGBB)'),
+    visibility: ProjectVisibilitySchema.optional()
+        .default('public')
+        .describe('Видимость: public | private'),
+    taskSequence: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .default(0)
+        .describe('Счётчик для автонумерации задач'),
 });
 
 export class CreateProjectDto extends createZodDto(CreateProjectSchema) {}
@@ -38,7 +66,7 @@ export const UpdateProjectSchema = CreateProjectSchema.extend({
 export class UpdateProjectDto extends createZodDto(UpdateProjectSchema) {}
 
 const CreateProjectsResponseSchema = ActionResponseSchema.extend({
-    projectId: z.string().describe('Уникальный идентификатор проекта в системе'),
+    slug: z.string().describe('Уникальный идентификатор проекта в системе'),
 });
 
 export class CreateProjectResponse extends createZodDto(CreateProjectsResponseSchema) {}

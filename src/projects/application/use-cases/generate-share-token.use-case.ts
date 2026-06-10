@@ -13,8 +13,8 @@ export class GenerateShareTokenUseCase {
         private readonly policy: ProjectAccessPolicy,
     ) {}
 
-    public async execute(id: string, teamId: string, userId: string, dto: CreateShareTokenDto) {
-        const { project } = await this.policy.validateProjectAccess(id, teamId, userId);
+    public async execute(slug: string, teamId: string, userId: string, dto: CreateShareTokenDto) {
+        const { project } = await this.policy.validateProjectAccess(slug, teamId, userId);
 
         let expiresAt: Date;
 

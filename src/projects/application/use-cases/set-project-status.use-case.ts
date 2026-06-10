@@ -12,8 +12,8 @@ export class SetProjectStatusUseCase {
         private readonly policy: ProjectAccessPolicy,
     ) {}
 
-    public async execute(id: string, teamId: string, userId: string, status: ProjectStatus) {
-        const { project } = await this.policy.validateProjectAccess(id, teamId, userId);
+    public async execute(slug: string, teamId: string, userId: string, status: ProjectStatus) {
+        const { project } = await this.policy.validateProjectAccess(slug, teamId, userId);
         const result = await this.projectsRepo.update(project.id, { status });
 
         if (!result) {

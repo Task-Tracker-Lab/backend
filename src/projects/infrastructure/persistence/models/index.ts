@@ -1,2 +1,2 @@
 export { projectStatusEnum, projectVisibilityEnum } from './enums';
-export { projectShares, projects } from './projects.model';
+export { projectShares, projects, projectStates } from './projects.model';

@@ -19,20 +19,20 @@ export class FindProjectQuery {
      * Точка входа для получения проекта с проверкой прав.
      */
     public async execute(
-        projectId: string,
+        slug: string,
         teamId: string,
         userId?: string,
         shareToken?: string,
         minRole: keyof typeof ROLE_PRIORITY = 'viewer',
     ) {
-        const project = await this.projectsRepo.findOne(projectId);
+        const project = await this.projectsRepo.findOne(slug);
 
         if (!project) {
             throw new BaseException(
                 {
                     code: 'PROJECT_NOT_FOUND',
                     message: 'Проект не найден',
-                    details: [{ target: 'projectId', value: projectId }],
+                    details: [{ target: 'slug', value: slug }],
                 },
                 HttpStatus.NOT_FOUND,
             );
@@ -102,7 +102,7 @@ export class FindProjectQuery {
         }
 
         const hashedToken = createHash('sha256').update(token).digest('hex');
-        const isValidToken = await this.projectsRepo.hasValidShareToken(project.id, hashedToken);
+        const isValidToken = await this.projectsRepo.hasValidShareToken(project.slug, hashedToken);
 
         if (!isValidToken) {
             throw new BaseException(

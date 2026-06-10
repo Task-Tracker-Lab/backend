@@ -23,12 +23,12 @@ export class CreateProjectUseCase {
             status: ProjectStatus.Active,
         };
 
-        const { result, id } = await this.projectsRepo.create(data);
+        const { result, slug } = await this.projectsRepo.create(data);
 
         return {
             success: result,
             message: `Проект ${dto.name} успешно создан`,
-            projectId: id,
+            slug,
         };
     }
 }

@@ -55,14 +55,14 @@ export class ProjectAccessPolicy {
      * Полная проверка доступа к конкретному проекту внутри команды
      */
     public async validateProjectAccess(
-        projectId: string,
+        slug: string,
         teamId: string,
         userId: string,
         minRole: keyof typeof ROLE_PRIORITY = 'admin',
     ) {
         const { team, member } = await this.ensureTeamAccess(teamId, userId, minRole);
 
-        const project = await this.projectsRepo.findOne(projectId);
+        const project = await this.projectsRepo.findOne(slug);
         if (!project || project.teamId !== team.id) {
             throw new BaseException(
                 {
@@ -77,14 +77,14 @@ export class ProjectAccessPolicy {
     }
 
     /**
-     * Проверка доступа к проекту по projectId
+     * Проверка доступа к проекту по slug
      */
     public async validateProjectAccessById(
-        projectId: string,
+        slug: string,
         userId: string,
         minRole: keyof typeof ROLE_PRIORITY = 'viewer',
     ) {
-        const project = await this.projectsRepo.findOne(projectId);
+        const project = await this.projectsRepo.findOne(slug);
         if (!project) {
             throw new BaseException(
                 { code: 'PROJECT_NOT_FOUND', message: 'Проект не найден' },
