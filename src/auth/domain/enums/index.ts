@@ -1,1 +1,1 @@
-export { AuthMailJobs, AuthQueues } from './mail-jobs.enum';
+export { AuthMailJobs, AuthUserJobs, AuthQueues } from './auth-jobs.enum';
