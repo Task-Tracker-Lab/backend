@@ -9,7 +9,10 @@ import { ResetPasswordDto } from '../dtos';
 import { FindUserQuery } from '@core/user';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
-import { RESET_PASSWORD_CACHE_KEY } from '@core/auth/infrastructure/constants';
+import {
+    EMAIL_CODE_TTL_SECONDS,
+    RESET_PASSWORD_CACHE_KEY,
+} from '@core/auth/infrastructure/constants';
 import { ResetPasswordCacheData } from '@core/auth/application/interfaces';
 
 @Injectable()
@@ -59,7 +62,7 @@ export class ResetPasswordUseCase {
         const token = await generate({
             secret,
             digits: 6,
-            period: 900,
+            period: EMAIL_CODE_TTL_SECONDS,
             strategy: 'totp',
         });
 
@@ -72,7 +75,7 @@ export class ResetPasswordUseCase {
         await this.cacheService.setOne(
             RESET_PASSWORD_CACHE_KEY(dto.email),
             JSON.stringify(resetPayload),
-            900,
+            EMAIL_CODE_TTL_SECONDS,
         );
 
         const event = new ResetPasswordEvent(dto.email, token);

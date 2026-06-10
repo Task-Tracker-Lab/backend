@@ -1,4 +1,4 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { BaseException } from '@shared/error';
@@ -7,13 +7,17 @@ import { AuthQueues } from '@core/auth/domain/enums';
 import { Queue } from 'bullmq';
 import { ResendCodeDto } from '@core/auth/application/dtos';
 import {
-    RESEND_CODE_COOLDOWN_SECONDS,
-    RESEND_CODE_RATE_LIMIT_KEY,
+    EMAIL_CODE_TTL_SECONDS,
+    MAX_ATTEMPTS,
+    RESEND_ATTEMPTS_KEY,
+    RESEND_COOLDOWN_KEY,
+    SECONDS_BETWEEN_ATTEMPTS,
 } from '@core/auth/infrastructure/constants';
 import { RESEND_CODE_STRATEGIES, ResendCodeStrategy } from '../strategies';
 
 @Injectable()
 export class ResendCodeUseCase {
+    private readonly logger = new Logger('TEST');
     constructor(
         @Inject(CACHE_SERVICE)
         private readonly cacheService: ICacheService,
@@ -23,14 +27,6 @@ export class ResendCodeUseCase {
 
     async execute(dto: ResendCodeDto) {
         const strategy = this.getStrategy(dto.context);
-        const rateLimitKey = RESEND_CODE_RATE_LIMIT_KEY(dto.context, dto.email);
-
-        const retryAfterSeconds = await this.cacheService.getTtl(rateLimitKey);
-
-        if (retryAfterSeconds > 0) {
-            throw this.createRateLimitException(dto.email, retryAfterSeconds);
-        }
-
         const cacheKey = strategy.getCacheKey(dto.email);
         const cachedDataStr = await this.cacheService.getOne(cacheKey);
 
@@ -45,18 +41,71 @@ export class ResendCodeUseCase {
             );
         }
 
+        const cooldownKey = RESEND_COOLDOWN_KEY(dto.context, dto.email);
+        const { ttlSeconds: cooldownTtl } = await this.cacheService.getOneWithTtl(cooldownKey);
+
+        if (cooldownTtl > 0) {
+            throw new BaseException(
+                {
+                    code: 'RESEND_RATE_LIMIT',
+                    message: `Повторная отправка доступна через ${this.formatWaitTime(cooldownTtl)}`,
+                    details: [
+                        {
+                            target: 'email',
+                            value: dto.email,
+                            ttlSeconds: cooldownTtl,
+                            nextResendAt: this.buildResendTiming(cooldownTtl).nextResendAt,
+                        },
+                    ],
+                },
+                HttpStatus.TOO_MANY_REQUESTS,
+            );
+        }
+
+        const attemptsKey = RESEND_ATTEMPTS_KEY(dto.context, dto.email);
+        const attemptsStr = await this.cacheService.getOne(attemptsKey);
+
+        let attemptsLeft = attemptsStr ? parseInt(attemptsStr, 10) : MAX_ATTEMPTS;
+        this.logger.error(attemptsLeft);
+        if (attemptsLeft <= 0) {
+            throw new BaseException(
+                {
+                    code: 'MAX_ATTEMPTS_REACHED',
+                    message:
+                        'Превышено максимальное количество попыток отправки кода. Начните процесс заново позже.',
+                    details: [{ target: 'email', value: dto.email }],
+                },
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
+        attemptsLeft -= 1;
+
         const cachedData = JSON.parse(cachedDataStr);
         const { token, secret } = await strategy.generateOtp();
         const newCacheData = strategy.buildNewCacheData(cachedData, token, secret);
 
-        await this.cacheService.setOne(cacheKey, JSON.stringify(newCacheData), 900);
-        await this.cacheService.setOne(rateLimitKey, '1', RESEND_CODE_COOLDOWN_SECONDS);
+        await this.cacheService.setOne(
+            cacheKey,
+            JSON.stringify(newCacheData),
+            EMAIL_CODE_TTL_SECONDS,
+        );
+
+        await this.cacheService.setOne(
+            attemptsKey,
+            attemptsLeft.toString(),
+            EMAIL_CODE_TTL_SECONDS,
+        );
+
+        await this.cacheService.setOne(cooldownKey, 'locked', SECONDS_BETWEEN_ATTEMPTS);
+
         await strategy.dispatchEmail(this.mailQueue, dto.email, token, cachedData);
 
         return {
             success: true,
             message: strategy.successMessage,
-            ...this.buildResendTiming(RESEND_CODE_COOLDOWN_SECONDS),
+            retries: attemptsLeft,
+            ...this.buildResendTiming(SECONDS_BETWEEN_ATTEMPTS),
         };
     }
 
@@ -71,26 +120,6 @@ export class ResendCodeUseCase {
         }
 
         return strategy;
-    }
-
-    private createRateLimitException(email: string, retryAfterSeconds: number) {
-        const { nextResendAt } = this.buildResendTiming(retryAfterSeconds);
-
-        return new BaseException(
-            {
-                code: 'RESEND_RATE_LIMIT',
-                message: `Повторная отправка доступна через ${this.formatWaitTime(retryAfterSeconds)}`,
-                details: [
-                    {
-                        target: 'email',
-                        value: email,
-                        retryAfterSeconds,
-                        nextResendAt,
-                    },
-                ],
-            },
-            HttpStatus.TOO_MANY_REQUESTS,
-        );
     }
 
     private buildResendTiming(retryAfterSeconds: number) {

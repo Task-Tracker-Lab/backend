@@ -1,7 +1,10 @@
 import { AuthMailJobs } from '@core/auth/domain/enums';
 import { ResetPasswordEvent } from '@core/auth/domain/events';
 import { ResetPasswordCacheData } from '@core/auth/application/interfaces';
-import { RESET_PASSWORD_CACHE_KEY } from '@core/auth/infrastructure/constants';
+import {
+    EMAIL_CODE_TTL_SECONDS,
+    RESET_PASSWORD_CACHE_KEY,
+} from '@core/auth/infrastructure/constants';
 import { Queue } from 'bullmq';
 import { generate, generateSecret } from 'otplib';
 import { ResendCodeStrategy } from './resend-code.strategy';
@@ -22,7 +25,7 @@ export class ResetPasswordResendStrategy extends ResendCodeStrategy<ResetPasswor
         const token = await generate({
             secret,
             digits: 6,
-            period: 900,
+            period: EMAIL_CODE_TTL_SECONDS,
             strategy: 'totp',
         });
 

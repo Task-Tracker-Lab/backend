@@ -1,7 +1,7 @@
 import { AuthMailJobs } from '@core/auth/domain/enums';
 import { RegisterCodeEvent } from '@core/auth/domain/events';
 import { SignUpCacheData } from '@core/auth/application/interfaces';
-import { SIGNUP_CACHE_KEY } from '@core/auth/infrastructure/constants';
+import { EMAIL_CODE_TTL_SECONDS, SIGNUP_CACHE_KEY } from '@core/auth/infrastructure/constants';
 import { Queue } from 'bullmq';
 import { generate, generateSecret } from 'otplib';
 import { ResendCodeStrategy } from './resend-code.strategy';
@@ -22,7 +22,7 @@ export class SignUpResendStrategy extends ResendCodeStrategy<SignUpCacheData> {
             secret,
             algorithm: 'sha256',
             digits: 6,
-            period: 900,
+            period: EMAIL_CODE_TTL_SECONDS,
             strategy: 'totp',
         });
 

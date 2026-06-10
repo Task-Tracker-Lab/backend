@@ -87,6 +87,11 @@ export const ResendCodeResponseSchema = ActionResponseSchema.extend({
         .int()
         .positive()
         .describe('Секунды до следующей доступной отправки'),
+    retries: z
+        .number()
+        .int()
+        .nonnegative()
+        .describe('Количество повторных отправок в текущем окне'),
 });
 
 export class ResendCodeResponse extends createZodDto(ResendCodeResponseSchema) {}
