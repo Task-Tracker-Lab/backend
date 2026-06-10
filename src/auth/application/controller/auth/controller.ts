@@ -5,8 +5,9 @@ import {
     PostRefreshSwagger,
     PostRegisterSwagger,
     PostSignUpConfirmSwagger,
+    ResendCodeSwagger,
 } from './swagger';
-import { SignInDto, SignUpDto, VerifyDto } from '../../dtos';
+import { ResendCodeDto, SignInDto, SignUpDto, VerifyDto } from '../../dtos';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { BearerAuthGuard, CookieAuthGuard } from '@shared/guards';
 import { AuthFacade } from '../../auth.facade';
@@ -32,6 +33,13 @@ export class AuthController {
     @HttpCode(202)
     async signUp(@Body() dto: SignUpDto) {
         return this.facade.signUp(dto);
+    }
+
+    @Post('resend')
+    @ResendCodeSwagger()
+    @HttpCode(200)
+    async resendCode(@Body() dto: ResendCodeDto) {
+        return this.facade.resendCode(dto);
     }
 
     @Post('sign-up/confirm')

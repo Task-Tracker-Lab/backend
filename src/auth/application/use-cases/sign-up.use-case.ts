@@ -10,6 +10,8 @@ import { RegisterCodeEvent } from '../../domain/events';
 import { SignUpDto } from '../dtos';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
+import { EMAIL_CODE_TTL_SECONDS, SIGNUP_CACHE_KEY } from '@core/auth/infrastructure/constants';
+import { SignUpCacheData } from '@core/auth/application/interfaces';
 
 @Injectable()
 export class SignUpUseCase {
@@ -22,8 +24,7 @@ export class SignUpUseCase {
     ) {}
 
     async execute(dto: SignUpDto) {
-        const redisKey = `reg:${dto.email}`;
-        const cachedData = await this.cacheService.getOne(redisKey);
+        const cachedData = await this.cacheService.getOne(SIGNUP_CACHE_KEY(dto.email));
 
         if (cachedData) {
             throw new BaseException(
@@ -56,17 +57,21 @@ export class SignUpUseCase {
             secret,
             algorithm: 'sha256',
             digits: 6,
-            period: 900,
+            period: EMAIL_CODE_TTL_SECONDS,
             strategy: 'totp',
         });
 
-        const data = {
+        const data: SignUpCacheData = {
             user: dto,
             password: hashPass,
             otp: { token, secret },
         };
 
-        await this.cacheService.setOne(`reg:${dto.email}`, JSON.stringify(data), 900);
+        await this.cacheService.setOne(
+            SIGNUP_CACHE_KEY(dto.email),
+            JSON.stringify(data),
+            EMAIL_CODE_TTL_SECONDS,
+        );
 
         const event = new RegisterCodeEvent(dto.email, dto.firstName, token);
         await this.mailQueue.add(AuthMailJobs.SEND_REGISTER_CODE, event, {

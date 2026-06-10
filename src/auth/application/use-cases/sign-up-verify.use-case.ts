@@ -9,6 +9,8 @@ import { VerifyDto } from '../dtos';
 import { createId } from '@paralleldrive/cuid2';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
+import { SIGNUP_CACHE_KEY } from '@core/auth/infrastructure/constants';
+import { SignUpCacheData } from '@core/auth/application/interfaces';
 
 @Injectable()
 export class SignUpVerifyUseCase {
@@ -22,8 +24,7 @@ export class SignUpVerifyUseCase {
     ) {}
 
     async execute(dto: VerifyDto, meta: DeviceMetadata) {
-        const redisKey = `reg:${dto.email}`;
-        const cachedData = await this.cacheService.getOne(redisKey);
+        const cachedData = await this.cacheService.getOne(SIGNUP_CACHE_KEY(dto.email));
 
         if (!cachedData) {
             throw new BaseException(
@@ -35,7 +36,7 @@ export class SignUpVerifyUseCase {
             );
         }
 
-        const userData = JSON.parse(cachedData);
+        const userData: SignUpCacheData = JSON.parse(cachedData);
 
         if (!userData) {
             throw new BaseException(
@@ -44,6 +45,17 @@ export class SignUpVerifyUseCase {
                     message: 'Ошибка целостности данных. Попробуйте начать регистрацию заново.',
                 },
                 HttpStatus.UNPROCESSABLE_ENTITY,
+            );
+        }
+
+        if (userData.otp.token !== dto.code) {
+            throw new BaseException(
+                {
+                    code: 'INVALID_OTP',
+                    message: 'Неверный или истекший код подтверждения',
+                    details: [{ target: 'code', message: 'OTP code is invalid or expired' }],
+                },
+                HttpStatus.BAD_REQUEST,
             );
         }
 
@@ -88,7 +100,7 @@ export class SignUpVerifyUseCase {
             expiresAt: expiresAt.toISOString(),
         });
 
-        await this.cacheService.removeOne(redisKey);
+        await this.cacheService.removeOne(SIGNUP_CACHE_KEY(dto.email));
 
         return {
             success: true,

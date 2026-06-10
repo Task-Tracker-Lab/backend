@@ -63,3 +63,35 @@ export const SignResponseSchema = ActionResponseSchema.extend({
 });
 
 export class SignResponse extends createZodDto(SignResponseSchema) {}
+
+export const ResendCodeSchema = z.object({
+    context: z
+        .enum(['sign-up', 'reset-password'], {
+            error: 'Выберите корректный контекст: sign-up или reset-password',
+        })
+        .describe('Контекст, для которого нужно отправить код (регистрация или сброс пароля)'),
+    email: z.email('Некорректный формат email').describe('Email пользователя'),
+});
+
+export class ResendCodeDto extends createZodDto(ResendCodeSchema) {}
+
+export const ResendCodeResponseSchema = ActionResponseSchema.extend({
+    nextResendAt: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+            message: 'Строка не является валидной датой',
+        })
+        .describe('Время, когда можно запросить повторную отправку кода (ISO 8601)'),
+    retryAfterSeconds: z
+        .number()
+        .int()
+        .positive()
+        .describe('Секунды до следующей доступной отправки'),
+    retries: z
+        .number()
+        .int()
+        .nonnegative()
+        .describe('Количество повторных отправок в текущем окне'),
+});
+
+export class ResendCodeResponse extends createZodDto(ResendCodeResponseSchema) {}

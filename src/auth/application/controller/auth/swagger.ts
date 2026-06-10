@@ -5,6 +5,7 @@ import {
     ApiConflict,
     ApiForbidden,
     ApiNotFound,
+    ApiTooManyRequests,
     ApiUnauthorized,
     ApiValidationError,
 } from '@shared/error';
@@ -15,6 +16,8 @@ import {
     VerifyDto,
     SessionsResponse,
     SessionResponse,
+    ResendCodeDto,
+    ResendCodeResponse,
 } from '../../dtos';
 import { ActionResponse } from '@shared/dtos';
 import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
@@ -137,4 +140,24 @@ export const DeleteSessionSwagger = () =>
         ApiForbidden(),
         ApiNotFound('Сессия не найдена или уже истекла'),
         SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
+    );
+
+export const ResendCodeSwagger = () =>
+    applyDecorators(
+        ApiOperation({
+            summary: 'Повторная отправка кода подтверждения',
+            description:
+                'Отправляет новый код подтверждения на email, связанный с текущей сессией регистрации или сброса пароля.',
+        }),
+        ApiBody({ type: ResendCodeDto.Output }),
+        ApiResponse({
+            status: 200,
+            description: 'Код успешно отправлен.',
+            type: ResendCodeResponse.Output,
+        }),
+        ApiBadRequest('Неверный формат email'),
+        ApiNotFound('Сессия регистрации или сброса пароля не найдена или истекла'),
+        ApiTooManyRequests('Превышено количество попыток запроса нового кода на email'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ResendCodeResponse),
     );

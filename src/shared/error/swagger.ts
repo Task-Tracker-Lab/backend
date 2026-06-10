@@ -55,6 +55,9 @@ export const ApiValidationError = (
 export const ApiConflict = (description: string = 'Ресурс уже существует') =>
     applyDecorators(ApiErrorResponse(409, 'CONFLICT', description));
 
+export const ApiTooManyRequests = (description: string = 'Слишком много попыток') =>
+    applyDecorators(ApiErrorResponse(429, 'TOO_MANY_REQUESTS', description));
+
 export const DATABASE_ERRORS: Record<string, { code: number; msg: string }> = {
     '23505': { code: 409, msg: 'Запись с таким значением уже существует (дубликат).' },
     '23503': { code: 409, msg: 'Ошибка внешнего ключа: связанная запись не найдена.' },

@@ -15,6 +15,7 @@ import { OAuthOrchestratorUseCase } from './oauth/oauth-orchestrator.use-case';
 import { ProcessOAuthLoginUseCase } from './oauth/process-oauth-login.use-case';
 import { ProcessOAuthRegistrationUseCase } from './oauth/process-oauth-registration.use-case';
 import { ConnectOAuthProviderUseCase } from './oauth/connect-oauth-provider.use-case';
+import { ResendCodeUseCase } from './resend-code.use-case';
 
 export {
     ConfirmResetPasswordUseCase,
@@ -34,6 +35,7 @@ export {
     SignInUseCase,
     SignOutUseCase,
     SignUpUseCase,
+    ResendCodeUseCase,
 };
 
 export const AuthUseCases = [
@@ -55,4 +57,5 @@ export const AuthUseCases = [
     SignInUseCase,
     SignOutUseCase,
     SignUpUseCase,
+    ResendCodeUseCase,
 ];
