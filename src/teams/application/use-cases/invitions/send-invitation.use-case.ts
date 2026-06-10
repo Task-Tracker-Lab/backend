@@ -13,6 +13,7 @@ import { TeamMemberPolicy } from '@core/teams/domain/policy';
 import type { TeamRole } from '@shared/entities';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
+import { ImageHelper } from '@shared/utils';
 
 @Injectable()
 export class SendInvitationUseCase {
@@ -105,10 +106,14 @@ export class SendInvitationUseCase {
 
     private buildInviteData(team: any, inviter: any, dto: InviteMemberDto): TeamInvite {
         const expiresAt = new Date(Date.now() + this.INVITE_TTL * 1000);
+
+        const cdn = this.getCdnBaseUrl();
+        const { small } = ImageHelper.buildResponsiveUrls(cdn, team.avatarUrl);
+
         return {
             teamId: team.id,
             teamName: team.name,
-            teamAvatar: team.avatarUrl,
+            teamAvatar: small,
             email: dto.email.toLowerCase(),
             role: (dto.role || 'member') as TeamRole,
             inviterId: inviter.userId,
@@ -137,5 +142,13 @@ export class SendInvitationUseCase {
             backoff: { type: 'exponential', delay: 5000 },
             removeOnComplete: true,
         });
+    }
+
+    private getCdnBaseUrl(): string {
+        const domain = this.cfg.get<string>('DOMAIN');
+        const bucket = this.cfg.get<string>('S3_BUCKET_NAME');
+        const endpoint = this.cfg.get<string>('S3_ENDPOINT');
+
+        return domain ? `https://cdn.${domain}/${bucket}` : `${endpoint}/${bucket}`;
     }
 }
