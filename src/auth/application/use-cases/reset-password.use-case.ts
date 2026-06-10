@@ -9,6 +9,8 @@ import { ResetPasswordDto } from '../dtos';
 import { FindUserQuery } from '@core/user';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
+import { RESET_PASSWORD_CACHE_KEY } from '@core/auth/infrastructure/constants';
+import { ResetPasswordCacheData } from '@core/auth/application/interfaces';
 
 @Injectable()
 export class ResetPasswordUseCase {
@@ -21,8 +23,7 @@ export class ResetPasswordUseCase {
     ) {}
 
     async execute(dto: ResetPasswordDto) {
-        const redisKey = `pass:reset:${dto.email}`;
-        const isExistsAttempt = await this.cacheService.getOne(redisKey);
+        const isExistsAttempt = await this.cacheService.getOne(RESET_PASSWORD_CACHE_KEY(dto.email));
 
         if (isExistsAttempt) {
             throw new BaseException(
@@ -62,13 +63,17 @@ export class ResetPasswordUseCase {
             strategy: 'totp',
         });
 
-        const resetPayload = {
+        const resetPayload: ResetPasswordCacheData = {
             email: entity.user.email,
             otp: { secret, token },
             isVerified: false,
         };
 
-        await this.cacheService.setOne(redisKey, JSON.stringify(resetPayload), 900);
+        await this.cacheService.setOne(
+            RESET_PASSWORD_CACHE_KEY(dto.email),
+            JSON.stringify(resetPayload),
+            900,
+        );
 
         const event = new ResetPasswordEvent(dto.email, token);
         await this.mailQueue.add(AuthMailJobs.SEND_RESET_PASSWORD, event, {

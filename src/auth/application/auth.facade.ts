@@ -13,17 +13,19 @@ import {
     DisconnectProviderUseCase,
     GetConnectedProvidersQuery,
     GetEnabledProvidersQuery,
+    ResendCodeUseCase,
 } from './use-cases';
 import {
     OAuthResponse,
     PasswordResetConfirmDto,
+    ResendCodeDto,
     ResetPasswordDto,
     SignInDto,
     SignUpDto,
     VerifyDto,
     VerifyResetCodeDto,
 } from './dtos';
-import type { DeviceMetadata } from '../infrastructure/utils/get-device-meta';
+import type { DeviceMetadata } from '../infrastructure/utils';
 
 @Injectable()
 export class AuthFacade {
@@ -41,6 +43,7 @@ export class AuthFacade {
         private readonly disconnectProviderUseCase: DisconnectProviderUseCase,
         private readonly getConnectedProvidersQuery: GetConnectedProvidersQuery,
         private readonly confirmResetPasswordUseCase: ConfirmResetPasswordUseCase,
+        private readonly resendCodeUseCase: ResendCodeUseCase,
     ) {}
 
     async signIn(dto: SignInDto, device: DeviceMetadata) {
@@ -49,6 +52,10 @@ export class AuthFacade {
 
     async signUp(dto: SignUpDto) {
         return this.signUpUseCase.execute(dto);
+    }
+
+    async resendCode(dto: ResendCodeDto) {
+        return this.resendCodeUseCase.execute(dto);
     }
 
     async verifySignUp(dto: VerifyDto, device: DeviceMetadata) {
