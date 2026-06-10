@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
 import { createZodDto } from 'nestjs-zod';
-import { AvatarResponseSchema, createPaginationSchema } from '@shared/schemas';
+import { AvatarResponseSchema } from '@shared/schemas';
 import { ActionResponseSchema } from '@shared/dtos';
 
 export const CreateTeamSchema = z.object({
@@ -52,9 +52,8 @@ export const UserTeamSchema = z.object({
     permissions: TeamPermissionsSchema.describe('Объект прав доступа текущего пользователя'),
 });
 
-export class UserTeamResponse extends createZodDto(UserTeamSchema) {}
-
-export class UserTeamsResponse extends createZodDto(createPaginationSchema(UserTeamSchema)) {}
+export const UserTeamsSchema = z.array(UserTeamSchema);
+export class UserTeamsResponse extends createZodDto(UserTeamsSchema) {}
 
 export const TeamResponseSchema = z.object({
     id: z.string().describe('Уникальный ID команды'),
@@ -65,8 +64,6 @@ export const TeamResponseSchema = z.object({
         .url()
         .nullable()
         .describe('URL аватара команды или null, если аватар отсутствует'),
-    //TODO: replace with schema
-    // avatar: AvatarResponseSchema,
     coverUrl: z.string().nullable().describe('URL обложки команды'),
     ownerId: z.string().nullable().describe('ID владельца команды'),
     createdAt: z

@@ -59,9 +59,8 @@ export const UserInviteSchema = z.object({
     teamAvatar: z
         .string()
         .url()
+        .nullable()
         .describe('URL аватара команды (может быть null, если аватар не установлен)'),
-    //TODO: replace with right schema after handling avatar in use-case
-    // avatar: AvatarResponseSchema,
     role: z.string().describe('Роль'),
     inviterName: z.string().describe('Имя пригласившего'),
     expiresAt: z
