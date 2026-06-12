@@ -3,10 +3,16 @@ import { FindUserQuery, RegisterUserUseCase } from '@core/user';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { OAuthResponse } from '../../dtos';
 import { BaseException } from '@shared/error';
+import { InjectQueue } from '@nestjs/bullmq';
+import { AuthQueues, AuthUserJobs } from '@core/auth/domain/enums';
+import { Queue } from 'bullmq';
+import { CreateUserWorkspaceEvent } from '@core/auth/domain/events/create-user-workspace.event';
 
 @Injectable()
 export class ProcessOAuthRegistrationUseCase {
     constructor(
+        @InjectQueue(AuthQueues.AUTH_USER)
+        private readonly queue: Queue,
         @Inject('IIdentitiesRepository')
         private readonly identitiesRepo: IIdentitiesRepository,
         private readonly findUserQuery: FindUserQuery,
@@ -44,6 +50,9 @@ export class ProcessOAuthRegistrationUseCase {
             providerUserId: dto.id,
             email: dto.email,
         });
+
+        const event = new CreateUserWorkspaceEvent(user.id, user.firstName);
+        await this.queue.add(AuthUserJobs.CREATE_WORKSPACE, event);
 
         return { user, isNewUser: true, isConnect: false };
     }
