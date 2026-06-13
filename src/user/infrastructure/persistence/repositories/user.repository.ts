@@ -3,7 +3,7 @@ import * as sc from '../models';
 import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
 import { Inject, Injectable } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
-import { desc, eq, count } from 'drizzle-orm';
+import { desc, eq, count, inArray } from 'drizzle-orm';
 import type {
     NewUser,
     NewUserActivity,
@@ -46,6 +46,12 @@ export class UserRepository implements IUserRepository {
             preferences,
             notifications: settings,
         };
+    }
+
+    async findByIds(ids: string[]) {
+        if (ids.length === 0) return [];
+
+        return this.db.select().from(sc.users).where(inArray(sc.users.id, ids));
     }
 
     async findById(id: string) {

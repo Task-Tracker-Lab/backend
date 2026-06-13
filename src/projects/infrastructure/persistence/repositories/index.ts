@@ -1,13 +1,13 @@
-import { ProjectStatesRepository } from './states.repository';
-import { ProjectsRepository } from './projects.repository';
+import { MemberRepository } from './member.repository';
+import { ProjectRepository } from './project.repository';
 
 export const REPOSITORIES = [
     {
-        provide: 'IProjectsRepository',
-        useClass: ProjectsRepository,
+        provide: 'IProjectRepository',
+        useClass: ProjectRepository,
     },
     {
-        provide: 'IProjectStatesRepository',
-        useClass: ProjectStatesRepository,
+        provide: 'IMemberRepository',
+        useClass: MemberRepository,
     },
 ];

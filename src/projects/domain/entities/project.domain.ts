@@ -1,19 +1,9 @@
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
-import { projects, projectShares } from '../../infrastructure/persistence/models/projects.model';
-
-export enum ProjectStatus {
-    Active = 'active',
-    Archived = 'archived',
-    Template = 'template',
-}
-
-export enum ProjectVisibility {
-    Public = 'public',
-    Private = 'private',
-}
+import { projects, projectShares } from '../../infrastructure/persistence/models/project.model';
 
 export type Project = InferSelectModel<typeof projects>;
 export type NewProject = InferInsertModel<typeof projects>;
+
 export interface ProjectSettings {
     allowGuestComments?: boolean;
     defaultAssigneeId?: string;

@@ -1,2 +1,3 @@
 export * from './project.domain';
-export * from './state.domain';
+export * from './member.domain';
+export * from './enum';

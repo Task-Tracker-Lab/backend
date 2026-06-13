@@ -12,7 +12,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import { BearerAuthGuard, OAuthGuard } from '@shared/guards';
 import { AuthFacade } from '../../auth.facade';
 import { getDeviceMeta } from '@core/auth/infrastructure/utils';
-import { ApiBaseController, GetUserId, SkipZodValidation } from '@shared/decorators';
+import { ApiBaseController, GetUserId, SkipContractHandle } from '@shared/decorators';
 import { ConfigService } from '@nestjs/config';
 
 @ApiBaseController('auth/oauth', 'OAuth')
@@ -31,13 +31,13 @@ export class OAuthController {
     @Get(':provider')
     @OAuthLoginSwagger()
     @UseGuards(OAuthGuard)
-    @SkipZodValidation()
+    @SkipContractHandle()
     async oauthLogin() {}
 
     @Get(':provider/callback')
     @OAuthCallbackSwagger()
     @UseGuards(OAuthGuard)
-    @SkipZodValidation()
+    @SkipContractHandle()
     async oauthCallback(
         @Query() query: { code?: string; state?: string },
         @Param('provider') provider: 'google' | 'yandex' | 'github' | 'vkontakte',

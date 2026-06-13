@@ -1,4 +1,4 @@
 import { SetMetadata } from '@nestjs/common';
 
-export const SKIP_ZOD_VALIDATION = 'SKIP_ZOD_VALIDATION';
-export const SkipZodValidation = () => SetMetadata(SKIP_ZOD_VALIDATION, true);
+export const SKIP_CONTRACT_HANDLE = 'SKIP_CONTRACT_HANDLE';
+export const SkipContractHandle = () => SetMetadata(SKIP_CONTRACT_HANDLE, true);

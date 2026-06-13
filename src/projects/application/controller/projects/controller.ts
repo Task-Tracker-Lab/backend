@@ -2,6 +2,7 @@ import { ApiBaseController, GetUserId, Public } from '@shared/decorators';
 import { Body, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import {
     ArchiveProjectSwagger,
+    CheckSlugSwagger,
     CreateProjectSwagger,
     CreateShareTokenSwagger,
     FindAllProjectsSwagger,
@@ -10,12 +11,11 @@ import {
     UpdateProjectSwagger,
 } from './swagger';
 import { CreateProjectDto, CreateShareTokenDto, UpdateProjectDto } from '../../dtos';
-import { ProjectStatus } from '@core/projects/domain/entities';
-import { ProjectsFacade } from '../../projects.facade';
+import { ProjectFacade } from '../../project.facade';
 
 @ApiBaseController('teams/:teamId/projects', 'Projects', true)
 export class ProjectsController {
-    constructor(private readonly facade: ProjectsFacade) {}
+    constructor(private readonly facade: ProjectFacade) {}
 
     @Get()
     @FindAllProjectsSwagger()
@@ -46,6 +46,12 @@ export class ProjectsController {
         return this.facade.generateShareToken(slug, teamId, userId, dto);
     }
 
+    @Get('check-slug')
+    @CheckSlugSwagger()
+    async checkSlug(@Param('teamId') teamId: string, @Query('q') slug: string) {
+        return this.facade.checkSlugAvailability(teamId, slug);
+    }
+
     @Post(':slug/archive')
     @ArchiveProjectSwagger()
     async archive(
@@ -53,7 +59,7 @@ export class ProjectsController {
         @Param('teamId') teamId: string,
         @GetUserId() userId: string,
     ) {
-        return this.facade.setStatus(slug, teamId, userId, ProjectStatus.Archived);
+        return this.facade.setStatus(slug, teamId, userId, 'archived');
     }
 
     @Post()

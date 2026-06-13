@@ -1,2 +1,2 @@
-export * from './projects.repository.interface';
-export * from './project-states.repository.interface';
+export * from './project.repository.interface';
+export * from './member.repository.interface';

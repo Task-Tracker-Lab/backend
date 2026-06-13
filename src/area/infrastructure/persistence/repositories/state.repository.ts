@@ -1,0 +1,115 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
+import * as schema from '../models';
+import { and, count, eq, isNotNull, isNull } from 'drizzle-orm';
+import { IStateRepository } from '@core/area/domain/repository';
+import type { NewState } from '@core/area/domain/entities';
+
+@Injectable()
+export class StateRepository implements IStateRepository {
+    constructor(
+        @Inject(DATABASE_SERVICE)
+        private readonly db: DatabaseService<typeof schema>,
+    ) {}
+
+    public async create(data: NewState) {
+        const [result] = await this.db
+            .insert(schema.states)
+            .values(data)
+            .returning({ id: schema.states.id });
+
+        return result;
+    }
+
+    public async delete(areaId: string, stateId: string) {
+        const result = await this.db
+            .delete(schema.states)
+            .where(
+                and(
+                    eq(schema.states.id, stateId),
+                    eq(schema.states.areaId, areaId),
+                    isNotNull(schema.states.deletedAt),
+                ),
+            );
+
+        return (result.count ?? 0) > 0;
+    }
+
+    public async find(query: unknown) {
+        void query;
+        return this.db.select().from(schema.states);
+    }
+
+    public async findOne(areaId: string, stateId: string, deleted?: boolean) {
+        const [result] = await this.db
+            .select()
+            .from(schema.states)
+            .where(
+                and(
+                    eq(schema.states.id, stateId),
+                    eq(schema.states.areaId, areaId),
+                    deleted ? isNotNull(schema.states.deletedAt) : isNull(schema.states.deletedAt),
+                ),
+            );
+
+        return result ?? null;
+    }
+
+    public async update(areaId: string, stateId: string, data: Partial<NewState>) {
+        const result = await this.db
+            .update(schema.states)
+            .set(data)
+            .where(
+                and(
+                    eq(schema.states.id, stateId),
+                    eq(schema.states.areaId, areaId),
+                    isNull(schema.states.deletedAt),
+                ),
+            );
+
+        return (result.count ?? 0) > 0;
+    }
+
+    public async findByType(
+        areaId: string,
+        // TODO: ADD BASE ENUM TOO
+        stateType: 'custom' | 'archived' | 'backlog' | 'todo' | 'in_progress' | 'review' | 'done',
+    ) {
+        const [result] = await this.db
+            .select()
+            .from(schema.states)
+            .where(
+                and(
+                    eq(schema.states.areaId, areaId),
+                    eq(schema.states.stateType, stateType),
+                    isNull(schema.states.deletedAt),
+                ),
+            );
+
+        return result ?? null;
+    }
+
+    public async findByTitle(areaId: string, title: string) {
+        const [result] = await this.db
+            .select()
+            .from(schema.states)
+            .where(
+                and(
+                    eq(schema.states.areaId, areaId),
+                    eq(schema.states.title, title),
+                    isNull(schema.states.deletedAt),
+                ),
+            );
+
+        return result ?? null;
+    }
+
+    public async countByArea(areaId: string) {
+        const [result] = await this.db
+            .select({ count: count() })
+            .from(schema.states)
+            .where(and(eq(schema.states.areaId, areaId), isNull(schema.states.deletedAt)));
+
+        return result.count;
+    }
+}
