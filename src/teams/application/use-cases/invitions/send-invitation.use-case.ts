@@ -108,12 +108,12 @@ export class SendInvitationUseCase {
         const expiresAt = new Date(Date.now() + this.INVITE_TTL * 1000);
 
         const cdn = this.getCdnBaseUrl();
-        const { small } = ImageHelper.buildResponsiveUrls(cdn, team.avatarUrl);
+        const urls = ImageHelper.buildResponsiveUrls(cdn, team.avatarUrl);
 
         return {
             teamId: team.id,
             teamName: team.name,
-            teamAvatar: small,
+            teamAvatar: urls ? urls.small : null,
             email: dto.email.toLowerCase(),
             role: (dto.role || 'member') as TeamRole,
             inviterId: inviter.userId,
