@@ -35,7 +35,7 @@ import { MetricsModule } from '@libs/metrics';
                     schema,
                     schemaName: cfg.getOrThrow('DB_SCHEMA'),
                     logging: true,
-                    runMigrations: false,
+                    // runMigrations: false,
                 };
             },
         }),

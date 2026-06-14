@@ -1,6 +1,6 @@
 {
-  "id": "55316de9-3aec-4333-b5b7-b1b6a78f8ce1",
-  "prevId": "6fbd096d-2d73-46c8-b4f9-a337fb5cb1c2",
+  "id": "67369ea6-fc42-4bb1-b9d7-589a4bdbc919",
+  "prevId": "1d56485a-be26-4f3d-b9d4-929c725cb84b",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -110,6 +110,61 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "base.user_preferences": {
+      "name": "user_preferences",
+      "schema": "base",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "theme": {
+          "name": "theme",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'system'"
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'UTC'"
+        },
+        "language": {
+          "name": "language",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'ru'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_preferences_user_id_users_id_fk": {
+          "name": "user_preferences_user_id_users_id_fk",
+          "tableFrom": "user_preferences",
+          "tableTo": "users",
+          "schemaTo": "base",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "base.user_security": {
       "name": "user_security",
       "schema": "base",
@@ -124,7 +179,13 @@
           "name": "password_hash",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "recovery_email": {
+          "name": "recovery_email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
         },
         "is_2fa_enabled": {
           "name": "is_2fa_enabled",
@@ -136,6 +197,12 @@
         "two_factor_secret": {
           "name": "two_factor_secret",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_login_at": {
+          "name": "last_login_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
@@ -180,6 +247,24 @@
           "primaryKey": true,
           "notNull": true
         },
+        "username": {
+          "name": "username",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "headline": {
+          "name": "headline",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
         "first_name": {
           "name": "first_name",
           "type": "varchar(50)",
@@ -210,25 +295,80 @@
           "primaryKey": false,
           "notNull": false
         },
+        "phone": {
+          "name": "phone",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vacation_start": {
+          "name": "vacation_start",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vacation_end": {
+          "name": "vacation_end",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vacation_message": {
+          "name": "vacation_message",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gender": {
+          "name": "gender",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'none'"
+        },
+        "pronouns": {
+          "name": "pronouns",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'none'"
+        },
+        "pronouns_custom": {
+          "name": "pronouns_custom",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
         "avatar_url": {
           "name": "avatar_url",
           "type": "varchar(512)",
           "primaryKey": false,
           "notNull": false
         },
-        "timezone": {
-          "name": "timezone",
-          "type": "varchar(50)",
+        "email_verified": {
+          "name": "email_verified",
+          "type": "boolean",
           "primaryKey": false,
           "notNull": true,
-          "default": "'UTC'"
+          "default": false
         },
-        "language": {
-          "name": "language",
-          "type": "varchar(5)",
+        "email_verified_at": {
+          "name": "email_verified_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'ru'"
+          "notNull": false
+        },
+        "last_team_id": {
+          "name": "last_team_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",
@@ -249,6 +389,13 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "users_username_unique": {
+          "name": "users_username_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "username"
+          ]
+        },
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
@@ -370,8 +517,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "base.tags": {
-      "name": "tags",
+    "base.user_identities": {
+      "name": "user_identities",
       "schema": "base",
       "columns": {
         "id": {
@@ -380,22 +527,69 @@
           "primaryKey": true,
           "notNull": true
         },
-        "name": {
-          "name": "name",
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider": {
+          "name": "provider",
           "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true
+        },
+        "provider_user_id": {
+          "name": "provider_user_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "avatar_url": {
+          "name": "avatar_url",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "user_identities_user_id_users_id_fk": {
+          "name": "user_identities_user_id_users_id_fk",
+          "tableFrom": "user_identities",
+          "tableTo": "users",
+          "schemaTo": "base",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "tags_name_unique": {
-          "name": "tags_name_unique",
+        "provider_user_id_idx": {
+          "name": "provider_user_id_idx",
           "nullsNotDistinct": false,
           "columns": [
-            "name"
+            "provider",
+            "provider_user_id"
           ]
         }
       },
@@ -437,13 +631,13 @@
         },
         "joined_at": {
           "name": "joined_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
@@ -541,12 +735,6 @@
           "primaryKey": true,
           "notNull": true
         },
-        "slug": {
-          "name": "slug",
-          "type": "varchar(120)",
-          "primaryKey": false,
-          "notNull": true
-        },
         "name": {
           "name": "name",
           "type": "varchar(100)",
@@ -579,57 +767,26 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "deleted_at": {
           "name": "deleted_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
       },
       "indexes": {
-        "team_active_slug_idx": {
-          "name": "team_active_slug_idx",
-          "columns": [
-            {
-              "expression": "slug",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "where": "\"base\".\"teams\".\"deleted_at\" is null",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "team_slug_idx": {
-          "name": "team_slug_idx",
-          "columns": [
-            {
-              "expression": "slug",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "team_owner_idx": {
           "name": "team_owner_idx",
           "columns": [
@@ -678,42 +835,96 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "teams_slug_unique": {
-          "name": "teams_slug_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
-        }
-      },
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "base.teams_to_tags": {
-      "name": "teams_to_tags",
+    "base.project_members": {
+      "name": "project_members",
       "schema": "base",
       "columns": {
-        "team_id": {
-          "name": "team_id",
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "tag_id": {
-          "name": "tag_id",
+        "user_id": {
+          "name": "user_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'member'"
+        },
+        "added_by": {
+          "name": "added_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {
-        "teams_to_tags_tag_id_idx": {
-          "name": "teams_to_tags_tag_id_idx",
+        "project_member_unique_idx": {
+          "name": "project_member_unique_idx",
           "columns": [
             {
-              "expression": "tag_id",
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "project_member_user_idx": {
+          "name": "project_member_user_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "project_member_project_idx": {
+          "name": "project_member_project_idx",
+          "columns": [
+            {
+              "expression": "project_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -726,13 +937,13 @@
         }
       },
       "foreignKeys": {
-        "teams_to_tags_team_id_teams_id_fk": {
-          "name": "teams_to_tags_team_id_teams_id_fk",
-          "tableFrom": "teams_to_tags",
-          "tableTo": "teams",
+        "project_members_project_id_projects_id_fk": {
+          "name": "project_members_project_id_projects_id_fk",
+          "tableFrom": "project_members",
+          "tableTo": "projects",
           "schemaTo": "base",
           "columnsFrom": [
-            "team_id"
+            "project_id"
           ],
           "columnsTo": [
             "id"
@@ -740,31 +951,312 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "teams_to_tags_tag_id_tags_id_fk": {
-          "name": "teams_to_tags_tag_id_tags_id_fk",
-          "tableFrom": "teams_to_tags",
-          "tableTo": "tags",
+        "project_members_user_id_users_id_fk": {
+          "name": "project_members_user_id_users_id_fk",
+          "tableFrom": "project_members",
+          "tableTo": "users",
           "schemaTo": "base",
           "columnsFrom": [
-            "tag_id"
+            "user_id"
           ],
           "columnsTo": [
             "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
+        },
+        "project_members_added_by_users_id_fk": {
+          "name": "project_members_added_by_users_id_fk",
+          "tableFrom": "project_members",
+          "tableTo": "users",
+          "schemaTo": "base",
+          "columnsFrom": [
+            "added_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "teams_to_tags_team_id_tag_id_pk": {
-          "name": "teams_to_tags_team_id_tag_id_pk",
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "base.project_settings": {
+      "name": "project_settings",
+      "schema": "base",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "default_view": {
+          "name": "default_view",
+          "type": "layout_type",
+          "typeSchema": "base",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'kanban'"
+        },
+        "task_prefix": {
+          "name": "task_prefix",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "auto_close_days": {
+          "name": "auto_close_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_tasks_per_area": {
+          "name": "max_tasks_per_area",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_members": {
+          "name": "max_members",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_areas": {
+          "name": "max_areas",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "allow_guests": {
+          "name": "allow_guests",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "time_tracking": {
+          "name": "time_tracking",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "time_tracking_mode": {
+          "name": "time_tracking_mode",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'optional'"
+        },
+        "default_assignee_id": {
+          "name": "default_assignee_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "project_settings_project_idx": {
+          "name": "project_settings_project_idx",
           "columns": [
-            "team_id",
-            "tag_id"
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "project_settings_project_id_projects_id_fk": {
+          "name": "project_settings_project_id_projects_id_fk",
+          "tableFrom": "project_settings",
+          "tableTo": "projects",
+          "schemaTo": "base",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "project_settings_default_assignee_id_users_id_fk": {
+          "name": "project_settings_default_assignee_id_users_id_fk",
+          "tableFrom": "project_settings",
+          "tableTo": "users",
+          "schemaTo": "base",
+          "columnsFrom": [
+            "default_assignee_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "project_settings_project_id_unique": {
+          "name": "project_settings_project_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "project_id"
           ]
         }
       },
-      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "base.project_shares": {
+      "name": "project_shares",
+      "schema": "base",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token": {
+          "name": "token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "token_idx": {
+          "name": "token_idx",
+          "columns": [
+            {
+              "expression": "token",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "project_share_project_id_idx": {
+          "name": "project_share_project_id_idx",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "project_shares_project_id_projects_id_fk": {
+          "name": "project_shares_project_id_projects_id_fk",
+          "tableFrom": "project_shares",
+          "tableTo": "projects",
+          "schemaTo": "base",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "project_shares_created_by_users_id_fk": {
+          "name": "project_shares_created_by_users_id_fk",
+          "tableFrom": "project_shares",
+          "tableTo": "users",
+          "schemaTo": "base",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "project_shares_token_unique": {
+          "name": "project_shares_token_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "token"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -785,9 +1277,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "key": {
-          "name": "key",
-          "type": "varchar(10)",
+        "slug": {
+          "name": "slug",
+          "type": "varchar(100)",
           "primaryKey": false,
           "notNull": true
         },
@@ -799,6 +1291,12 @@
         },
         "description": {
           "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "descriptionHtml": {
+          "name": "descriptionHtml",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -823,11 +1321,11 @@
           "notNull": true,
           "default": "'active'"
         },
-        "task_sequence": {
-          "name": "task_sequence",
+        "sequence": {
+          "name": "sequence",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": 0
         },
         "owner_id": {
@@ -844,50 +1342,30 @@
           "notNull": true,
           "default": "'public'"
         },
-        "is_publicly_viewable": {
-          "name": "is_publicly_viewable",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "share_token": {
-          "name": "share_token",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "settings": {
-          "name": "settings",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'{}'::jsonb"
-        },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "deleted_at": {
           "name": "deleted_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
       },
       "indexes": {
-        "project_team_key_idx": {
-          "name": "project_team_key_idx",
+        "project_team_slug_idx": {
+          "name": "project_team_slug_idx",
           "columns": [
             {
               "expression": "team_id",
@@ -896,7 +1374,7 @@
               "nulls": "last"
             },
             {
-              "expression": "key",
+              "expression": "slug",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -928,21 +1406,6 @@
           "columns": [
             {
               "expression": "team_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "project_share_token_idx": {
-          "name": "project_share_token_idx",
-          "columns": [
-            {
-              "expression": "share_token",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -986,11 +1449,11 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "projects_share_token_unique": {
-          "name": "projects_share_token_unique",
+        "projects_slug_unique": {
+          "name": "projects_slug_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "share_token"
+            "slug"
           ]
         }
       },
@@ -1021,13 +1484,24 @@
         "inactive"
       ]
     },
+    "base.layout_type": {
+      "name": "layout_type",
+      "schema": "base",
+      "values": [
+        "kanban",
+        "list",
+        "calendar",
+        "gantt"
+      ]
+    },
     "base.project_status": {
       "name": "project_status",
       "schema": "base",
       "values": [
         "active",
         "archived",
-        "template"
+        "template",
+        "deleted"
       ]
     },
     "base.project_visibility": {
@@ -1036,6 +1510,30 @@
       "values": [
         "public",
         "private"
+      ]
+    },
+    "base.state_category": {
+      "name": "state_category",
+      "schema": "base",
+      "values": [
+        "backlog",
+        "active",
+        "review",
+        "completed",
+        "archived"
+      ]
+    },
+    "base.state_type": {
+      "name": "state_type",
+      "schema": "base",
+      "values": [
+        "backlog",
+        "todo",
+        "in_progress",
+        "review",
+        "done",
+        "archived",
+        "custom"
       ]
     }
   },

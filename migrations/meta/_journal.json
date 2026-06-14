@@ -5,92 +5,43 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1775839169154,
-      "tag": "0000_stale_sunspot",
-      "breakpoints": true
+      "when": 1781462966790,
+      "tag": "0000_initial_migration",
+      "breakpoints": false
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1775925642197,
-      "tag": "0001_solid_kronos",
-      "breakpoints": true
+      "when": 1781463057149,
+      "tag": "0001_add_user",
+      "breakpoints": false
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1776100122085,
-      "tag": "0002_pink_krista_starr",
-      "breakpoints": true
+      "when": 1781463078471,
+      "tag": "0002_add_session",
+      "breakpoints": false
     },
     {
       "idx": 3,
       "version": "7",
-      "when": 1776171079742,
-      "tag": "0003_open_oracle",
-      "breakpoints": true
+      "when": 1781463089195,
+      "tag": "0003_add_team",
+      "breakpoints": false
     },
     {
       "idx": 4,
       "version": "7",
-      "when": 1776262066530,
-      "tag": "0004_chief_talkback",
-      "breakpoints": true
+      "when": 1781463097728,
+      "tag": "0004_add_project",
+      "breakpoints": false
     },
     {
       "idx": 5,
       "version": "7",
-      "when": 1776614072462,
-      "tag": "0005_calm_vivisector",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1779204823788,
-      "tag": "0006_absent_doctor_doom",
-      "breakpoints": false
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1779292738699,
-      "tag": "0007_bent_misty_knight",
-      "breakpoints": false
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1780843802831,
-      "tag": "0008_quiet_loners",
-      "breakpoints": false
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1780853186023,
-      "tag": "0009_true_avengers",
-      "breakpoints": false
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1781457335805,
-      "tag": "0010_sour_praxagora",
-      "breakpoints": false
-    },
-    {
-      "idx": 11,
-      "version": "7",
-      "when": 1781457351595,
-      "tag": "0011_massive_black_queen",
-      "breakpoints": false
-    },
-    {
-      "idx": 12,
-      "version": "7",
-      "when": 1781457356804,
-      "tag": "0012_nasty_mandarin",
+      "when": 1781463108615,
+      "tag": "0005_add_area",
       "breakpoints": false
     }
   ]
