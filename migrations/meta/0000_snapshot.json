@@ -1,10 +1,84 @@
 {
-  "id": "a40dfb7f-7d44-4721-bf37-a197b5f1e479",
+  "id": "c4cd8525-a0b5-4d36-aa6c-48e3d0329e89",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {},
-  "enums": {},
+  "enums": {
+    "base.team_role": {
+      "name": "team_role",
+      "schema": "base",
+      "values": [
+        "owner",
+        "admin",
+        "lead",
+        "moderator",
+        "member",
+        "viewer"
+      ]
+    },
+    "base.member_status": {
+      "name": "member_status",
+      "schema": "base",
+      "values": [
+        "active",
+        "banned",
+        "inactive"
+      ]
+    },
+    "base.layout_type": {
+      "name": "layout_type",
+      "schema": "base",
+      "values": [
+        "kanban",
+        "list",
+        "calendar",
+        "gantt"
+      ]
+    },
+    "base.project_status": {
+      "name": "project_status",
+      "schema": "base",
+      "values": [
+        "active",
+        "archived",
+        "template",
+        "deleted"
+      ]
+    },
+    "base.project_visibility": {
+      "name": "project_visibility",
+      "schema": "base",
+      "values": [
+        "public",
+        "private"
+      ]
+    },
+    "base.state_category": {
+      "name": "state_category",
+      "schema": "base",
+      "values": [
+        "backlog",
+        "active",
+        "review",
+        "completed",
+        "archived"
+      ]
+    },
+    "base.state_type": {
+      "name": "state_type",
+      "schema": "base",
+      "values": [
+        "backlog",
+        "todo",
+        "in_progress",
+        "review",
+        "done",
+        "archived",
+        "custom"
+      ]
+    }
+  },
   "schemas": {
     "base": "base"
   },

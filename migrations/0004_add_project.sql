@@ -1,7 +1,3 @@
-CREATE TYPE "base"."layout_type" AS ENUM ('kanban', 'list', 'calendar', 'gantt');
-
-ALTER TYPE "base"."project_status" ADD VALUE 'deleted';
-
 CREATE TABLE
 	"base"."project_members" (
 		"id" text PRIMARY KEY NOT NULL,
@@ -37,37 +33,46 @@ CREATE TABLE
 			CONSTRAINT "project_settings_project_id_unique" UNIQUE ("project_id")
 	);
 
-ALTER TABLE "base"."board_columns" DISABLE ROW LEVEL SECURITY;
+CREATE TABLE
+	"base"."project_shares" (
+		"id" text PRIMARY KEY NOT NULL,
+		"project_id" text NOT NULL,
+		"token" text NOT NULL,
+		"expires_at" timestamp
+		with
+			time zone,
+			"created_by" text,
+			"created_at" timestamp
+		with
+			time zone DEFAULT now () NOT NULL,
+			CONSTRAINT "project_shares_token_unique" UNIQUE ("token")
+	);
 
-ALTER TABLE "base"."boards_views" DISABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "base"."boards" DISABLE ROW LEVEL SECURITY;
-
-DROP TABLE "base"."board_columns" CASCADE;
-
-DROP TABLE "base"."boards_views" CASCADE;
-
-DROP TABLE "base"."boards" CASCADE;
-
-DROP INDEX "base"."project_team_key_idx";
-
-DROP INDEX "base"."project_team_name_idx";
-
-ALTER TABLE "base"."project_shares"
-ALTER COLUMN "created_by"
-DROP NOT NULL;
-
-ALTER TABLE "base"."users"
-ADD COLUMN "last_team_id" text;
-
-ALTER TABLE "base"."projects"
-ADD COLUMN "slug" varchar(100) NOT NULL;
-
-ALTER TABLE "base"."projects"
-ADD COLUMN "descriptionHtml" text;
-
-ALTER TABLE "base"."projects"
-ADD COLUMN "sequence" integer DEFAULT 0;
+CREATE TABLE
+	"base"."projects" (
+		"id" text PRIMARY KEY NOT NULL,
+		"team_id" text NOT NULL,
+		"slug" varchar(100) NOT NULL,
+		"name" varchar(100) NOT NULL,
+		"description" text,
+		"descriptionHtml" text,
+		"icon" varchar(255),
+		"color" varchar(7),
+		"status" "base"."project_status" DEFAULT 'active' NOT NULL,
+		"sequence" integer DEFAULT 0,
+		"owner_id" text,
+		"visibility" "base"."project_visibility" DEFAULT 'public' NOT NULL,
+		"created_at" timestamp
+		with
+			time zone DEFAULT now () NOT NULL,
+			"updated_at" timestamp
+		with
+			time zone DEFAULT now () NOT NULL,
+			"deleted_at" timestamp
+		with
+			time zone,
+			CONSTRAINT "projects_slug_unique" UNIQUE ("slug")
+	);
 
 ALTER TABLE "base"."project_members" ADD CONSTRAINT "project_members_project_id_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "base"."projects" ("id") ON DELETE cascade ON UPDATE no action;
 
@@ -79,6 +84,14 @@ ALTER TABLE "base"."project_settings" ADD CONSTRAINT "project_settings_project_i
 
 ALTER TABLE "base"."project_settings" ADD CONSTRAINT "project_settings_default_assignee_id_users_id_fk" FOREIGN KEY ("default_assignee_id") REFERENCES "base"."users" ("id") ON DELETE set null ON UPDATE no action;
 
+ALTER TABLE "base"."project_shares" ADD CONSTRAINT "project_shares_project_id_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "base"."projects" ("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "base"."project_shares" ADD CONSTRAINT "project_shares_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "base"."users" ("id") ON DELETE no action ON UPDATE no action;
+
+ALTER TABLE "base"."projects" ADD CONSTRAINT "projects_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "base"."teams" ("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "base"."projects" ADD CONSTRAINT "projects_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "base"."users" ("id") ON DELETE set null ON UPDATE no action;
+
 CREATE UNIQUE INDEX "project_member_unique_idx" ON "base"."project_members" USING btree ("project_id", "user_id");
 
 CREATE INDEX "project_member_user_idx" ON "base"."project_members" USING btree ("user_id");
@@ -87,23 +100,14 @@ CREATE INDEX "project_member_project_idx" ON "base"."project_members" USING btre
 
 CREATE UNIQUE INDEX "project_settings_project_idx" ON "base"."project_settings" USING btree ("project_id");
 
-ALTER TABLE "base"."project_shares" ADD CONSTRAINT "project_shares_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "base"."users" ("id") ON DELETE no action ON UPDATE no action;
+CREATE INDEX "token_idx" ON "base"."project_shares" USING btree ("token");
+
+CREATE INDEX "project_share_project_id_idx" ON "base"."project_shares" USING btree ("project_id");
 
 CREATE UNIQUE INDEX "project_team_slug_idx" ON "base"."projects" USING btree ("team_id", "slug")
 WHERE
 	"base"."projects"."deleted_at" is null;
 
-ALTER TABLE "base"."projects"
-DROP COLUMN "key";
+CREATE INDEX "project_owner_id_idx" ON "base"."projects" USING btree ("owner_id");
 
-ALTER TABLE "base"."projects"
-DROP COLUMN "task_sequence";
-
-ALTER TABLE "base"."projects"
-DROP COLUMN "settings";
-
-ALTER TABLE "base"."projects" ADD CONSTRAINT "projects_slug_unique" UNIQUE ("slug");
-
-DROP TYPE "base"."board_type";
-
-DROP TYPE "base"."column_status";
+CREATE INDEX "project_team_id_idx" ON "base"."projects" USING btree ("team_id");
