@@ -2,7 +2,7 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
 import { ReordersStatesDto } from '../../dtos';
 import { IStateRepository } from '@core/area/domain/repository';
-import { ProjectStateErrorCodes, ProjectStateErrorMessages } from '@core/area/domain/errors';
+import { StateErrorCodes, StateErrorMessages } from '@core/area/domain/errors';
 import { GetAreaQuery } from '../areas';
 
 @Injectable()
@@ -13,30 +13,40 @@ export class ReorderStateUseCase {
         private readonly getAreaQ: GetAreaQuery,
     ) {}
 
-    async execute(slug: string, dto: ReordersStatesDto, userId: string) {
-        const area = await this.getAreaQ.execute('projectSlug', slug, userId);
+    async execute(slug: string, _dto: ReordersStatesDto, userId: string) {
+        try {
+            const area = await this.getAreaQ.execute({ key: slug }, userId);
 
-        const state = await this.stateRepo.find(slug);
+            const state = await this.stateRepo.findOne(area.id, slug);
 
-        if (!state) {
+            if (!state) {
+                throw new BaseException(
+                    {
+                        code: StateErrorCodes.NOT_FOUND,
+                        message: StateErrorMessages[StateErrorCodes.NOT_FOUND],
+                    },
+                    HttpStatus.NOT_FOUND,
+                );
+            }
+
+            const result = true;
+
+            return {
+                success: result,
+                message: result
+                    ? 'Состояние успешно восстановлено'
+                    : 'Не удалось восстановить состояние: запись не найдена или уже активна',
+            };
+        } catch (err) {
+            if (err instanceof BaseException) throw err;
+
             throw new BaseException(
                 {
-                    code: ProjectStateErrorCodes.NOT_FOUND,
-                    message: ProjectStateErrorMessages[ProjectStateErrorCodes.NOT_FOUND],
+                    code: StateErrorCodes.REORDER_FAILED,
+                    message: StateErrorMessages[StateErrorCodes.REORDER_FAILED],
                 },
-                HttpStatus.NOT_FOUND,
+                HttpStatus.INTERNAL_SERVER_ERROR,
             );
         }
-
-        // TODO: ADD REODER STATES
-        (void dto, area);
-        const result = true;
-
-        return {
-            success: result,
-            message: result
-                ? 'Состояние успешно восстановлено'
-                : 'Не удалось восстановить состояние: запись не найдена или уже активна',
-        };
     }
 }

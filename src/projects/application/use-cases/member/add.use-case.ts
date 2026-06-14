@@ -3,11 +3,9 @@ import { IMemberRepository } from '@core/projects/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
 import { AddProjectMemberDto } from '../../dtos';
-import { MemberErrorCodes, MemberErrorMessages } from '@core/projects/domain/errors/member.errors';
+import { MemberErrorCodes, MemberErrorMessages } from '@core/projects/domain/errors';
 import { FindTeamMemberQuery } from '@core/teams';
-
-// TODO: at feature migrate to dynamic field at project
-const MAX_MEMBERS_PROJECT = 10;
+import { MAX_MEMBERS_PER_PROJECT } from '@core/projects/infrastructure/constants';
 
 @Injectable()
 export class AddProjectMemberUseCase {
@@ -63,8 +61,8 @@ export class AddProjectMemberUseCase {
         }
 
         const currentCount = await this.memberRepo.countByProject(project.id);
-        // TODO: project.settings?.maxMembers ?? MAX_MEMBERS_PROJECT
-        if (currentCount >= MAX_MEMBERS_PROJECT) {
+        // TODO: project.settings?.maxMembers ?? MAX_MEMBERS_PER_PROJECT
+        if (currentCount >= MAX_MEMBERS_PER_PROJECT) {
             throw new BaseException(
                 {
                     code: MemberErrorCodes.LIMIT_REACHED,

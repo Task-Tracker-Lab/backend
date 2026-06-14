@@ -1,5 +1,42 @@
 import { z } from 'zod/v4';
 
+export const PaginationBaseSchema = z.object({
+    page: z.coerce
+        .number()
+        .int()
+        .positive('Страница должна быть положительным числом')
+        .optional()
+        .default(1)
+        .describe('Номер страницы (начиная с 1)'),
+
+    offset: z.coerce
+        .number()
+        .int()
+        .min(0, 'Смещение не может быть отрицательным')
+        .optional()
+        .default(0)
+        .describe('Смещение для пагинации (альтернатива page)'),
+
+    limit: z.coerce
+        .number()
+        .int()
+        .min(1, 'Лимит должен быть не менее 1')
+        .max(100, 'Лимит не может превышать 100')
+        .optional()
+        .default(20)
+        .describe('Количество записей на странице'),
+});
+
+export const PaginationSchema = PaginationBaseSchema.transform((data) => {
+    if (data.page > 1 && data.offset === 0) {
+        return {
+            ...data,
+            offset: (data.page - 1) * (data.limit || 20),
+        };
+    }
+    return data;
+});
+
 export const paginationResponseSchema = z.object({
     hasNextPage: z
         .boolean()

@@ -1,8 +1,9 @@
 import { z } from 'zod/v4';
 import { createZodDto } from 'nestjs-zod';
+import { DEFAULT_VIEWS } from '@core/area/domain/entities';
 
 export const DefaultViewSchema = z
-    .enum(['kanban', 'list', 'calendar', 'gantt'])
+    .enum(DEFAULT_VIEWS)
     .default('kanban')
     .describe('Тип отображения по умолчанию для области');
 
@@ -97,10 +98,10 @@ export const CreateAreaSchema = AreaSchema.omit({
     updatedAt: true,
     createdBy: true,
     deletedAt: true,
-    descriptionHtml: true,
 })
     .partial({
         description: true,
+        descriptionHtml: true,
         color: true,
         icon: true,
         position: true,
@@ -116,10 +117,16 @@ export const CreateAreaSchema = AreaSchema.omit({
     })
     .describe('Схема для создания новой области');
 
-export const UpdateAreaSchema = CreateAreaSchema.partial().describe('Схема для обновления области');
+export const UpdateAreaSchema = CreateAreaSchema.partial()
+    .refine((data) => Object.keys(data).length > 0, {
+        error: 'Необходимо передать хотя бы одно поле для обновления',
+        abort: true,
+    })
+    .describe('Схема для обновления области');
+
+export const AreasSchema = z.array(AreaSchema);
 
 export class AreaResponse extends createZodDto(AreaSchema) {}
-
+export class AreasResponse extends createZodDto(AreasSchema) {}
 export class CreateAreaDto extends createZodDto(CreateAreaSchema) {}
-
 export class UpdateAreaDto extends createZodDto(UpdateAreaSchema) {}

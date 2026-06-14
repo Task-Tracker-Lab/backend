@@ -22,11 +22,17 @@ export class StateController {
     async getAll(
         @Param('slug') slug: string,
         @GetUserId() userId: string,
+        // TODO: ADD SCHEMA, AT DTO, AND VALIDATE WITH CONTRACT
         @Query('hidden') hidden?: boolean,
         @Query('counts') counts?: boolean,
         @Query('my') my?: boolean,
         @Query('category') category?: string,
         @Query('overdue') overdue?: boolean,
+        @Query('orderBy') orderBy?: 'order' | 'title' | 'tasksCount' | 'createdAt',
+        @Query('order') order?: 'asc' | 'desc',
+        @Query('page') page?: number,
+        @Query('offset') offset?: number,
+        @Query('limit') limit?: number,
     ) {
         const query = {
             hidden,
@@ -34,6 +40,11 @@ export class StateController {
             my,
             category,
             overdue,
+            order,
+            limit,
+            offset,
+            page,
+            orderBy,
         };
 
         return this.facade.getStates(slug, query, userId);

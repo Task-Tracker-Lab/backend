@@ -3,7 +3,7 @@ import { IMemberRepository } from '@core/projects/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
 import { UpdateProjectMemberDto } from '../../dtos';
-import { MemberErrorCodes, MemberErrorMessages } from '@core/projects/domain/errors/member.errors';
+import { MemberErrorCodes, MemberErrorMessages } from '@core/projects/domain/errors';
 
 @Injectable()
 export class UpdateProjectMemberUseCase {

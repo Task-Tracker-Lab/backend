@@ -31,10 +31,10 @@ export class AreaController {
         @GetUserId() userId: string,
         @Query('deleted') deleted?: string,
     ) {
-        return this.facade.getAreas(slug, deleted === 'true', userId);
+        return this.facade.getAreas(slug, userId, deleted === 'true');
     }
 
-    @Get(':slug')
+    @Get(':key')
     @FindOneAreaSwagger()
     async findOne(
         @Param('slug') slug: string,
@@ -44,7 +44,7 @@ export class AreaController {
         return this.facade.getArea(slug, key, userId);
     }
 
-    @Delete(':slug')
+    @Delete(':key')
     @DeleteAreaSwagger()
     async delete(
         @Param('slug') slug: string,

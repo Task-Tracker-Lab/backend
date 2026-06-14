@@ -1,4 +1,4 @@
-export const ProjectStateErrorCodes = {
+export const StateErrorCodes = {
     NOT_FOUND: 'STATE.NOT_FOUND',
     UPDATE_FAILED: 'STATE.UPDATE_FAILED',
     DUPLICATE_TITLE: 'STATE.DUPLICATE_TITLE',
@@ -55,76 +55,65 @@ export const ProjectStateErrorCodes = {
     CIRCULAR_DEPENDENCY: 'STATE.CIRCULAR_DEPENDENCY',
 } as const;
 
-export type ProjectStateErrorCode =
-    (typeof ProjectStateErrorCodes)[keyof typeof ProjectStateErrorCodes];
+export type StateErrorCode = (typeof StateErrorCodes)[keyof typeof StateErrorCodes];
 
-export const ProjectStateErrorMessages: Record<ProjectStateErrorCode, string> = {
-    [ProjectStateErrorCodes.NOT_FOUND]: 'Состояние проекта не найдено',
-    [ProjectStateErrorCodes.UPDATE_FAILED]: 'Не удалось обновить состояние',
-    [ProjectStateErrorCodes.DUPLICATE_TITLE]:
-        'Состояние с таким названием уже существует в проекте',
-    [ProjectStateErrorCodes.DUPLICATE_TYPE]: 'Системный тип состояния уже используется в проекте',
-    [ProjectStateErrorCodes.SYSTEM_TYPE_IMMUTABLE]:
-        'Нельзя изменить тип системного состояния на custom',
-    [ProjectStateErrorCodes.MAX_LIMIT_REACHED]: 'Достигнут лимит состояний в проекте',
-    [ProjectStateErrorCodes.INVALID_TRANSITION]: 'Недопустимый переход между состояниями',
-    [ProjectStateErrorCodes.LOCKED]: 'Состояние заблокировано и не может быть изменено',
+export const StateErrorMessages: Record<StateErrorCode, string> = {
+    [StateErrorCodes.NOT_FOUND]: 'Состояние проекта не найдено',
+    [StateErrorCodes.UPDATE_FAILED]: 'Не удалось обновить состояние',
+    [StateErrorCodes.DUPLICATE_TITLE]: 'Состояние с таким названием уже существует в проекте',
+    [StateErrorCodes.DUPLICATE_TYPE]: 'Системный тип состояния уже используется в проекте',
+    [StateErrorCodes.SYSTEM_TYPE_IMMUTABLE]: 'Нельзя изменить тип системного состояния на custom',
+    [StateErrorCodes.MAX_LIMIT_REACHED]: 'Достигнут лимит состояний в проекте',
+    [StateErrorCodes.INVALID_TRANSITION]: 'Недопустимый переход между состояниями',
+    [StateErrorCodes.LOCKED]: 'Состояние заблокировано и не может быть изменено',
 
-    [ProjectStateErrorCodes.CREATE_FAILED]: 'Не удалось создать состояние',
-    [ProjectStateErrorCodes.TITLE_REQUIRED]: 'Название состояния не может быть пустым',
-    [ProjectStateErrorCodes.TITLE_TOO_LONG]:
-        'Название состояния слишком длинное (максимум 255 символов)',
-    [ProjectStateErrorCodes.PROJECT_REQUIRED]: 'ID проекта обязателен',
-    [ProjectStateErrorCodes.SLUG_INVALID]:
+    [StateErrorCodes.CREATE_FAILED]: 'Не удалось создать состояние',
+    [StateErrorCodes.TITLE_REQUIRED]: 'Название состояния не может быть пустым',
+    [StateErrorCodes.TITLE_TOO_LONG]: 'Название состояния слишком длинное (максимум 255 символов)',
+    [StateErrorCodes.PROJECT_REQUIRED]: 'ID проекта обязателен',
+    [StateErrorCodes.SLUG_INVALID]:
         'Ключ должен содержать только строчные латинские буквы, цифры и _ (до 50 символов)',
-    [ProjectStateErrorCodes.SLUG_DUPLICATE]: 'Состояние с таким ключом уже существует в проекте',
-    [ProjectStateErrorCodes.COLOR_INVALID]: 'Цвет должен быть в формате HEX (например, #FFFFFF)',
-    [ProjectStateErrorCodes.ICON_INVALID]: 'Иконка слишком длинная (максимум 20 символов)',
-    [ProjectStateErrorCodes.DESCRIPTION_TOO_LONG]:
-        'Описание слишком длинное (максимум 2000 символов)',
-    [ProjectStateErrorCodes.ORDER_INDEX_INVALID]: 'Недопустимый индекс порядка',
-    [ProjectStateErrorCodes.MAX_TASKS_LIMIT_INVALID]:
-        'Лимит задач должен быть положительным числом',
-    [ProjectStateErrorCodes.AUTO_TRANSITION_INVALID]: 'Недопустимое состояние для автоперехода',
-    [ProjectStateErrorCodes.SYSTEM_TYPE_REQUIRED]:
+    [StateErrorCodes.SLUG_DUPLICATE]: 'Состояние с таким ключом уже существует в проекте',
+    [StateErrorCodes.COLOR_INVALID]: 'Цвет должен быть в формате HEX (например, #FFFFFF)',
+    [StateErrorCodes.ICON_INVALID]: 'Иконка слишком длинная (максимум 20 символов)',
+    [StateErrorCodes.DESCRIPTION_TOO_LONG]: 'Описание слишком длинное (максимум 2000 символов)',
+    [StateErrorCodes.ORDER_INDEX_INVALID]: 'Недопустимый индекс порядка',
+    [StateErrorCodes.MAX_TASKS_LIMIT_INVALID]: 'Лимит задач должен быть положительным числом',
+    [StateErrorCodes.AUTO_TRANSITION_INVALID]: 'Недопустимое состояние для автоперехода',
+    [StateErrorCodes.SYSTEM_TYPE_REQUIRED]:
         'Для проекта должен быть хотя бы один системный тип каждого вида (todo, in_progress, done)',
 
-    [ProjectStateErrorCodes.DELETE_FAILED]: 'Не удалось удалить состояние',
-    [ProjectStateErrorCodes.CANNOT_DELETE_SYSTEM]: 'Нельзя удалить системное состояние',
-    [ProjectStateErrorCodes.CANNOT_DELETE_LAST_ACTIVE]:
+    [StateErrorCodes.DELETE_FAILED]: 'Не удалось удалить состояние',
+    [StateErrorCodes.CANNOT_DELETE_SYSTEM]: 'Нельзя удалить системное состояние',
+    [StateErrorCodes.CANNOT_DELETE_LAST_ACTIVE]:
         'Нельзя удалить последнее активное состояние проекта',
-    [ProjectStateErrorCodes.HAS_ACTIVE_TASKS]: 'Нельзя удалить состояние, в котором есть задачи',
-    [ProjectStateErrorCodes.ALREADY_DELETED]: 'Состояние уже удалено',
+    [StateErrorCodes.HAS_ACTIVE_TASKS]: 'Нельзя удалить состояние, в котором есть задачи',
+    [StateErrorCodes.ALREADY_DELETED]: 'Состояние уже удалено',
 
-    [ProjectStateErrorCodes.RESTORE_FAILED]: 'Не удалось восстановить состояние',
-    [ProjectStateErrorCodes.NOT_DELETED]: 'Состояние не удалено, восстановление не требуется',
+    [StateErrorCodes.RESTORE_FAILED]: 'Не удалось восстановить состояние',
+    [StateErrorCodes.NOT_DELETED]: 'Состояние не удалено, восстановление не требуется',
 
-    [ProjectStateErrorCodes.REORDER_FAILED]: 'Не удалось изменить порядок состояний',
-    [ProjectStateErrorCodes.CANNOT_REORDER_SYSTEM]: 'Нельзя изменить порядок системных состояний',
+    [StateErrorCodes.REORDER_FAILED]: 'Не удалось изменить порядок состояний',
+    [StateErrorCodes.CANNOT_REORDER_SYSTEM]: 'Нельзя изменить порядок системных состояний',
 
-    [ProjectStateErrorCodes.CATEGORY_IMMUTABLE]: 'Нельзя изменить категорию системного состояния',
-    [ProjectStateErrorCodes.INVALID_CATEGORY]: 'Недопустимая категория состояния',
+    [StateErrorCodes.CATEGORY_IMMUTABLE]: 'Нельзя изменить категорию системного состояния',
+    [StateErrorCodes.INVALID_CATEGORY]: 'Недопустимая категория состояния',
 
-    [ProjectStateErrorCodes.CANNOT_HIDE_SYSTEM]: 'Нельзя скрыть системное состояние',
+    [StateErrorCodes.CANNOT_HIDE_SYSTEM]: 'Нельзя скрыть системное состояние',
 
-    [ProjectStateErrorCodes.NOTIFY_ON_ENTER_INVALID]:
-        'Некорректная настройка уведомления при входе',
-    [ProjectStateErrorCodes.NOTIFY_ON_EXIT_INVALID]:
-        'Некорректная настройка уведомления при выходе',
+    [StateErrorCodes.NOTIFY_ON_ENTER_INVALID]: 'Некорректная настройка уведомления при входе',
+    [StateErrorCodes.NOTIFY_ON_EXIT_INVALID]: 'Некорректная настройка уведомления при выходе',
 
-    [ProjectStateErrorCodes.VERSION_CONFLICT]:
+    [StateErrorCodes.VERSION_CONFLICT]:
         'Состояние было изменено другим пользователем. Обновите страницу и попробуйте снова',
-    [ProjectStateErrorCodes.VERSION_REQUIRED]: 'Версия состояния обязательна для обновления',
+    [StateErrorCodes.VERSION_REQUIRED]: 'Версия состояния обязательна для обновления',
 
-    [ProjectStateErrorCodes.WIP_LIMIT_EXCEEDED]: 'Достигнут лимит задач в этом состоянии',
-    [ProjectStateErrorCodes.WIP_LIMIT_NEGATIVE]: 'Лимит задач не может быть отрицательным',
+    [StateErrorCodes.WIP_LIMIT_EXCEEDED]: 'Достигнут лимит задач в этом состоянии',
+    [StateErrorCodes.WIP_LIMIT_NEGATIVE]: 'Лимит задач не может быть отрицательным',
 
-    [ProjectStateErrorCodes.AUTO_TRANSITION_SELF]:
-        'Нельзя настроить автопереход состояния на само себя',
-    [ProjectStateErrorCodes.AUTO_TRANSITION_NOT_FOUND]:
-        'Целевое состояние для автоперехода не найдено',
+    [StateErrorCodes.AUTO_TRANSITION_SELF]: 'Нельзя настроить автопереход состояния на само себя',
+    [StateErrorCodes.AUTO_TRANSITION_NOT_FOUND]: 'Целевое состояние для автоперехода не найдено',
 
-    [ProjectStateErrorCodes.PARENT_STATE_NOT_FOUND]: 'Родительское состояние не найдено',
-    [ProjectStateErrorCodes.CIRCULAR_DEPENDENCY]:
-        'Обнаружена циклическая зависимость между состояниями',
+    [StateErrorCodes.PARENT_STATE_NOT_FOUND]: 'Родительское состояние не найдено',
+    [StateErrorCodes.CIRCULAR_DEPENDENCY]: 'Обнаружена циклическая зависимость между состояниями',
 };

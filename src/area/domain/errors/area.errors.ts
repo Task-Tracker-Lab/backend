@@ -9,12 +9,9 @@ export const AreaErrorCodes = {
     ALREADY_UNLOCKED: 'AREA.ALREADY_UNLOCKED',
 
     // 400 — Bad Request
-    TITLE_REQUIRED: 'AREA.TITLE_REQUIRED',
-    TITLE_TOO_LONG: 'AREA.TITLE_TOO_LONG',
     SLUG_INVALID: 'AREA.SLUG_INVALID',
     COLOR_INVALID: 'AREA.COLOR_INVALID',
     ICON_INVALID: 'AREA.ICON_INVALID',
-    DESCRIPTION_TOO_LONG: 'AREA.DESCRIPTION_TOO_LONG',
     PROJECT_REQUIRED: 'AREA.PROJECT_REQUIRED',
     DEFAULT_VIEW_INVALID: 'AREA.DEFAULT_VIEW_INVALID',
     POSITION_INVALID: 'AREA.POSITION_INVALID',
@@ -47,13 +44,10 @@ export const AreaErrorMessages: Record<AreaErrorCode, string> = {
     [AreaErrorCodes.ALREADY_LOCKED]: 'Область уже заблокирована',
     [AreaErrorCodes.ALREADY_UNLOCKED]: 'Область уже разблокирована',
 
-    [AreaErrorCodes.TITLE_REQUIRED]: 'Название области не может быть пустым',
-    [AreaErrorCodes.TITLE_TOO_LONG]: 'Название области слишком длинное (максимум 255 символов)',
     [AreaErrorCodes.SLUG_INVALID]:
         'Ключ области должен быть в формате kebab-case: строчные латинские буквы, цифры и дефисы',
     [AreaErrorCodes.COLOR_INVALID]: 'Цвет должен быть в формате HEX (например, #3b82f6)',
     [AreaErrorCodes.ICON_INVALID]: 'Иконка слишком длинная (максимум 20 символов)',
-    [AreaErrorCodes.DESCRIPTION_TOO_LONG]: 'Описание слишком длинное (максимум 5000 символов)',
     [AreaErrorCodes.PROJECT_REQUIRED]: 'ID проекта обязателен',
     [AreaErrorCodes.DEFAULT_VIEW_INVALID]: 'Недопустимый вид отображения по умолчанию',
     [AreaErrorCodes.POSITION_INVALID]: 'Позиция должна быть неотрицательным целым числом',

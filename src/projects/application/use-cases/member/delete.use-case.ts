@@ -1,4 +1,4 @@
-import { MemberErrorCodes, MemberErrorMessages } from '@core/projects/domain/errors/member.errors';
+import { MemberErrorCodes, MemberErrorMessages } from '@core/projects/domain/errors';
 import { ProjectAccessPolicy } from '@core/projects/domain/policy';
 import { IMemberRepository } from '@core/projects/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';

@@ -37,6 +37,18 @@ CREATE TABLE
 			CONSTRAINT "project_settings_project_id_unique" UNIQUE ("project_id")
 	);
 
+ALTER TABLE "base"."board_columns" DISABLE ROW LEVEL SECURITY;
+
+ALTER TABLE "base"."boards_views" DISABLE ROW LEVEL SECURITY;
+
+ALTER TABLE "base"."boards" DISABLE ROW LEVEL SECURITY;
+
+DROP TABLE "base"."board_columns" CASCADE;
+
+DROP TABLE "base"."boards_views" CASCADE;
+
+DROP TABLE "base"."boards" CASCADE;
+
 DROP INDEX "base"."project_team_key_idx";
 
 DROP INDEX "base"."project_team_name_idx";
@@ -91,3 +103,7 @@ ALTER TABLE "base"."projects"
 DROP COLUMN "settings";
 
 ALTER TABLE "base"."projects" ADD CONSTRAINT "projects_slug_unique" UNIQUE ("slug");
+
+DROP TYPE "base"."board_type";
+
+DROP TYPE "base"."column_status";

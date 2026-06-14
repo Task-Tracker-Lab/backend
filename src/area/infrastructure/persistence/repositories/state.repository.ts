@@ -23,21 +23,24 @@ export class StateRepository implements IStateRepository {
 
     public async delete(areaId: string, stateId: string) {
         const result = await this.db
-            .delete(schema.states)
+            .update(schema.states)
+            .set({ deletedAt: new Date().toISOString() })
             .where(
                 and(
                     eq(schema.states.id, stateId),
                     eq(schema.states.areaId, areaId),
-                    isNotNull(schema.states.deletedAt),
+                    isNull(schema.states.deletedAt),
                 ),
             );
 
         return (result.count ?? 0) > 0;
     }
 
-    public async find(query: unknown) {
-        void query;
-        return this.db.select().from(schema.states);
+    public async find(areaId: string, _query: unknown) {
+        return this.db
+            .select()
+            .from(schema.states)
+            .where(and(eq(schema.states.areaId, areaId), isNull(schema.states.deletedAt)));
     }
 
     public async findOne(areaId: string, stateId: string, deleted?: boolean) {

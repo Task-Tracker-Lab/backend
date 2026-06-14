@@ -22,8 +22,8 @@ CREATE TABLE
 		"area_id" text,
 		"title" text NOT NULL,
 		"description" text,
-		"state_type" "base"."state_type" DEFAULT 'custom' NOT NULL,
-		"category" "base"."state_category" DEFAULT 'active' NOT NULL,
+		"state_type" "state_type" DEFAULT 'custom' NOT NULL,
+		"category" "state_category" DEFAULT 'active' NOT NULL,
 		"color" varchar(10),
 		"icon" varchar(20),
 		"position" integer DEFAULT 0 NOT NULL,
@@ -50,6 +50,12 @@ ALTER TABLE "base"."states" ADD CONSTRAINT "states_area_id_areas_id_fk" FOREIGN 
 ALTER TABLE "base"."states" ADD CONSTRAINT "states_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "base"."users" ("id") ON DELETE no action ON UPDATE no action;
 
 CREATE INDEX "idx_states_position" ON "base"."states" USING btree ("area_id", "position");
+
+CREATE INDEX "idx_states_title" ON "base"."states" USING btree ("area_id", "title");
+
+CREATE INDEX "idx_states_created_at" ON "base"."states" USING btree ("area_id", "created_at");
+
+CREATE INDEX "idx_states_search" ON "base"."states" USING btree ("area_id", "title");
 
 CREATE UNIQUE INDEX "idx_states_unique_title" ON "base"."states" USING btree ("area_id", "title")
 WHERE

@@ -1,7 +1,11 @@
 import { IAreaRepository } from '@core/area/domain/repository';
-import { Inject, Injectable } from '@nestjs/common';
-import { CreateAreaDto } from '../../dtos';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import type { CreateAreaDto } from '../../dtos';
 import { ProjectAccessPolicy } from '@core/projects/domain/policy';
+import slugify from 'slugify';
+import { BaseException } from '@shared/error';
+import { AreaErrorCodes, AreaErrorMessages } from '@core/area/domain/errors';
+import { MAX_AREAS_PER_PROJECT } from '@core/area/infrastructure/constants';
 
 @Injectable()
 export class CreateAreaUseCase {
@@ -12,17 +16,78 @@ export class CreateAreaUseCase {
     ) {}
 
     async execute(slug: string, dto: CreateAreaDto, userId: string) {
-        const { member, project } = await this.projectPolicy.ensureProjectAccess(slug, userId, [
-            'admin',
-            'owner',
-        ]);
+        try {
+            const { project } = await this.projectPolicy.ensureProjectAccess(slug, userId, [
+                'admin',
+                'owner',
+            ]);
 
-        (void member, project, dto);
-        void this.areaRepo;
+            const baseSlug = dto.slug || dto.title;
+            const currentSlug = slugify(baseSlug, {
+                lower: true,
+                strict: true,
+                trim: true,
+            });
 
-        return {
-            success: true,
-            message: '',
-        };
+            if (!currentSlug) {
+                throw new BaseException(
+                    {
+                        code: AreaErrorCodes.SLUG_INVALID,
+                        message: AreaErrorMessages[AreaErrorCodes.SLUG_INVALID],
+                    },
+                    HttpStatus.BAD_REQUEST,
+                );
+            }
+
+            const existingArea = await this.areaRepo.findBySlug(project.id, currentSlug);
+
+            if (existingArea) {
+                throw new BaseException(
+                    {
+                        code: AreaErrorCodes.SLUG_DUPLICATE,
+                        message: AreaErrorMessages[AreaErrorCodes.SLUG_DUPLICATE],
+                    },
+                    HttpStatus.CONFLICT,
+                );
+            }
+
+            await this.checkProjectLimits(project.id);
+
+            const result = await this.areaRepo.create({
+                ...dto,
+                projectId: project.id,
+                slug: currentSlug,
+                createdBy: userId,
+            });
+
+            return {
+                success: true,
+                message: `Пространство ${dto.title} успешно создано.`,
+                slug: result.slug,
+            };
+        } catch (e) {
+            if (e instanceof BaseException) throw e;
+
+            throw new BaseException(
+                {
+                    code: AreaErrorCodes.CREATE_FAILED,
+                    message: AreaErrorMessages[AreaErrorCodes.CREATE_FAILED],
+                },
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+    }
+
+    private async checkProjectLimits(projectId: string): Promise<void> {
+        const areasCount = await this.areaRepo.countByProject(projectId);
+        if (areasCount >= MAX_AREAS_PER_PROJECT) {
+            throw new BaseException(
+                {
+                    code: AreaErrorCodes.MAX_LIMIT_REACHED,
+                    message: AreaErrorMessages[AreaErrorCodes.MAX_LIMIT_REACHED],
+                },
+                HttpStatus.FORBIDDEN,
+            );
+        }
     }
 }

@@ -9,7 +9,7 @@ import {
     ApiConflict,
 } from '@shared/error';
 import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
-import { CreateAreaDto, UpdateAreaDto, AreaResponse } from '../../dtos';
+import { CreateAreaDto, UpdateAreaDto, AreaResponse, AreasResponse } from '../../dtos';
 
 export const CreateAreaSwagger = () =>
     applyDecorators(
@@ -89,12 +89,12 @@ export const FindAllAreasSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Список областей получен',
-            type: [AreaResponse.Output],
+            type: AreasResponse.Output,
         }),
         ApiUnauthorized(),
         ApiNotFound('Проект не найден'),
 
-        SetMetadata(ZOD_RESPONSE_TOKEN, AreaResponse),
+        SetMetadata(ZOD_RESPONSE_TOKEN, AreasResponse),
     );
 
 export const FindOneAreaSwagger = () =>

@@ -1,13 +1,14 @@
 import { z } from 'zod/v4';
 import { createZodDto } from 'nestjs-zod';
 import { ActionResponseSchema } from '@shared/dtos';
+import { STATE_CATEGORIES, STATE_TYPES } from '@core/area/domain/entities';
 
 export const StateTypeSchema = z
-    .enum(['backlog', 'todo', 'in_progress', 'review', 'done', 'archived', 'custom'])
+    .enum(STATE_TYPES)
     .describe('Тип состояния: системный или кастомный');
 
 export const StateCategorySchema = z
-    .enum(['active', 'completed', 'backlog', 'review', 'archived'])
+    .enum(STATE_CATEGORIES)
     .describe('Категория состояния: активное, завершённое или отменённое');
 
 export const StateSchema = z.object({
@@ -15,32 +16,22 @@ export const StateSchema = z.object({
         .string()
         .min(1, 'ID не может быть пустым')
         .describe('Уникальный идентификатор состояния (UUID или наноид)'),
-
-    Id: z
-        .string()
-        .min(1, 'ID проекта обязателен')
-        .describe('ID проекта, к которому принадлежит состояние'),
-
     title: z
         .string()
         .min(1, 'Название состояния обязательно')
         .max(255, 'Название не должно превышать 255 символов')
         .describe('Отображаемое название состояния (например: "To Do", "In Progress", "Done")'),
-
     description: z
         .string()
         .nullable()
         .optional()
         .describe('Описание состояния, его назначение и правила использования в workflow'),
-
     stateType: StateTypeSchema.default('custom').describe(
         'Тип состояния: custom — пользовательское, default — системное (нельзя удалить)',
     ),
-
     category: StateCategorySchema.default('active').describe(
         'Группа для аналитики и фильтрации: backlog, active, done, closed',
     ),
-
     color: z
         .string()
         .regex(
@@ -50,26 +41,22 @@ export const StateSchema = z.object({
         .nullable()
         .optional()
         .describe('HEX-код цвета для визуального отображения на доске (например: "#4A90E2")'),
-
     icon: z
         .string()
         .max(20, 'Иконка должна быть не длиннее 20 символов')
         .nullable()
         .optional()
         .describe('Emoji или иконка для визуального обозначения (например: "📋", "🚀", "✅")'),
-
     orderIndex: z
         .number()
         .int('Порядковый номер должен быть целым числом')
         .min(0, 'Порядковый номер не может быть отрицательным')
         .default(0)
         .describe('Порядок отображения на доске (меньше число — левее/выше)'),
-
     isVisible: z
         .boolean()
         .default(true)
         .describe('Видимость состояния на доске и в выпадающих списках (можно скрыть, не удаляя)'),
-
     maxTasksLimit: z
         .number()
         .int('Лимит задач должен быть целым числом')
@@ -79,40 +66,32 @@ export const StateSchema = z.object({
         .describe(
             'Максимальное количество задач в этом состоянии (WIP лимит для Kanban). Null — без лимита',
         ),
-
     autoTransitionTo: z
         .string()
         .nullable()
         .optional()
         .describe('Автоматический переход в другое состояние при достижении лимита или по условию'),
-
     notifyOnEnter: z
         .boolean()
         .default(false)
         .describe('Отправлять уведомление, когда задача попадает в это состояние'),
-
     notifyOnExit: z
         .boolean()
         .default(false)
         .describe('Отправлять уведомление, когда задача покидает это состояние'),
-
     isLocked: z
         .boolean()
         .default(false)
         .describe('Заблокировано для изменений (нельзя перемещать задачи в/из этого состояния)'),
-
     createdAt: z
         .string()
         .datetime({ offset: true })
         .describe('Дата и время создания состояния (ISO 8601 с таймзоной)'),
-
     updatedAt: z
         .string()
         .datetime({ offset: true })
         .describe('Дата и время последнего обновления состояния'),
-
     createdBy: z.string().nullable().optional().describe('ID пользователя, создавшего состояние'),
-
     deletedAt: z
         .string()
         .datetime({ offset: true })
@@ -122,8 +101,10 @@ export const StateSchema = z.object({
 });
 
 export const CreateStateResponseSchema = ActionResponseSchema.extend({
-    id: z.string().describe('ID созданного состояния'),
+    stateId: z.string().describe('ID созданного состояния'),
 });
+
+export const StatesSchema = z.array(StateSchema);
 
 export const CreateStateSchema = StateSchema.omit({
     id: true,
@@ -151,11 +132,8 @@ export const ReorderStatesSchema = z.object({
 });
 
 export class StateResponse extends createZodDto(StateSchema) {}
-
+export class StatesResponse extends createZodDto(StatesSchema) {}
 export class CreateStateDto extends createZodDto(CreateStateSchema) {}
-
 export class UpdateStateDto extends createZodDto(CreateStateSchema.partial()) {}
-
 export class CreateStateResponse extends createZodDto(CreateStateResponseSchema) {}
-
 export class ReordersStatesDto extends createZodDto(ReorderStatesSchema) {}

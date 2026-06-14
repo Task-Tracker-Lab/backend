@@ -2,60 +2,71 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
 import { IStateRepository } from '@core/area/domain/repository';
 import { UpdateStateDto } from '../../dtos';
-import { FindProjectQuery } from '@core/projects';
-import { ProjectStateErrorCodes, ProjectStateErrorMessages } from '@core/area/domain/errors';
+import { StateErrorCodes, StateErrorMessages } from '@core/area/domain/errors';
+import { GetAreaQuery } from '../areas';
 
 @Injectable()
 export class UpdateStateUseCase {
     constructor(
         @Inject('IStateRepository')
         private readonly stateRepo: IStateRepository,
-        private readonly findProjectQ: FindProjectQuery,
+        private readonly getAreaQ: GetAreaQuery,
     ) {}
 
     async execute(slug: string, stateId: string, dto: UpdateStateDto, userId: string) {
-        await this.findProjectQ.execute(slug, 'teamId??', 'admin', userId);
+        try {
+            const area = await this.getAreaQ.execute({ key: slug }, userId);
 
-        const state = await this.stateRepo.findOne(slug, stateId);
+            const state = await this.stateRepo.findOne(area.id, stateId);
 
-        if (!state) {
+            if (!state) {
+                throw new BaseException(
+                    {
+                        code: StateErrorCodes.NOT_FOUND,
+                        message: StateErrorMessages[StateErrorCodes.NOT_FOUND],
+                    },
+                    HttpStatus.NOT_FOUND,
+                );
+            }
+
+            if (state.isLocked) {
+                throw new BaseException(
+                    {
+                        code: StateErrorCodes.LOCKED,
+                        message: StateErrorMessages[StateErrorCodes.LOCKED],
+                    },
+                    HttpStatus.CONFLICT,
+                );
+            }
+
+            if (state.stateType !== 'custom' && dto.stateType === 'custom') {
+                throw new BaseException(
+                    {
+                        code: StateErrorCodes.SYSTEM_TYPE_IMMUTABLE,
+                        message: StateErrorMessages[StateErrorCodes.SYSTEM_TYPE_IMMUTABLE],
+                    },
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                );
+            }
+
+            const result = await this.stateRepo.update(area.id, stateId, dto);
+
+            return {
+                success: result,
+                message: result
+                    ? 'Состояние успешно обновлено'
+                    : 'Не удалось обновить состояние: запись не найдена',
+            };
+        } catch (err) {
+            if (err instanceof BaseException) throw err;
+
             throw new BaseException(
                 {
-                    code: ProjectStateErrorCodes.NOT_FOUND,
-                    message: ProjectStateErrorMessages[ProjectStateErrorCodes.NOT_FOUND],
+                    code: StateErrorCodes.UPDATE_FAILED,
+                    message: StateErrorMessages[StateErrorCodes.UPDATE_FAILED],
                 },
-                HttpStatus.NOT_FOUND,
+                HttpStatus.INTERNAL_SERVER_ERROR,
             );
         }
-
-        if (state.isLocked) {
-            throw new BaseException(
-                {
-                    code: ProjectStateErrorCodes.LOCKED,
-                    message: ProjectStateErrorMessages[ProjectStateErrorCodes.LOCKED],
-                },
-                HttpStatus.CONFLICT,
-            );
-        }
-
-        if (state.stateType !== 'custom' && dto.stateType === 'custom') {
-            throw new BaseException(
-                {
-                    code: ProjectStateErrorCodes.SYSTEM_TYPE_IMMUTABLE,
-                    message:
-                        ProjectStateErrorMessages[ProjectStateErrorCodes.SYSTEM_TYPE_IMMUTABLE],
-                },
-                HttpStatus.UNPROCESSABLE_ENTITY,
-            );
-        }
-
-        const result = await this.stateRepo.update(slug, stateId, dto);
-
-        return {
-            success: result,
-            message: result
-                ? 'Состояние успешно обновлено'
-                : 'Не удалось обновить состояние: запись не найдена',
-        };
     }
 }

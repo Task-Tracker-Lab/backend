@@ -15,7 +15,9 @@ import {
     ReordersStatesDto,
     CreateStateResponse,
     StateResponse,
+    StatesResponse,
 } from '../../dtos';
+import { ApiListQuery } from '@shared/decorators';
 
 export const FindAllStatesSwagger = () =>
     applyDecorators(
@@ -39,8 +41,8 @@ export const FindAllStatesSwagger = () =>
             name: 'hidden',
             required: false,
             type: Boolean,
-            description: 'Показать скрытые статусы',
-            example: 'false',
+            description: 'Показать скрытые статусы (isVisible = false)',
+            example: false,
         }),
         ApiQuery({
             name: 'category',
@@ -50,18 +52,30 @@ export const FindAllStatesSwagger = () =>
             example: 'active',
         }),
         ApiQuery({
+            name: 'isLocked',
+            required: false,
+            type: Boolean,
+            description: 'Фильтр по заблокированным статусам',
+            example: false,
+        }),
+        ApiQuery({
             name: 'counts',
             required: false,
             type: Boolean,
             description: 'Добавить количество задач в каждом статусе (tasksCount)',
-            example: 'true',
+            example: true,
         }),
         ApiQuery({
             name: 'my',
             required: false,
             type: Boolean,
             description: 'Показать только мои задачи (добавляет myTasksCount)',
-            example: 'false',
+            example: false,
+        }),
+        ApiListQuery({
+            sortableFields: ['order', 'title', 'tasksCount', 'createdAt'],
+            defaultSortField: 'order',
+            defaultSortOrder: 'asc',
         }),
         ApiQuery({
             name: 'overdue',
@@ -69,17 +83,17 @@ export const FindAllStatesSwagger = () =>
             type: Boolean,
             description:
                 'Добавить информацию о просроченных задачах (hasOverdueTasks, overdueTasksCount)',
-            example: 'true',
+            example: true,
         }),
         ApiResponse({
             status: 200,
             description: 'Список состояний получен',
-            type: [StateResponse.Output],
+            type: StatesResponse.Output,
         }),
         ApiUnauthorized(),
         ApiNotFound('Проект не найден'),
 
-        SetMetadata(ZOD_RESPONSE_TOKEN, StateResponse),
+        SetMetadata(ZOD_RESPONSE_TOKEN, StatesResponse),
     );
 
 export const FindOneStateSwagger = () =>
@@ -147,7 +161,7 @@ export const CreateStateSwagger = () =>
         ApiForbidden('Нет прав для создания состояния в этом проекте'),
         ApiConflict('Состояние с таким названием или типом уже существует'),
 
-        SetMetadata(ZOD_RESPONSE_TOKEN, CreateStateDto),
+        SetMetadata(ZOD_RESPONSE_TOKEN, CreateStateResponse),
     );
 
 export const UpdateStateSwagger = () =>
@@ -193,6 +207,7 @@ export const UpdateStateSwagger = () =>
 export const ReorderStatesSwagger = () =>
     applyDecorators(
         ApiOperation({
+            deprecated: true,
             summary: 'Изменить порядок колонок на доске',
             description: [
                 'Позволяет переставить колонки на канбан-доске так, как вам удобно.',

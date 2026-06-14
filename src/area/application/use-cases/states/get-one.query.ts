@@ -1,32 +1,35 @@
-import { ProjectStateErrorCodes, ProjectStateErrorMessages } from '@core/area/domain/errors';
+import { StateErrorCodes, StateErrorMessages } from '@core/area/domain/errors';
 import { IStateRepository } from '@core/area/domain/repository';
-import { FindProjectQuery } from '@core/projects';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
+import { GetAreaQuery } from '../areas';
 
 @Injectable()
 export class GetStateQuery {
     constructor(
         @Inject('IStateRepository')
         private readonly stateRepo: IStateRepository,
-        private readonly findProjectQ: FindProjectQuery,
+        private readonly getAreaQ: GetAreaQuery,
     ) {}
 
     async execute(slug: string, stateId: string, userId: string) {
-        const { project } = await this.findProjectQ.execute(slug, 'teamId??', 'viewer', userId);
-
-        const state = await this.stateRepo.findOne(project.id, stateId);
+        const area = await this.getAreaQ.execute({ key: slug }, userId);
+        const state = await this.stateRepo.findOne(area.id, stateId);
 
         if (!state) {
             throw new BaseException(
                 {
-                    code: ProjectStateErrorCodes.NOT_FOUND,
-                    message: ProjectStateErrorMessages[ProjectStateErrorCodes.NOT_FOUND],
+                    code: StateErrorCodes.NOT_FOUND,
+                    message: StateErrorMessages[StateErrorCodes.NOT_FOUND],
                 },
                 HttpStatus.NOT_FOUND,
             );
         }
 
-        return state;
+        return {
+            ...state,
+            createdAt: new Date(state.createdAt).toISOString(),
+            updatedAt: new Date(state.updatedAt).toISOString(),
+        };
     }
 }

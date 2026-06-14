@@ -53,12 +53,12 @@ export class AreaFacade {
         return this.deleteAreaUC.execute(slug, key, userId);
     }
 
-    public async getAreas(slug: string, deleted: boolean, userId: string) {
-        return this.getAreasQ.execute(slug, deleted, userId);
+    public async getAreas(slug: string, userId: string, query: unknown) {
+        return this.getAreasQ.execute(slug, userId, query);
     }
 
     public async getArea(slug: string, key: string, userId: string) {
-        return this.getAreaQ.execute(slug, key, userId);
+        return this.getAreaQ.execute({ projectSlug: slug, key }, userId);
     }
 
     public async createState(slug: string, dto: CreateStateDto, userId: string) {

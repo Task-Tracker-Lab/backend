@@ -10,15 +10,14 @@ export class GetAreasQuery {
         private readonly projectPolicy: ProjectAccessPolicy,
     ) {}
 
-    async execute(slug: string, dto: unknown, userId: string) {
-        (void this.areaRepo, this.projectPolicy);
+    async execute(slug: string, userId: string, _query: unknown) {
+        const { project } = await this.projectPolicy.ensureProjectAccess(slug, userId);
+        const areas = await this.areaRepo.findAll(project.id);
 
-        return {
-            success: true,
-            message: '',
-            slug,
-            dto,
-            userId,
-        };
+        return areas.map((a) => ({
+            ...a,
+            createdAt: new Date(a.createdAt).toISOString(),
+            updatedAt: new Date(a.updatedAt).toISOString(),
+        }));
     }
 }

@@ -6,9 +6,7 @@ import { ProjectAccessPolicy } from '@core/projects/domain/policy';
 import { BaseException } from '@shared/error';
 import { ProjectErrorCodes, ProjectErrorMessages } from '@core/projects/domain/errors';
 import slugify from 'slugify';
-
-// TODO: at feature migrate to dynamic field at team
-const MAX_PROJECTS_PER_TEAM = 20;
+import { MAX_PROJECTS_PER_TEAM } from '@core/projects/infrastructure/constants';
 
 @Injectable()
 export class CreateProjectUseCase {
@@ -21,7 +19,8 @@ export class CreateProjectUseCase {
         const { settings, ...project } = dto;
         const { team } = await this.policy.ensureTeamAccess(teamId, userId, 'admin');
 
-        console.log(settings);
+        // TODO: TMP VAR
+        console.debug(settings);
 
         const currentSlug = slugify(project?.slug ? project.slug : project.name, {
             lower: true,

@@ -11,9 +11,15 @@ export class GetStatesQuery {
     ) {}
 
     async execute(slug: string, userId: string, query: unknown) {
-        const area = await this.getAreaQ.execute(slug, userId, 'viewer');
+        const area = await this.getAreaQ.execute({ key: slug }, userId);
         const states = await this.stateRepo.find(area.id, query);
 
-        return states;
+        return states
+            .map((s) => ({
+                ...s,
+                createdAt: new Date(s.createdAt).toISOString(),
+                updatedAt: new Date(s.updatedAt).toISOString(),
+            }))
+            .sort((a, b) => a.position - b.position);
     }
 }

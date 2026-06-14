@@ -5,12 +5,14 @@ import { BaseException } from '@shared/error';
 import { ProjectAccessPolicy } from '@core/projects/domain/policy';
 import { IProjectRepository } from '@core/projects/domain/repository';
 import { ProjectErrorCodes, ProjectErrorMessages } from '@core/projects/domain/errors';
+import {
+    SHARE_LINK_LENGTH,
+    SHARE_LINK_PREFIX,
+    SHARE_LINK_TTL_MONTHS,
+} from '@core/projects/infrastructure/constants';
 
 @Injectable()
 export class GenerateShareTokenUseCase {
-    private readonly TOKEN_PREFIX = 'st_';
-    private readonly DEFAULT_TTL_MONTHS = 3;
-
     constructor(
         @Inject('IProjectRepository')
         private readonly projectsRepo: IProjectRepository,
@@ -99,12 +101,12 @@ export class GenerateShareTokenUseCase {
         }
 
         const date = new Date();
-        date.setMonth(date.getMonth() + this.DEFAULT_TTL_MONTHS);
+        date.setMonth(date.getMonth() + SHARE_LINK_TTL_MONTHS);
         return date;
     }
 
     private generateToken(): string {
-        return `${this.TOKEN_PREFIX}${randomBytes(32).toString('hex')}`;
+        return `${SHARE_LINK_PREFIX}${randomBytes(SHARE_LINK_LENGTH).toString('hex')}`;
     }
 
     private hashToken(token: string): string {
