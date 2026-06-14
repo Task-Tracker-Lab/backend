@@ -28,6 +28,7 @@ export const users = baseSchema.table('users', {
     avatarUrl: varchar('avatar_url', { length: 512 }),
     emailVerified: boolean('email_verified').default(false).notNull(),
     emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true, mode: 'string' }),
+    lastTeamId: text('last_team_id'),
     deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'string' }),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
         .defaultNow()

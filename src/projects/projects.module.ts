@@ -1,25 +1,16 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { ProjectsRepository } from './infrastructure/persistence/repositories';
 import { TeamsModule } from '@core/teams';
-import { ProjectsController } from './application/controller';
-import {
-    CreateProjectUseCase,
-    FindProjectQuery,
-    ProjectQueries,
-    ProjectUseCases,
-} from './application/use-cases';
+import { CONTROLLERS } from './application/controller';
+import { CreateProjectUseCase, FindProjectQuery, USE_CASES } from './application/use-cases';
 import { POLICIES, ProjectAccessPolicy } from './domain/policy';
-import { ProjectsFacade } from './application/projects.facade';
-
-const REPOSITORY = {
-    provide: 'IProjectsRepository',
-    useClass: ProjectsRepository,
-};
+import { ProjectFacade } from './application/project.facade';
+import { REPOSITORIES } from './infrastructure/persistence/repositories';
+import { UserModule } from '@core/user';
 
 @Module({
-    imports: [forwardRef(() => TeamsModule)],
-    controllers: [ProjectsController],
-    providers: [REPOSITORY, ...POLICIES, ...ProjectUseCases, ...ProjectQueries, ProjectsFacade],
+    imports: [UserModule, forwardRef(() => TeamsModule)],
+    controllers: CONTROLLERS,
+    providers: [...REPOSITORIES, ...POLICIES, ...USE_CASES, ProjectFacade],
     exports: [FindProjectQuery, ProjectAccessPolicy, CreateProjectUseCase],
 })
 export class ProjectsModule {}

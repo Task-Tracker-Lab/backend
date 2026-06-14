@@ -1,1 +1,1 @@
-export { ProjectsMapper } from './projects.mapper';
+export { ProjectMapper } from './project.mapper';

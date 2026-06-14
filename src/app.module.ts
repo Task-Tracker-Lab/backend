@@ -21,6 +21,7 @@ import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { DatabaseHealthService } from '@libs/database';
 import { ZodValidationInterceptor } from '@shared/interceptors';
+import { AreaModule } from './area';
 import { MetricsModule } from '@libs/metrics';
 
 @Module({
@@ -34,6 +35,7 @@ import { MetricsModule } from '@libs/metrics';
                     schema,
                     schemaName: cfg.getOrThrow('DB_SCHEMA'),
                     logging: true,
+                    runMigrations: false,
                 };
             },
         }),
@@ -55,6 +57,7 @@ import { MetricsModule } from '@libs/metrics';
         UserModule,
         TeamsModule,
         ProjectsModule,
+        AreaModule,
         MetricsModule,
         HealthModule.registerAsync({
             inject: [DatabaseHealthService, S3Service, CACHE_SERVICE],

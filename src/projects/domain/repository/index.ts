@@ -1,1 +1,2 @@
-export { IProjectsRepository } from './projects.repository.interface';
+export * from './project.repository.interface';
+export * from './member.repository.interface';

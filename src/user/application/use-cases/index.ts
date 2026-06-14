@@ -7,6 +7,7 @@ import { UploadAvatarUseCase } from './upload-avatar.use-case';
 import { FindProfileQuery } from './find-profile.query';
 import { FindUserQuery } from './find-user.query';
 import { GetActivityQuery } from './get-activity.query';
+import { FindByIdsQuery } from './find-by-ids.query';
 
 export * from './register-user.use-case';
 export * from './update-notifications.use-case';
@@ -17,6 +18,7 @@ export * from './upload-avatar.use-case';
 export * from './find-profile.query';
 export * from './find-user.query';
 export * from './get-activity.query';
+export * from './find-by-ids.query';
 
 export const UserUseCases = [
     RegisterUserUseCase,
@@ -26,6 +28,11 @@ export const UserUseCases = [
     UploadAvatarUseCase,
 ];
 
-export const UserQueries = [FindProfileQuery, FindUserQuery, GetActivityQuery];
+export const UserQueries = [FindProfileQuery, FindByIdsQuery, FindUserQuery, GetActivityQuery];
 
-export const USER_EXTERNAL_USE_CASES = [RegisterUserUseCase, UpdatePasswordUseCase, FindUserQuery];
+export const USER_EXTERNAL_USE_CASES = [
+    RegisterUserUseCase,
+    UpdatePasswordUseCase,
+    FindUserQuery,
+    FindByIdsQuery,
+];

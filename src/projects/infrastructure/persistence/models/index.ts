@@ -1,2 +1,3 @@
-export { projectStatusEnum, projectVisibilityEnum } from './enums';
-export { projectShares, projects } from './projects.model';
+export { projectStatusEnum, projectVisibilityEnum, layoutEnum } from './enum';
+export { projectShares, projectSettings, projects } from './project.model';
+export { projectMembers } from './member.model';

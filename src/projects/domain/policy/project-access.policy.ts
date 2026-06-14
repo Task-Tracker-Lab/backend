@@ -1,14 +1,19 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { IProjectsRepository } from '../repository';
+import { IMemberRepository, IProjectRepository } from '../repository';
 import { BaseException } from '@shared/error';
 import { FindTeamMemberQuery, FindTeamQuery } from '@core/teams';
-import { ROLE_PRIORITY } from '@shared/constants';
+import { ROLE_PRIORITY, PROJECT_ROLE_PRIORITY } from '@shared/constants';
+import type { MemberRole } from '../entities';
+import { MemberErrorCodes, MemberErrorMessages } from '../errors/member.errors';
+import { ProjectErrorCodes, ProjectErrorMessages } from '../errors';
 
 @Injectable()
 export class ProjectAccessPolicy {
     constructor(
-        @Inject('IProjectsRepository')
-        private readonly projectsRepo: IProjectsRepository,
+        @Inject('IProjectRepository')
+        private readonly projectRepo: IProjectRepository,
+        @Inject('IMemberRepository')
+        private readonly memberRepo: IMemberRepository,
         private readonly findTeamQ: FindTeamQuery,
         private readonly findTeamMemberQ: FindTeamMemberQuery,
     ) {}
@@ -52,39 +57,62 @@ export class ProjectAccessPolicy {
     }
 
     /**
-     * Полная проверка доступа к конкретному проекту внутри команды
+     * Проверка доступа к проекту.
+     * Проверяет роль пользователя именно в проекте, а не в команде.
      */
-    public async validateProjectAccess(
-        projectId: string,
-        teamId: string,
+    public async ensureProjectAccess(
+        slug: string,
         userId: string,
-        minRole: keyof typeof ROLE_PRIORITY = 'admin',
+        minRoles: MemberRole[] = ['viewer'],
     ) {
-        const { team, member } = await this.ensureTeamAccess(teamId, userId, minRole);
-
-        const project = await this.projectsRepo.findOne(projectId);
-        if (!project || project.teamId !== team.id) {
+        const project = await this.projectRepo.findBySlug(slug);
+        if (!project) {
             throw new BaseException(
                 {
-                    code: 'PROJECT_NOT_FOUND',
-                    message: 'Проект не найден в этой команде',
+                    code: ProjectErrorCodes.NOT_FOUND,
+                    message: ProjectErrorMessages[ProjectErrorCodes.NOT_FOUND],
                 },
                 HttpStatus.NOT_FOUND,
             );
         }
 
-        return { project, member, team };
+        const member = await this.memberRepo.findByProjectAndUser(project.id, userId);
+        if (!member) {
+            throw new BaseException(
+                {
+                    code: MemberErrorCodes.ACCESS_DENIED,
+                    message: MemberErrorMessages[MemberErrorCodes.ACCESS_DENIED],
+                },
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
+        const hasRole = minRoles.some(
+            (role) => PROJECT_ROLE_PRIORITY[member.role] >= PROJECT_ROLE_PRIORITY[role],
+        );
+
+        if (!hasRole) {
+            throw new BaseException(
+                {
+                    code: MemberErrorCodes.INSUFFICIENT_PERMISSIONS,
+                    message: `Требуется одна из ролей: ${minRoles.join(', ')}. Ваша роль: ${member.role}`,
+                },
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
+        return { project, member };
     }
 
     /**
-     * Проверка доступа к проекту по projectId
+     * Проверка доступа к проекту по slug
      */
     public async validateProjectAccessById(
-        projectId: string,
+        slug: string,
         userId: string,
         minRole: keyof typeof ROLE_PRIORITY = 'viewer',
     ) {
-        const project = await this.projectsRepo.findOne(projectId);
+        const project = await this.projectRepo.findOne(slug);
         if (!project) {
             throw new BaseException(
                 { code: 'PROJECT_NOT_FOUND', message: 'Проект не найден' },

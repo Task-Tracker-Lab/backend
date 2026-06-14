@@ -12,6 +12,7 @@ import type {
 export interface IUserRepository {
     create(data: NewUser): Promise<User>;
     findById(id: string): Promise<UserWithSecurity | null>;
+    findByIds(ids: string[]): Promise<User[]>;
     findByEmail(email: string): Promise<UserWithSecurity | null>;
     findProfile(id: string): Promise<UserProfile>;
     findActivityByUser(
