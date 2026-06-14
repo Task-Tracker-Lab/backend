@@ -4,7 +4,8 @@ import { Job } from 'bullmq';
 import { CreateTeamUseCase } from '@core/teams/application/use-cases';
 import { CreateProjectUseCase } from '@core/projects/application/use-cases';
 import { AuthUserJobs } from '@core/auth/domain/enums/auth-jobs.enum';
-import { CreateUserWorkspaceEvent } from '@core/auth/domain/events/create-user-workspace.event';
+import { CreateUserWorkspaceEvent } from '@core/auth/domain/events';
+import slugify from 'slugify';
 
 @Processor(AuthQueues.AUTH_USER)
 export class UserProcessor extends WorkerHost {
@@ -31,7 +32,7 @@ export class UserProcessor extends WorkerHost {
 
             await job.log(`[DONE] Job ${job.id} processed`);
         } catch (error) {
-            await job.log(error);
+            await job.log(String(error));
 
             throw error;
         }
@@ -51,7 +52,11 @@ export class UserProcessor extends WorkerHost {
         await this.createProjectUseCase.execute(userId, team.teamId, {
             name: `${username}'s Project`,
             description: `Personal project for ${username}`,
-            key: username.slice(0, 10).toUpperCase(),
+            slug: slugify(username.slice(0, 10), {
+                lower: true,
+                strict: true,
+            }),
+            status: 'active',
             visibility: 'private',
         });
 
