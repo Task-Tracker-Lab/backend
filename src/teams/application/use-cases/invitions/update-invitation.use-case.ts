@@ -1,12 +1,14 @@
+import { TeamMemberPolicy } from '@core/teams/domain/policy';
 import { ITeamsRepository } from '@core/teams/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { UpdateInvitationDto } from '../../dtos';
-import { BaseException } from '@shared/error';
-import { TeamInvite } from '../../dtos/invitation.dto';
-import { TeamMemberPolicy } from '@core/teams/domain/policy';
-import { TeamRole } from '@shared/entities';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
+import { BaseException } from '@shared/error';
+
+import { UpdateInvitationDto } from '../../dtos';
+import { TeamInvite } from '../../dtos/invitation.dto';
+
+import type { TeamRole } from '../../../infrastructure/persistence/models';
 
 @Injectable()
 export class UpdateInvitationUseCase {
@@ -28,8 +30,12 @@ export class UpdateInvitationUseCase {
         this.validateInviteOwnership(invite, team.id);
         this.validatePolicy(member.role as TeamRole, invite.role as TeamRole, dto.role as TeamRole);
 
-        invite.role = dto.role as TeamRole;
-        await this.cacheService.setOne(key, JSON.stringify(invite), ttlSeconds);
+        const updatedInvite = {
+            ...invite,
+            role: dto.role as TeamRole,
+        };
+
+        await this.cacheService.setOne(key, JSON.stringify(updatedInvite), ttlSeconds);
 
         return {
             success: true,

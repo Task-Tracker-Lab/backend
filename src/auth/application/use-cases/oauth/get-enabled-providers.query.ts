@@ -7,24 +7,19 @@ export class GetEnabledProvidersQuery {
     constructor(private readonly cfg: ConfigService) {}
 
     async execute() {
-        const providers = [];
-
-        if (this.cfg.get('GOOGLE_CLIENT_ID') && this.cfg.get('GOOGLE_CLIENT_SECRET')) {
-            providers.push(OAuthAssets.google);
-        }
-
-        if (this.cfg.get('GITHUB_CLIENT_ID') && this.cfg.get('GITHUB_CLIENT_SECRET')) {
-            providers.push(OAuthAssets.github);
-        }
-
-        if (this.cfg.get('YANDEX_CLIENT_ID') && this.cfg.get('YANDEX_CLIENT_SECRET')) {
-            providers.push(OAuthAssets.yandex);
-        }
-
-        if (this.cfg.get('VKONTAKTE_CLIENT_ID') && this.cfg.get('VKONTAKTE_CLIENT_SECRET')) {
-            providers.push(OAuthAssets.yandex);
-        }
-
-        return providers;
+        return [
+            ...(this.cfg.get('GOOGLE_CLIENT_ID') && this.cfg.get('GOOGLE_CLIENT_SECRET')
+                ? [OAuthAssets.google]
+                : []),
+            ...(this.cfg.get('GITHUB_CLIENT_ID') && this.cfg.get('GITHUB_CLIENT_SECRET')
+                ? [OAuthAssets.github]
+                : []),
+            ...(this.cfg.get('YANDEX_CLIENT_ID') && this.cfg.get('YANDEX_CLIENT_SECRET')
+                ? [OAuthAssets.yandex]
+                : []),
+            ...(this.cfg.get('VKONTAKTE_CLIENT_ID') && this.cfg.get('VKONTAKTE_CLIENT_SECRET')
+                ? [OAuthAssets.vkontakte]
+                : []),
+        ];
     }
 }

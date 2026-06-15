@@ -1,8 +1,9 @@
+import { StateErrorCodes, StateErrorMessages } from '@core/area/domain/errors';
+import { IStateRepository } from '@core/area/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
-import { IStateRepository } from '@core/area/domain/repository';
+
 import { UpdateStateDto } from '../../dtos';
-import { StateErrorCodes, StateErrorMessages } from '@core/area/domain/errors';
 import { GetAreaQuery } from '../areas';
 
 @Injectable()
@@ -58,7 +59,9 @@ export class UpdateStateUseCase {
                     : 'Не удалось обновить состояние: запись не найдена',
             };
         } catch (err) {
-            if (err instanceof BaseException) throw err;
+            if (err instanceof BaseException) {
+                throw err;
+            }
 
             throw new BaseException(
                 {

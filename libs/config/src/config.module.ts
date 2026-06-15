@@ -1,8 +1,11 @@
+/* eslint-disable no-console */
+import * as path from 'node:path';
+
 import { Module } from '@nestjs/common';
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
-import * as path from 'path';
-import { ConfigSchema } from './config.schema';
 import { ZodError } from 'zod/v4';
+
+import { ConfigSchema } from './config.schema';
 
 const validateConfig = (config: Record<string, unknown>) => {
     try {
@@ -23,7 +26,7 @@ const validateConfig = (config: Record<string, unknown>) => {
 
             console.groupEnd();
 
-            throw new Error('Invalid environment configuration');
+            throw new Error('Invalid environment configuration', { cause: error });
         }
         throw error;
     }

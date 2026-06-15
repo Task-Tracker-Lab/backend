@@ -1,10 +1,11 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import * as argon from 'argon2';
-import { BaseException } from '@shared/error';
-import { PasswordResetConfirmDto } from '../dtos';
 import { UpdatePasswordUseCase } from '@core/user';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
+import { BaseException } from '@shared/error';
+import * as argon from 'argon2';
+
+import { PasswordResetConfirmDto } from '../dtos';
 
 @Injectable()
 export class ConfirmResetPasswordUseCase {

@@ -1,9 +1,10 @@
-import { Processor, WorkerHost } from '@nestjs/bullmq';
-import type { Job } from 'bullmq';
-import { IMailPort } from '@shared/adapters/mail';
-import { Inject } from '@nestjs/common';
-import { TeamInvitationEvent } from '@core/teams/domain/events';
 import { TeamQueues } from '@core/teams/domain/enums';
+import { TeamInvitationEvent } from '@core/teams/domain/events';
+import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Inject } from '@nestjs/common';
+import { IMailPort } from '@shared/adapters/mail';
+
+import type { Job } from 'bullmq';
 
 @Processor(TeamQueues.TEAM_MAIL)
 export class MailProcessor extends WorkerHost {
@@ -35,7 +36,7 @@ export class MailProcessor extends WorkerHost {
         }
     }
 
-    private sendTeamInvitation = async (job: Job<TeamInvitationEvent>) => {
+    private readonly sendTeamInvitation = async (job: Job<TeamInvitationEvent>) => {
         const { email, teamName, inviteUrl } = job.data;
 
         await job.log(`Sending team(${teamName}) invitation link to: ${email}`);

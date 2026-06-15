@@ -1,11 +1,12 @@
-import { IAreaRepository } from '@core/area/domain/repository';
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import type { CreateAreaDto } from '../../dtos';
-import { ProjectAccessPolicy } from '@core/projects/domain/policy';
-import slugify from 'slugify';
-import { BaseException } from '@shared/error';
 import { AreaErrorCodes, AreaErrorMessages } from '@core/area/domain/errors';
+import { IAreaRepository } from '@core/area/domain/repository';
 import { MAX_AREAS_PER_PROJECT } from '@core/area/infrastructure/constants';
+import { ProjectAccessPolicy } from '@core/projects/domain/policy';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { BaseException } from '@shared/error';
+import slugify from 'slugify';
+
+import { CreateAreaDto } from '../../dtos';
 
 @Injectable()
 export class CreateAreaUseCase {
@@ -66,7 +67,9 @@ export class CreateAreaUseCase {
                 slug: result.slug,
             };
         } catch (e) {
-            if (e instanceof BaseException) throw e;
+            if (e instanceof BaseException) {
+                throw e;
+            }
 
             throw new BaseException(
                 {

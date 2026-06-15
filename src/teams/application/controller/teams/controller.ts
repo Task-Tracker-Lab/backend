@@ -1,13 +1,15 @@
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { ApiBaseController, GetUserId } from '@shared/decorators';
+
+import { CreateTeamDto, UpdateTeamDto } from '../../dtos';
+import { TeamsFacade } from '../../team.facade';
+
 import {
     CreateTeamSwagger,
     FindOneTeamSwagger,
     RemoveTeamSwagger,
     UpdateTeamSwagger,
 } from './swagger';
-import { CreateTeamDto, UpdateTeamDto } from '../../dtos';
-import { TeamsFacade } from '../../team.facade';
 
 @ApiBaseController('teams', 'Teams', true)
 export class TeamsController {

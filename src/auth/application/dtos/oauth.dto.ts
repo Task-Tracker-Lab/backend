@@ -1,5 +1,5 @@
-import { z } from 'zod/v4';
 import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod/v4';
 
 const OAuthResponseSchema = z.object({
     id: z.string(),

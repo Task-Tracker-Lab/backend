@@ -1,10 +1,11 @@
+import { CreateTeamResponse } from '@core/teams/application/dtos/team.dto';
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ActionResponse } from '@shared/dtos';
 import { ApiForbidden, ApiNotFound, ApiUnauthorized, ApiValidationError } from '@shared/error';
-import { CreateTeamDto, UpdateTeamDto, TeamResponse } from '../../dtos';
 import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
-import { CreateTeamResponse } from '@core/teams/application/dtos/team.dto';
+
+import { CreateTeamDto, UpdateTeamDto, TeamResponse } from '../../dtos';
 
 export const CreateTeamSwagger = () =>
     applyDecorators(

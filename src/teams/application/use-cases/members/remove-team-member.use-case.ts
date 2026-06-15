@@ -1,8 +1,9 @@
 import { TeamMemberPolicy } from '@core/teams/domain/policy';
 import { ITeamsRepository } from '@core/teams/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import type { TeamRole } from '@shared/entities';
 import { BaseException } from '@shared/error';
+
+import type { TeamRole } from '@shared/entities';
 
 @Injectable()
 export class RemoveTeamMemberUseCase {
@@ -69,7 +70,9 @@ export class RemoveTeamMemberUseCase {
                     : `Участник успешно исключен из команды ${team.name}`,
             };
         } catch (error) {
-            if (error instanceof BaseException) throw error;
+            if (error instanceof BaseException) {
+                throw error;
+            }
 
             throw new BaseException(
                 { code: 'MEMBER_REMOVAL_FAILED', message: 'Ошибка при удалении участника' },

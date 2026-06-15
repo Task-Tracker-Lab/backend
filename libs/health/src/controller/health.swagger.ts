@@ -1,7 +1,8 @@
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { HealthResponse, HealthDetailedResponse } from '../dtos';
 import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
+
+import { HealthResponse, HealthDetailedResponse } from '../dtos';
 
 export const GetHealthSwagger = () =>
     applyDecorators(

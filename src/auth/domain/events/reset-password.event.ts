@@ -1,6 +1,6 @@
 export class ResetPasswordEvent {
     constructor(
-        public email: string,
-        public otp: string,
+        public readonly email: string,
+        public readonly otp: string,
     ) {}
 }

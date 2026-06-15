@@ -1,16 +1,23 @@
-import type { UploadMediaDto } from '../dtos';
-import type { UpdateMediaTeam } from '../interfaces/media.interface';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { UploadMediaDto } from '../dtos';
 import { MEDIA_JOBS } from '../media.constant';
-import { MediaDispatchStrategy } from './media.strategy';
+
+import type { UpdateMediaTeam } from '../interfaces/media.interface';
+import type { MediaDispatchStrategy } from './media.strategy';
 
 export class TeamMediaStrategy implements MediaDispatchStrategy {
-    jobName: string = MEDIA_JOBS.UPDATE_TEAM_MEDIA;
+    readonly jobName: string = MEDIA_JOBS.UPDATE_TEAM_MEDIA;
 
     createPayload(dto: UploadMediaDto, userId: string, path: string): UpdateMediaTeam {
+        const type = dto.context.split('.').pop();
+        if (type !== 'avatar' && type !== 'banner') {
+            throw new Error(`Invalid media type: ${type}`);
+        }
+
         return {
             entity: { type: 'team', id: dto.teamId! },
-            type: dto.context.split('.').pop() as 'avatar' | 'banner',
             initiatorId: userId,
+            type,
             path,
         };
     }

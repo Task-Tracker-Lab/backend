@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
 import { InjectRedis } from '@nestjs-modules/ioredis';
+import { Injectable } from '@nestjs/common';
 import Redis, { ChainableCommander } from 'ioredis';
+
 import { ICacheService, ICacheTransaction } from '../ports';
 
 @Injectable()
@@ -14,7 +15,9 @@ export class RedisCacheAdapter implements ICacheService {
     }
 
     async getMany(keys: string[]): Promise<(string | null)[]> {
-        if (keys.length === 0) return [];
+        if (keys.length === 0) {
+            return [];
+        }
         return this.redis.mget(keys);
     }
 
@@ -26,8 +29,13 @@ export class RedisCacheAdapter implements ICacheService {
         await this.redis.set(key, value, 'EX', ttlSeconds);
     }
 
-    async setMany(items: { key: string; value: string }[], ttlSeconds: number = this.defaultTtl) {
-        if (!items.length) return;
+    async setMany(
+        items: readonly { readonly key: string; readonly value: string }[],
+        ttlSeconds: number = this.defaultTtl,
+    ) {
+        if (!items.length) {
+            return;
+        }
 
         const pipeline = this.redis.pipeline();
 
@@ -43,7 +51,9 @@ export class RedisCacheAdapter implements ICacheService {
     }
 
     async addManyToCollection(key: string, values: string[], ttlSeconds: number = this.defaultTtl) {
-        if (!values.length) return;
+        if (!values.length) {
+            return;
+        }
 
         await this.redis
             .pipeline()
@@ -57,7 +67,9 @@ export class RedisCacheAdapter implements ICacheService {
     }
 
     async removeMany(keys: string[]) {
-        if (!keys.length) return;
+        if (!keys.length) {
+            return;
+        }
         await this.redis.del(keys);
     }
 
@@ -66,7 +78,9 @@ export class RedisCacheAdapter implements ICacheService {
     }
 
     async removeManyFromCollection(key: string, values: string[]) {
-        if (!values.length) return;
+        if (!values.length) {
+            return;
+        }
         await this.redis.srem(key, ...values);
     }
 
@@ -110,7 +124,10 @@ class RedisTransaction implements ICacheTransaction {
         return this;
     }
 
-    setMany(items: { key: string; value: string }[], ttlSeconds: number = this.defaultTtl): this {
+    setMany(
+        items: readonly { readonly key: string; readonly value: string }[],
+        ttlSeconds: number = this.defaultTtl,
+    ): this {
         for (const item of items) {
             this.multi.set(item.key, item.value, 'EX', ttlSeconds);
         }
@@ -124,7 +141,9 @@ class RedisTransaction implements ICacheTransaction {
     }
 
     addManyToCollection(key: string, values: string[], ttlSeconds: number = this.defaultTtl): this {
-        if (!values.length) return this;
+        if (!values.length) {
+            return this;
+        }
         this.multi.sadd(key, ...values);
         this.multi.expire(key, ttlSeconds);
         return this;
@@ -136,7 +155,9 @@ class RedisTransaction implements ICacheTransaction {
     }
 
     removeMany(keys: string[]): this {
-        if (!keys.length) return this;
+        if (!keys.length) {
+            return this;
+        }
         this.multi.del(keys);
         return this;
     }
@@ -147,7 +168,9 @@ class RedisTransaction implements ICacheTransaction {
     }
 
     removeManyFromCollection(collectionKey: string, values: string[]): this {
-        if (!values.length) return this;
+        if (!values.length) {
+            return this;
+        }
         this.multi.srem(collectionKey, ...values);
         return this;
     }

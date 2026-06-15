@@ -1,7 +1,7 @@
 export class TeamInvitationEvent {
     constructor(
-        public email: string,
-        public teamName: string,
-        public inviteUrl: string,
+        public readonly email: string,
+        public readonly teamName: string,
+        public readonly inviteUrl: string,
     ) {}
 }

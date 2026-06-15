@@ -1,21 +1,22 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { verify as verifyOTP } from 'otplib';
+import { SignUpCacheData } from '@core/auth/application/interfaces';
+import { AuthQueues } from '@core/auth/domain/enums';
+import { AuthUserJobs } from '@core/auth/domain/enums/auth-jobs.enum';
+import { CreateUserWorkspaceEvent } from '@core/auth/domain/events/create-user-workspace.event';
+import { SIGNUP_CACHE_KEY } from '@core/auth/infrastructure/constants';
 import { RegisterUserUseCase } from '@core/user';
+import { InjectQueue } from '@nestjs/bullmq';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { createId } from '@paralleldrive/cuid2';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
 import { BaseException } from '@shared/error';
+import { Queue } from 'bullmq';
+import { verify as verifyOTP } from 'otplib';
+
 import { ISessionRepository } from '../../domain/repository';
 import { TokenService } from '../../infrastructure/security';
 import { DeviceMetadata } from '../../infrastructure/utils/get-device-meta';
 import { VerifyDto } from '../dtos';
-import { createId } from '@paralleldrive/cuid2';
-import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
-import { ICacheService } from '@shared/adapters/cache/ports';
-import { SIGNUP_CACHE_KEY } from '@core/auth/infrastructure/constants';
-import { SignUpCacheData } from '@core/auth/application/interfaces';
-import { InjectQueue } from '@nestjs/bullmq';
-import { AuthQueues } from '@core/auth/domain/enums';
-import { Queue } from 'bullmq';
-import { CreateUserWorkspaceEvent } from '@core/auth/domain/events/create-user-workspace.event';
-import { AuthUserJobs } from '@core/auth/domain/enums/auth-jobs.enum';
 
 @Injectable()
 export class SignUpVerifyUseCase {

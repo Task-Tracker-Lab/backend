@@ -1,25 +1,25 @@
+import fastifyCompress from '@fastify/compress';
+import fastifyCookie from '@fastify/cookie';
+import fastifyCsrf from '@fastify/csrf-protection';
+import fastifyMultipart from '@fastify/multipart';
 import { Logger, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
+import { createId } from '@paralleldrive/cuid2';
+
 import { DEFAULT_THROTTLER_OPTIONS } from './configs/throttler';
 import { setupCors, setupLogger, setupThrottler, setupSwagger } from './setups';
-import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
+
 import type { BootstrapOptions } from './interfaces/options.interface';
-import fastifyCookie from '@fastify/cookie';
-import fastifyCompress from '@fastify/compress';
-import fastifyMultipart from '@fastify/multipart';
-import fastifyCsrf from '@fastify/csrf-protection';
-import { createId } from '@paralleldrive/cuid2';
-import type { IncomingMessage } from 'http';
+import type { IncomingMessage } from 'node:http';
 
 export async function bootstrapApp(options: BootstrapOptions) {
     const startTime = performance.now();
     const adapter = new FastifyAdapter({
         requestIdHeader: 'x-request-id',
         requestIdLogLabel: 'request',
-        genReqId: (req: IncomingMessage) => {
-            return (req.headers['x-request-id'] as string) || createId();
-        },
+        genReqId: (req: IncomingMessage) => (req.headers['x-request-id'] as string) || createId(),
     });
 
     const {
@@ -56,10 +56,6 @@ export async function bootstrapApp(options: BootstrapOptions) {
 
     app.getHttpAdapter()
         .getInstance()
-        .addHook('onSend', async (request, reply, payload) => {
-            reply.header('x-request-id', request.id);
-            return payload;
-        })
         /**
          * НАЗНАЧЕНИЕ: Полифил совместимости Fastify с экосистемой Passport.js (Express-way).
          * * ПОЧЕМУ ТУТ ТИП 'any':
@@ -75,14 +71,21 @@ export async function bootstrapApp(options: BootstrapOptions) {
             reply.setHeader = function (key: string, value: string) {
                 return this.raw.setHeader(key, value);
             };
+
             reply.end = function () {
                 this.raw.end();
             };
+
             request.res = reply;
             done();
+        })
+        // eslint-disable-next-line require-await
+        .addHook('onSend', async (request, reply, payload) => {
+            reply.header('x-request-id', request.id);
+            return payload;
         });
 
-    await setupLogger(app, options.serviceName);
+    setupLogger(app, options.serviceName);
 
     await app.register(fastifyCompress, {
         global: true,
@@ -97,7 +100,9 @@ export async function bootstrapApp(options: BootstrapOptions) {
         },
     });
 
-    if (apiPrefix) app.setGlobalPrefix(apiPrefix);
+    if (apiPrefix) {
+        app.setGlobalPrefix(apiPrefix);
+    }
     if (version) {
         const hasV = version.startsWith('v');
 
@@ -107,7 +112,9 @@ export async function bootstrapApp(options: BootstrapOptions) {
             defaultVersion: hasV ? version.slice(1) : version,
         });
     }
-    if (useCors) setupCors(app, origins);
+    if (useCors) {
+        setupCors(app, origins);
+    }
     if (swaggerOptions) {
         const { path = 'docs', ...metadata } = swaggerOptions;
 
@@ -138,13 +145,15 @@ export async function bootstrapApp(options: BootstrapOptions) {
             },
         });
     }
-    if (setupApp) setupApp(app);
+    if (setupApp) {
+        await setupApp(app);
+    }
 
     await app.listen(port, '0.0.0.0', (_err, address) => {
         const prefix = [apiPrefix, version].filter(Boolean).join('/');
-        const baseUrl = `${address}${prefix ? '/' + prefix : ''}`;
+        const baseUrl = `${address}${prefix ? `/${prefix}` : ''}`;
 
-        const swaggerBase = `${address}${apiPrefix ? '/' + apiPrefix : ''}`;
+        const swaggerBase = `${address}${apiPrefix ? `/${apiPrefix}` : ''}`;
         const swaggerPath = swaggerOptions?.path ?? 'docs';
 
         if (_err) {

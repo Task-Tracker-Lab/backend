@@ -1,10 +1,11 @@
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { FastifyRequest } from 'fastify';
-import type { JwtPayload } from '@shared/types';
+import { PassportStrategy } from '@nestjs/passport';
 import { BaseException } from '@shared/error';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+
+import type { JwtPayload } from '@shared/types';
+import type { FastifyRequest } from 'fastify';
 
 @Injectable()
 export class CookieStrategy extends PassportStrategy(Strategy, 'cookie') {

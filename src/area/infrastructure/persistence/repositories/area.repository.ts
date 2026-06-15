@@ -1,10 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
-import * as schema from '../models';
-import { and, count, eq, isNotNull, isNull } from 'drizzle-orm';
 import { IAreaRepository } from '@core/area/domain/repository';
-import type { NewArea } from '@core/area/domain/entities';
+import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
+import { Inject, Injectable } from '@nestjs/common';
+import { and, count, eq, isNotNull, isNull } from 'drizzle-orm';
+
 import { DEFAULT_STATES } from '../../constants';
+import * as schema from '../models';
+
+import type { NewArea } from '@core/area/domain/entities';
 
 @Injectable()
 export class AreaRepository implements IAreaRepository {

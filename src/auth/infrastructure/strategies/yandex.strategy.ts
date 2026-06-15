@@ -1,44 +1,44 @@
+import { HttpService } from '@nestjs/axios';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-oauth2';
 import { BaseException } from '@shared/error';
-import { HttpService } from '@nestjs/axios';
+import { Strategy } from 'passport-oauth2';
 import { firstValueFrom } from 'rxjs';
 
 export interface IUserInfo {
-    id: string;
-    login: string;
-    client_id: string;
-    display_name: string;
-    real_name: string;
-    first_name: string;
-    last_name: string;
-    sex: 'male' | 'female';
-    default_email: string;
-    emails: string[];
-    birthday: string;
-    default_avatar_id: string;
-    is_avatar_empty: false;
-    default_phone: { id: number; number: string };
-    psuid: string;
+    readonly id: string;
+    readonly login: string;
+    readonly client_id: string;
+    readonly display_name: string;
+    readonly real_name: string;
+    readonly first_name: string;
+    readonly last_name: string;
+    readonly sex: 'male' | 'female';
+    readonly default_email: string;
+    readonly emails: readonly string[];
+    readonly birthday: string;
+    readonly default_avatar_id: string;
+    readonly is_avatar_empty: false;
+    readonly default_phone: { readonly id: number; readonly number: string };
+    readonly psuid: string;
 }
 
 export interface IYandexProfile {
-    provider: 'yandex';
-    id: string;
-    displayName: string;
-    username: string;
-    emails: [{ value: string }];
-    name: {
-        familyName: string;
-        givenName: string;
+    readonly provider: 'yandex';
+    readonly id: string;
+    readonly displayName: string;
+    readonly username: string;
+    readonly emails: readonly [{ readonly value: string }];
+    readonly name: {
+        readonly familyName: string;
+        readonly givenName: string;
     };
-    gender: 'female' | 'male' | undefined;
-    photos: [{ value: string }];
-    _raw: string;
-    _json: IUserInfo;
-    [key: string]: unknown;
+    readonly gender: 'female' | 'male' | undefined;
+    readonly photos: readonly [{ readonly value: string }];
+    readonly _raw: string;
+    readonly _json: IUserInfo;
+    readonly [key: string]: unknown;
 }
 
 @Injectable()
@@ -67,12 +67,12 @@ export class YandexStrategy extends PassportStrategy(Strategy, 'yandex-oauth') {
         });
     }
 
-    async validate(
+    validate(
         _req: never,
         _at: string,
         _rt: string,
         profile: IYandexProfile,
-        done: (...args: unknown[]) => void,
+        done: (...args: readonly unknown[]) => void,
     ) {
         const json = profile._json;
 
@@ -90,7 +90,7 @@ export class YandexStrategy extends PassportStrategy(Strategy, 'yandex-oauth') {
         done(null, user);
     }
 
-    private async getUserProfile(accessToken: string): Promise<any> {
+    private async getUserProfile(accessToken: string) {
         try {
             const response = await firstValueFrom(
                 this.http.get<IUserInfo>('https://login.yandex.ru/info', {
@@ -142,7 +142,7 @@ export class YandexStrategy extends PassportStrategy(Strategy, 'yandex-oauth') {
 
     override userProfile(
         accessToken: string,
-        done: (err?: Error | null, profile?: any) => void,
+        done: (err?: Error | null, profile?: unknown) => void,
     ): void {
         this.getUserProfile(accessToken)
             .then((profile) => done(null, profile))

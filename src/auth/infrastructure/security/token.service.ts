@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import type { JwtPayload } from '@shared/types';
+import { JwtService } from '@nestjs/jwt';
+
 import type { User } from '@core/user';
+import type { JwtPayload } from '@shared/types';
 
 @Injectable()
 export class TokenService {
@@ -12,15 +13,15 @@ export class TokenService {
     ) {}
 
     async generateTokens(user: User, sessionId: string) {
-        const domain = this.cfg.get<string>('DOMAIN');
-        const audConstraint = this.cfg.getOrThrow('JWT_AUDIENCE');
+        const iss = this.cfg.getOrThrow('JWT_ISSUER');
+        const aud = this.cfg.getOrThrow('JWT_AUDIENCE');
 
         const payload = {
             jti: sessionId,
             sub: user.id,
             email: user.email,
-            iss: btoa(domain ?? 'localhost'),
-            aud: btoa(audConstraint),
+            iss,
+            aud,
         };
 
         const accessExp = this.cfg.get<any>('JWT_ACCESS_EXPIRES_IN');

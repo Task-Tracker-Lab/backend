@@ -1,7 +1,8 @@
-import { primaryKey, timestamp, text, varchar, index } from 'drizzle-orm/pg-core';
 import { createId } from '@paralleldrive/cuid2';
-import { roleEnum, statusEnum } from './enums';
 import { baseSchema, users } from '@shared/entities';
+import { primaryKey, timestamp, text, varchar, index } from 'drizzle-orm/pg-core';
+
+import { roleEnum, statusEnum } from './enums';
 
 export const teams = baseSchema.table(
     'teams',

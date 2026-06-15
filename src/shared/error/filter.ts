@@ -6,18 +6,20 @@ import {
     HttpStatus,
     Logger,
 } from '@nestjs/common';
-import { ZodValidationException } from 'nestjs-zod';
-import type { FastifyReply, FastifyRequest } from 'fastify';
-import { PostgresError } from 'postgres';
-import { BaseException, type IErrorOptions } from './exception';
 import { DrizzleQueryError } from 'drizzle-orm';
-import type { ZodError, ZodIssue } from 'zod/v4';
+import { ZodValidationException } from 'nestjs-zod';
+import { PostgresError } from 'postgres';
+
+import { BaseException, type IErrorOptions } from './exception';
 import { DATABASE_ERRORS } from './swagger';
+
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { ZodError, ZodIssue } from 'zod/v4';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
     private readonly logger = new Logger(GlobalExceptionFilter.name);
-    private isDev = process.env['NODE_ENV'] === 'development';
+    private readonly isDev = process.env['NODE_ENV'] === 'development';
 
     catch(exception: unknown, host: ArgumentsHost) {
         if (exception instanceof ZodValidationException) {
@@ -39,7 +41,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         return this.handleUnknownError(exception, host);
     }
 
-    private parseZodValidation = async (exception: ZodValidationException, host: ArgumentsHost) => {
+    private parseZodValidation = (exception: ZodValidationException, host: ArgumentsHost) => {
         const { request, response } = this.getCtxBase(host);
         const status = exception.getStatus();
 
@@ -61,7 +63,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         );
     };
 
-    private parseDatabase = async (exception: DrizzleQueryError, host: ArgumentsHost) => {
+    private parseDatabase = (exception: DrizzleQueryError, host: ArgumentsHost) => {
         const { request, response } = this.getCtxBase(host);
 
         const error =
@@ -101,7 +103,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         );
     };
 
-    private parseHttp = async (exception: BaseException, host: ArgumentsHost) => {
+    private parseHttp = (exception: BaseException, host: ArgumentsHost) => {
         const { request, response } = this.getCtxBase(host);
         const status = exception.getStatus();
 
@@ -123,7 +125,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         );
     };
 
-    private parseNestHttp = async (exception: HttpException, host: ArgumentsHost) => {
+    private parseNestHttp = (exception: HttpException, host: ArgumentsHost) => {
         const { request, response } = this.getCtxBase(host);
         const status = exception.getStatus();
         const res = exception.getResponse();
@@ -174,7 +176,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     private formatErrorResponse(
         request: FastifyRequest,
         status: number,
-        data: { code: string; message: string; details: any[]; stack?: string; service?: string },
+        data: {
+            readonly code: string;
+            readonly message: string;
+            readonly details: readonly any[];
+            readonly stack?: string;
+            readonly service?: string;
+        },
     ) {
         const requestId = request.id ?? request.headers['x-request-id'];
 

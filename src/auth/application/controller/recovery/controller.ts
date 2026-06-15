@@ -1,12 +1,14 @@
-import { ApiBaseController } from '@shared/decorators';
 import { Body, Post } from '@nestjs/common';
+import { ApiBaseController } from '@shared/decorators';
+
+import { AuthFacade } from '../../auth.facade';
+import { PasswordResetConfirmDto, ResetPasswordDto, VerifyResetCodeDto } from '../../dtos';
+
 import {
     PostPasswordResetConfirmSwagger,
     PostPasswordResetSwagger,
     PostPasswordResetVerifySwagger,
 } from './swagger';
-import { PasswordResetConfirmDto, ResetPasswordDto, VerifyResetCodeDto } from '../../dtos';
-import { AuthFacade } from '../../auth.facade';
 
 @ApiBaseController('auth', 'Auth Recovery')
 export class AuthRecoveryController {

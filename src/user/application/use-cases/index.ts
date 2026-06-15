@@ -1,13 +1,12 @@
+import { FindByIdsQuery } from './find-by-ids.query';
+import { FindProfileQuery } from './find-profile.query';
+import { FindUserQuery } from './find-user.query';
+import { GetActivityQuery } from './get-activity.query';
 import { RegisterUserUseCase } from './register-user.use-case';
 import { UpdateNotificationsUseCase } from './update-notifications.use-case';
 import { UpdatePasswordUseCase } from './update-password.use-case';
 import { UpdateProfileUseCase } from './update-profile.use-case';
 import { UploadAvatarUseCase } from './upload-avatar.use-case';
-
-import { FindProfileQuery } from './find-profile.query';
-import { FindUserQuery } from './find-user.query';
-import { GetActivityQuery } from './get-activity.query';
-import { FindByIdsQuery } from './find-by-ids.query';
 
 export * from './register-user.use-case';
 export * from './update-notifications.use-case';

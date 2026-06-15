@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ROLE_PRIORITY } from '@shared/constants';
+
 import type { TeamRole } from '@shared/entities';
 
 @Injectable()
@@ -15,7 +16,9 @@ export class TeamMemberPolicy {
      */
     public canManage(issuerRole: TeamRole, targetRole: TeamRole): boolean {
         // Минимальный порог для управления — администратор
-        if (this.getPriority(issuerRole) < (ROLE_PRIORITY['admin'] ?? 3)) return false;
+        if (this.getPriority(issuerRole) < (ROLE_PRIORITY['admin'] ?? 3)) {
+            return false;
+        }
 
         // Нельзя редактировать того, кто равен или выше по рангу
         return this.getPriority(issuerRole) > this.getPriority(targetRole);
@@ -30,10 +33,14 @@ export class TeamMemberPolicy {
         newRole: TeamRole,
     ): boolean {
         // 1. Проверка прав на управление целью
-        if (!this.canManage(issuerRole, targetCurrentRole)) return false;
+        if (!this.canManage(issuerRole, targetCurrentRole)) {
+            return false;
+        }
 
         // 2. Роль Owner неприкосновенна (нельзя снять и нельзя назначить через обычный Update)
-        if (targetCurrentRole === 'owner' || newRole === 'owner') return false;
+        if (targetCurrentRole === 'owner' || newRole === 'owner') {
+            return false;
+        }
 
         // 3. Нельзя назначить роль выше своей или равную своей (если ты не владелец)
         if (issuerRole !== 'owner' && this.getPriority(newRole) >= this.getPriority(issuerRole)) {
@@ -48,7 +55,9 @@ export class TeamMemberPolicy {
      */
     public canChangeStatus(issuerRole: TeamRole, targetRole: TeamRole): boolean {
         // Владельца нельзя забанить или деактивировать
-        if (targetRole === 'owner') return false;
+        if (targetRole === 'owner') {
+            return false;
+        }
 
         // В остальном работают стандартные правила иерархии
         return this.canManage(issuerRole, targetRole);
@@ -76,13 +85,19 @@ export class TeamMemberPolicy {
         const newRolePrio = this.getPriority(newMemberRole);
 
         // Только админы и выше могут приглашать
-        if (issuerPrio < (ROLE_PRIORITY['admin'] ?? 3)) return false;
+        if (issuerPrio < (ROLE_PRIORITY['admin'] ?? 3)) {
+            return false;
+        }
 
         // Нельзя пригласить кого-то на роль выше или равную своей (кроме owner)
-        if (issuerRole !== 'owner' && newRolePrio >= issuerPrio) return false;
+        if (issuerRole !== 'owner' && newRolePrio >= issuerPrio) {
+            return false;
+        }
 
         // Нельзя пригласить на роль owner через обычный инвайт
-        if (newMemberRole === 'owner') return false;
+        if (newMemberRole === 'owner') {
+            return false;
+        }
 
         return true;
     }
@@ -93,8 +108,8 @@ export class TeamMemberPolicy {
      * @remarks
      * Логика базируется на приоритете ролей. Минимально допустимая роль — Модератор.
      *
-     * @param issuerRole - Роль участника, инициирующего обновление.
-     * @returns `true`, если приоритет роли равен или выше приоритета модератора, иначе `false`.
+     * @param {TeamRole} issuerRole - Роль участника, инициирующего обновление.
+     * @returns {boolean} `true`, если приоритет роли равен или выше приоритета модератора, иначе `false`.
      *
      * @example
      * const canUpdate = policy.canUpdateMedia('admin'); // true

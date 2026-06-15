@@ -1,4 +1,5 @@
 import { z } from 'zod/v4';
+
 import { jwtSecretValidation } from './helpers/jwt-secren-validation';
 
 const timeStringSchema = z.string().regex(/^[0-9]+[smhdw]$/, {
@@ -74,26 +75,28 @@ export const ConfigSchema = z.object({
             ),
         ),
 
+    JWT_ISSUER: z
+        .string({
+            error: 'Параметр JWT_ISSUER обязателен для проверки токенов',
+        })
+        .min(1, 'JWT_ISSUER не может быть пустым'),
     JWT_AUDIENCE: z
         .string({
             error: 'Параметр JWT_AUDIENCE обязателен для проверки токенов',
         })
         .min(1, 'JWT_AUDIENCE не может быть пустым'),
-
     JWT_ACCESS_SECRET: z
         .string({ error: 'Ключ JWT_ACCESS_SECRET обязателен для безопасности' })
         .refine(jwtSecretValidation, {
             message:
                 'JWT_ACCESS_SECRET должен быть не менее 32 символов ИЛИ содержать минимум 5 слов через дефис',
         }),
-
     JWT_REFRESH_SECRET: z
         .string({ error: 'Ключ JWT_REFRESH_SECRET обязателен для безопасности' })
         .refine(jwtSecretValidation, {
             message:
                 'JWT_REFRESH_SECRET должен быть не менее 32 символов ИЛИ содержать минимум 5 слов через дефис',
         }),
-
     JWT_ACCESS_EXPIRES_IN: timeStringSchema.default('15m'),
     JWT_REFRESH_EXPIRES_IN: timeStringSchema.default('30d'),
 

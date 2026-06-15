@@ -1,10 +1,10 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { IIdentityRepository } from '@core/auth/domain/repository';
 import { FindUserQuery } from '@core/user';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { BaseException } from '@shared/error';
-import { IIdentityRepository } from '@core/auth/domain/repository';
 
 @Injectable()
 export class ConnectProviderUseCase {
@@ -93,22 +93,15 @@ export class ConnectProviderUseCase {
             const minutesLeft = Math.floor(timeLeft / 60);
             const secondsLeft = timeLeft % 60;
 
-            let timeMessage = '';
-            if (minutesLeft > 0) {
-                timeMessage = `${minutesLeft} мин ${secondsLeft} сек`;
-            } else {
-                timeMessage = `${secondsLeft} сек`;
-            }
+            const timeMessage =
+                minutesLeft > 0 ? `${minutesLeft} мин ${secondsLeft} сек` : `${secondsLeft} сек`;
 
             const isSameProvider = activeSession.provider === newProvider;
             const providerName = this.getProviderName(activeSession.provider);
 
-            let message = '';
-            if (isSameProvider) {
-                message = `У вас уже есть активный процесс авторизации через ${providerName}. Подождите ${timeMessage} или завершите его в другом окне.`;
-            } else {
-                message = `У вас уже есть активный процесс авторизации через ${providerName}. Дождитесь его завершения (${timeMessage}) или отмените, чтобы начать через ${this.getProviderName(newProvider)}.`;
-            }
+            const message = isSameProvider
+                ? `У вас уже есть активный процесс авторизации через ${providerName}. Подождите ${timeMessage} или завершите его в другом окне.`
+                : `У вас уже есть активный процесс авторизации через ${providerName}. Дождитесь его завершения (${timeMessage}) или отмените, чтобы начать через ${this.getProviderName(newProvider)}.`;
 
             throw new BaseException(
                 {
@@ -121,7 +114,6 @@ export class ConnectProviderUseCase {
                             isSameProvider,
                             timeLeftSeconds: timeLeft,
                             expiresAt: activeSession.expiresAt,
-                            stateCode: activeSession.stateCode,
                         },
                     ],
                 },

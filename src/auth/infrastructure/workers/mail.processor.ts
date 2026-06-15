@@ -1,9 +1,11 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import type { Job } from 'bullmq';
-import { IMailPort } from '@shared/adapters/mail';
 import { Inject } from '@nestjs/common';
-import { RegisterCodeEvent, ResetPasswordEvent } from '../../domain/events';
+import { IMailPort } from '@shared/adapters/mail';
+
 import { AuthMailJobs, AuthQueues } from '../../domain/enums';
+import { RegisterCodeEvent, ResetPasswordEvent } from '../../domain/events';
+
+import type { Job } from 'bullmq';
 
 @Processor(AuthQueues.AUTH_MAIL)
 export class MailProcessor extends WorkerHost {
@@ -46,7 +48,7 @@ export class MailProcessor extends WorkerHost {
         }
     }
 
-    private sendRegisterCode = async (job: Job<RegisterCodeEvent>) => {
+    private readonly sendRegisterCode = async (job: Job<RegisterCodeEvent>) => {
         const { email, name, otp } = job.data;
 
         await job.log(`Sending registration code to: ${email}`);
@@ -58,7 +60,7 @@ export class MailProcessor extends WorkerHost {
         await job.updateProgress(100);
     };
 
-    private sendResetPassCode = async (job: Job<ResetPasswordEvent>) => {
+    private readonly sendResetPassCode = async (job: Job<ResetPasswordEvent>) => {
         const { email, otp } = job.data;
 
         await job.log(`Sending password reset to: ${email}`);

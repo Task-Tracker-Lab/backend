@@ -1,7 +1,7 @@
 export class RegisterCodeEvent {
     constructor(
-        public email: string,
-        public name: string,
-        public otp: string,
+        public readonly email: string,
+        public readonly name: string,
+        public readonly otp: string,
     ) {}
 }

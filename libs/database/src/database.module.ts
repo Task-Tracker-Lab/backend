@@ -1,15 +1,16 @@
+import { DatabaseHealthService } from '@libs/database/database-health.service';
 import { Inject, Logger, Module, OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
+
 import { DATABASE_SERVICE, SQL_CLIENT } from './constants';
-import { MigrationService } from './migration.service';
 import {
     ConfigurableModuleClass,
     MODULE_OPTIONS_TOKEN,
     OPTIONS_TYPE,
 } from './database.module-definition';
-import { DatabaseHealthService } from '@libs/database/database-health.service';
+import { MigrationService } from './migration.service';
 
 @Module({
     providers: [
@@ -54,8 +55,9 @@ import { DatabaseHealthService } from '@libs/database/database-health.service';
                         ? {
                               logQuery(query, params) {
                                   logger.debug(`SQL: ${query}`);
-                                  if (params?.length)
+                                  if (params?.length) {
                                       logger.debug(`Params: ${JSON.stringify(params)}`);
+                                  }
                               },
                           }
                         : false,

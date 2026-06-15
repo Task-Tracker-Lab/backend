@@ -1,19 +1,25 @@
+import { randomUUID } from 'node:crypto';
+import { extname } from 'node:path';
+
+import {
+    DeleteObjectCommand,
+    HeadBucketCommand,
+    S3Client,
+    PutObjectCommand,
+} from '@aws-sdk/client-s3';
 import { Inject, Injectable } from '@nestjs/common';
-import { DeleteObjectCommand, HeadBucketCommand, S3Client } from '@aws-sdk/client-s3';
+
 import { S3_CLIENT } from './constants';
 import { S3ModuleOptions } from './interfaces';
-import { PutObjectCommand } from '@aws-sdk/client-s3';
-import { randomUUID } from 'crypto';
-import { extname } from 'path';
 import { MODULE_OPTIONS_TOKEN } from './s3.module-definition';
 
 @Injectable()
 export class S3Service {
     constructor(
         @Inject(S3_CLIENT)
-        private s3Client: S3Client,
+        private readonly s3Client: S3Client,
         @Inject(MODULE_OPTIONS_TOKEN)
-        private options: S3ModuleOptions,
+        private readonly options: S3ModuleOptions,
     ) {}
 
     private get bucket(): string {
@@ -28,7 +34,7 @@ export class S3Service {
                 }),
             );
             return true;
-        } catch (error) {
+        } catch {
             return false;
         }
     }

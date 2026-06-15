@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { SignUpDto } from '@core/auth/application/dtos';
 
 export interface SignUpCacheData {

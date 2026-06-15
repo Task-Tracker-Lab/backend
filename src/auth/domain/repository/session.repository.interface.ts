@@ -1,4 +1,4 @@
-import { sessions } from '../../infrastructure/persistence/models/session.model';
+import type { sessions } from '../../infrastructure/persistence/models/session.model';
 
 export type SessionInsert = typeof sessions.$inferInsert;
 export type SessionSelect = typeof sessions.$inferSelect;
@@ -6,7 +6,7 @@ export type SessionSelect = typeof sessions.$inferSelect;
 export interface ISessionRepository {
     create(data: SessionInsert): Promise<SessionSelect>;
     findById(id: string): Promise<SessionSelect | null>;
-    findAllByUserId(userId: string): Promise<SessionSelect[]>;
+    findAllByUserId(userId: string): Promise<readonly SessionSelect[]>;
     revoke(id: string): Promise<boolean>;
     revokeAllByUserId(userId: string, exceptSessionId?: string): Promise<void>;
     deleteExpired(): Promise<number>;

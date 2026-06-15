@@ -1,5 +1,6 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
+
 import { ISessionRepository } from '../../domain/repository';
 import { TokenService } from '../../infrastructure/security';
 

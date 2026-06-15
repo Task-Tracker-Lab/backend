@@ -1,9 +1,12 @@
+import * as path from 'node:path';
+
 import { Inject, Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
+
 import { DATABASE_SERVICE } from './constants';
-import type { DatabaseService } from './interfaces';
-import * as path from 'path';
 import { MODULE_OPTIONS_TOKEN, OPTIONS_TYPE } from './database.module-definition';
+
+import type { DatabaseService } from './interfaces';
 
 @Injectable()
 export class MigrationService implements OnModuleInit {

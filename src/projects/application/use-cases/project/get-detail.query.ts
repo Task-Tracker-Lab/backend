@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
+
 import { ProjectMapper } from '../../mappers';
+
 import { FindProjectQuery } from './find-one.query';
 
 @Injectable()

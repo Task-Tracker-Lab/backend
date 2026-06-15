@@ -1,10 +1,11 @@
-import { IAreaRepository } from '@core/area/domain/repository';
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { UpdateAreaDto } from '../../dtos';
-import { ProjectAccessPolicy } from '@core/projects/domain/policy';
-import { BaseException } from '@shared/error';
 import { AreaErrorCodes, AreaErrorMessages } from '@core/area/domain/errors';
+import { IAreaRepository } from '@core/area/domain/repository';
+import { ProjectAccessPolicy } from '@core/projects/domain/policy';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { BaseException } from '@shared/error';
 import slugify from 'slugify';
+
+import { UpdateAreaDto } from '../../dtos';
 
 @Injectable()
 export class UpdateAreaUseCase {
@@ -37,24 +38,29 @@ export class UpdateAreaUseCase {
             const updateData: any = {
                 updatedAt: new Date().toISOString(),
                 updatedBy: userId,
+                ...(dto.title && dto.title !== area.title && { title: dto.title.trim() }),
+                ...(dto.description &&
+                    dto.description !== area.description && {
+                        description: dto.description?.trim() || null,
+                    }),
+                ...(dto.descriptionHtml &&
+                    dto.descriptionHtml !== area.descriptionHtml && {
+                        descriptionHtml: dto.descriptionHtml?.trim() || null,
+                    }),
+                ...(dto.color && dto.color !== area.color && { color: dto.color || null }),
+                ...(dto.icon && dto.icon !== area.icon && { icon: dto.icon || null }),
+                ...(dto.defaultView &&
+                    dto.defaultView !== area.defaultView && { defaultView: dto.defaultView }),
+                ...(dto.position &&
+                    dto.position !== area.position &&
+                    dto.position >= 0 && { position: dto.position }),
+                ...(dto.maxTasksLimit &&
+                    dto.maxTasksLimit !== area.maxTasksLimit &&
+                    dto.maxTasksLimit > 0 && { maxTasksLimit: dto.maxTasksLimit }),
+                ...(dto.isLocked && dto.isLocked !== area.isLocked && { isLocked: dto.isLocked }),
             };
 
             let hasChanges = false;
-
-            if (dto.title && dto.title !== area.title) {
-                updateData.title = dto.title.trim();
-                hasChanges = true;
-            }
-
-            if (dto.description && dto.description !== area.description) {
-                updateData.description = dto.description?.trim() || null;
-                hasChanges = true;
-            }
-
-            if (dto.descriptionHtml && dto.descriptionHtml !== area.descriptionHtml) {
-                updateData.descriptionHtml = dto.descriptionHtml?.trim() || null;
-                hasChanges = true;
-            }
 
             if (dto.slug && dto.slug !== area.slug) {
                 let newSlug = dto.slug;
@@ -98,54 +104,6 @@ export class UpdateAreaUseCase {
                 hasChanges = true;
             }
 
-            if (dto.color && dto.color !== area.color) {
-                updateData.color = dto.color || null;
-                hasChanges = true;
-            }
-
-            if (dto.icon && dto.icon !== area.icon) {
-                updateData.icon = dto.icon || null;
-                hasChanges = true;
-            }
-
-            if (dto.defaultView && dto.defaultView !== area.defaultView) {
-                updateData.defaultView = dto.defaultView;
-                hasChanges = true;
-            }
-
-            if (dto.position && dto.position !== area.position) {
-                if (dto.position < 0) {
-                    throw new BaseException(
-                        {
-                            code: AreaErrorCodes.POSITION_INVALID,
-                            message: AreaErrorMessages[AreaErrorCodes.POSITION_INVALID],
-                        },
-                        HttpStatus.BAD_REQUEST,
-                    );
-                }
-                updateData.position = dto.position;
-                hasChanges = true;
-            }
-
-            if (dto.maxTasksLimit && dto.maxTasksLimit !== area.maxTasksLimit) {
-                if (dto.maxTasksLimit !== null && dto.maxTasksLimit <= 0) {
-                    throw new BaseException(
-                        {
-                            code: AreaErrorCodes.MAX_TASKS_LIMIT_INVALID,
-                            message: AreaErrorMessages[AreaErrorCodes.MAX_TASKS_LIMIT_INVALID],
-                        },
-                        HttpStatus.BAD_REQUEST,
-                    );
-                }
-                updateData.maxTasksLimit = dto.maxTasksLimit;
-                hasChanges = true;
-            }
-
-            if (dto.isLocked && dto.isLocked !== area.isLocked) {
-                updateData.isLocked = dto.isLocked;
-                hasChanges = true;
-            }
-
             if (!hasChanges) {
                 return {
                     success: true,
@@ -160,7 +118,9 @@ export class UpdateAreaUseCase {
                 message: `Пространство ${dto.title || area.title} успешно обновлено`,
             };
         } catch (e) {
-            if (e instanceof BaseException) throw e;
+            if (e instanceof BaseException) {
+                throw e;
+            }
 
             throw new BaseException(
                 {

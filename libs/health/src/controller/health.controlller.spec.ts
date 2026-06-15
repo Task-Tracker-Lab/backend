@@ -1,10 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { HealthController } from './health.controller';
 import { HttpStatus, Logger } from '@nestjs/common';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+import { HealthController } from './health.controller';
 
 describe('HealthController', () => {
     let controller: HealthController;
-    let healthServiceMock: { getHealthData: ReturnType<typeof vi.fn> };
+    let healthServiceMock: { readonly getHealthData: ReturnType<typeof vi.fn> };
 
     const SERVICE_NAME = 'MyService';
 
@@ -15,7 +16,7 @@ describe('HealthController', () => {
 
         controller = new HealthController(healthServiceMock as any);
 
-        vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+        vi.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
     });
 
     it('should throw SERVICE_UNAVAILABLE when service status is false (down)', async () => {

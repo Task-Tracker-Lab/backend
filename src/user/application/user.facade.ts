@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
+
+import { UpdateProfileDto, UpdateNotificationsDto } from './dtos';
 import {
     FindProfileQuery,
     GetActivityQuery,
     UpdateNotificationsUseCase,
     UpdateProfileUseCase,
 } from './use-cases';
-import { UpdateProfileDto, UpdateNotificationsDto } from './dtos';
 
 @Injectable()
 export class UserFacade {

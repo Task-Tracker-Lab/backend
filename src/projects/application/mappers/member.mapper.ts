@@ -16,7 +16,7 @@ export class MemberMapper {
         };
     }
 
-    public static toMemberListResponse(members: MemberWithUser[]) {
+    public static toMemberListResponse(members: readonly MemberWithUser[]) {
         const items = members.map(MemberMapper.toMemberResponse);
 
         return {

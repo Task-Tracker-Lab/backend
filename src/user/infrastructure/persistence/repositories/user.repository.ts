@@ -1,9 +1,11 @@
 import { IUserRepository } from '@core/user/domain/repository';
-import * as sc from '../models';
 import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
 import { Inject, Injectable } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
 import { desc, eq, count, inArray } from 'drizzle-orm';
+
+import * as sc from '../models';
+
 import type {
     NewUser,
     NewUserActivity,
@@ -27,7 +29,7 @@ export class UserRepository implements IUserRepository {
             .leftJoin(sc.userNotifications, eq(sc.users.id, sc.userNotifications.userId));
     }
 
-    public findProfile = async (id: string) => {
+    public readonly findProfile = async (id: string) => {
         const [rows] = await this.fullUserQuery
             .leftJoin(sc.userPreferences, eq(sc.users.id, sc.userPreferences.userId))
             .where(eq(sc.users.id, id));
@@ -61,15 +63,19 @@ export class UserRepository implements IUserRepository {
         };
     };
 
-    public findByIds = async (ids: string[]) => {
-        if (ids.length === 0) return [];
+    public readonly findByIds = async (ids: readonly string[]) => {
+        if (ids.length === 0) {
+            return [];
+        }
 
         return this.db.select().from(sc.users).where(inArray(sc.users.id, ids));
     };
 
-    public findById = async (id: string) => {
+    public readonly findById = async (id: string) => {
         const [row] = await this.fullUserQuery.where(eq(sc.users.id, id));
-        if (!row || !row.user_security) return null;
+        if (!row || !row.user_security) {
+            return null;
+        }
         return {
             user: row.users,
             security: {
@@ -78,9 +84,11 @@ export class UserRepository implements IUserRepository {
         };
     };
 
-    public findByEmail = async (email: string) => {
+    public readonly findByEmail = async (email: string) => {
         const [row] = await this.fullUserQuery.where(eq(sc.users.email, email.toLowerCase()));
-        if (!row || !row.user_security) return null;
+        if (!row || !row.user_security) {
+            return null;
+        }
         return {
             user: row.users,
             security: {
@@ -89,7 +97,7 @@ export class UserRepository implements IUserRepository {
         };
     };
 
-    public findSecurityByUserId = async (userId: string) => {
+    public readonly findSecurityByUserId = async (userId: string) => {
         const [result] = await this.db
             .select()
             .from(sc.userSecurity)
@@ -97,8 +105,8 @@ export class UserRepository implements IUserRepository {
         return result || null;
     };
 
-    public create = async (data: NewUser) => {
-        return this.db.transaction(async (tx) => {
+    public readonly create = async (data: NewUser) =>
+        this.db.transaction(async (tx) => {
             const [newUser] = await tx.insert(sc.users).values(data).returning();
 
             if (!newUser) {
@@ -111,9 +119,8 @@ export class UserRepository implements IUserRepository {
 
             return newUser;
         });
-    };
 
-    public updateProfile = async (
+    public readonly updateProfile = async (
         id: string,
         user: Partial<User>,
         preferences?: Partial<UserPreferences>,
@@ -127,7 +134,9 @@ export class UserRepository implements IUserRepository {
     };
 
     private async updateUser(id: string, data: Partial<User>) {
-        if (Object.keys(data).length === 0) return null;
+        if (Object.keys(data).length === 0) {
+            return null;
+        }
 
         const result = await this.db
             .update(sc.users)
@@ -200,7 +209,10 @@ export class UserRepository implements IUserRepository {
         return (result?.count ?? 0) > 0;
     }
 
-    async findActivityByUser(userId: string, options: { limit: number; offset: number }) {
+    async findActivityByUser(
+        userId: string,
+        options: { readonly limit: number; readonly offset: number },
+    ) {
         const [totalResult, items] = await Promise.all([
             this.db
                 .select({ value: count() })

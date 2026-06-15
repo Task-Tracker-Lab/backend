@@ -1,8 +1,10 @@
 import { Body, Delete, Get, Param, Patch } from '@nestjs/common';
 import { ApiBaseController, GetUserId } from '@shared/decorators';
-import { GetMembersSwagger, RemoveMemberSwagger, UpdateMemberSwagger } from './swagger';
-import type { UpdateMemberDto } from '../../dtos/member.dto';
+
+import { UpdateMemberDto } from '../../dtos';
 import { TeamsFacade } from '../../team.facade';
+
+import { GetMembersSwagger, RemoveMemberSwagger, UpdateMemberSwagger } from './swagger';
 
 @ApiBaseController('teams/:teamId', 'Teams Members', true)
 export class TeamsMembersController {

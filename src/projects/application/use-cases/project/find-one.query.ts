@@ -1,11 +1,13 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { FindTeamMemberQuery, FindTeamQuery } from '@core/teams';
-import { createHash } from 'crypto';
-import { BaseException } from '@shared/error';
-import { isTeamRole, ROLE_PRIORITY } from '@shared/constants';
-import { IProjectRepository } from '@core/projects/domain/repository';
-import type { Project } from '@core/projects/domain/entities';
+import { createHash } from 'node:crypto';
+
 import { ProjectErrorCodes, ProjectErrorMessages } from '@core/projects/domain/errors';
+import { IProjectRepository } from '@core/projects/domain/repository';
+import { FindTeamMemberQuery, FindTeamQuery } from '@core/teams';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { isTeamRole, ROLE_PRIORITY } from '@shared/constants';
+import { BaseException } from '@shared/error';
+
+import type { Project } from '@core/projects/domain/entities';
 
 @Injectable()
 export class FindProjectQuery {
@@ -43,7 +45,7 @@ export class FindProjectQuery {
         return this.findPrivate(project, teamId, userId, minRole);
     }
 
-    private findPrivate = async (
+    private readonly findPrivate = async (
         project: Project,
         teamId: string,
         userId?: string,
@@ -91,7 +93,7 @@ export class FindProjectQuery {
         return { project, member, team };
     };
 
-    private findPublic = async (project: Project, token: string) => {
+    private readonly findPublic = async (project: Project, token: string) => {
         if (project.visibility !== 'public') {
             throw new BaseException(
                 { code: 'PROJECT_NOT_PUBLIC', message: 'Публичный доступ к проекту ограничен' },

@@ -1,6 +1,7 @@
 import { OAuthProvider } from '@core/auth/infrastructure/constants';
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ActionResponse } from '@shared/dtos';
 import {
     ApiBadRequest,
     ApiConflict,
@@ -8,9 +9,9 @@ import {
     ApiUnauthorized,
     ApiValidationError,
 } from '@shared/error';
-import { ConnectedProviders, ConnectProviderResponse, ProvidersResponse } from '../../dtos';
 import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
-import { ActionResponse } from '@shared/dtos';
+
+import { ConnectedProviders, ConnectProviderResponse, ProvidersResponse } from '../../dtos';
 
 export const OAuthLoginSwagger = () =>
     applyDecorators(

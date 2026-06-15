@@ -1,12 +1,13 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import type { CreateProjectDto } from '../../dtos';
-import { IProjectRepository } from '@core/projects/domain/repository';
 import { PROJECT_STATUSES } from '@core/projects/domain/entities';
-import { ProjectAccessPolicy } from '@core/projects/domain/policy';
-import { BaseException } from '@shared/error';
 import { ProjectErrorCodes, ProjectErrorMessages } from '@core/projects/domain/errors';
-import slugify from 'slugify';
+import { ProjectAccessPolicy } from '@core/projects/domain/policy';
+import { IProjectRepository } from '@core/projects/domain/repository';
 import { MAX_PROJECTS_PER_TEAM } from '@core/projects/infrastructure/constants';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { BaseException } from '@shared/error';
+import slugify from 'slugify';
+
+import { CreateProjectDto } from '../../dtos';
 
 @Injectable()
 export class CreateProjectUseCase {

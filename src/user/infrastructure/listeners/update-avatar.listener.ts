@@ -14,7 +14,9 @@ export class UpdateAvatarListener extends WorkerHost {
     }
 
     async process(job: Job<UpdateMediaUser>) {
-        if (job.name !== MEDIA_JOBS.UPDATE_USER_AVATAR) return;
+        if (job.name !== MEDIA_JOBS.UPDATE_USER_AVATAR) {
+            return;
+        }
 
         const { entity, path } = job.data;
 

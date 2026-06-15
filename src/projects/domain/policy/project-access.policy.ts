@@ -1,12 +1,14 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { IMemberRepository, IProjectRepository } from '../repository';
-import { BaseException } from '@shared/error';
 import { FindTeamMemberQuery, FindTeamQuery } from '@core/teams';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ROLE_PRIORITY, PROJECT_ROLE_PRIORITY } from '@shared/constants';
-import type { MemberRole } from '../entities';
-import { MemberErrorCodes, MemberErrorMessages } from '../errors/member.errors';
-import { ProjectErrorCodes, ProjectErrorMessages } from '../errors';
+import { BaseException } from '@shared/error';
+
 import { isTeamRole } from '../../../shared/constants/roles.constant';
+import { ProjectErrorCodes, ProjectErrorMessages } from '../errors';
+import { MemberErrorCodes, MemberErrorMessages } from '../errors/member.errors';
+import { IMemberRepository, IProjectRepository } from '../repository';
+
+import type { MemberRole } from '../entities';
 
 @Injectable()
 export class ProjectAccessPolicy {
@@ -64,7 +66,7 @@ export class ProjectAccessPolicy {
     public async ensureProjectAccess(
         slug: string,
         userId: string,
-        minRoles: MemberRole[] = ['viewer'],
+        minRoles: readonly MemberRole[] = ['viewer'],
     ) {
         const project = await this.projectRepo.findBySlug(slug);
         if (!project) {
@@ -89,7 +91,9 @@ export class ProjectAccessPolicy {
         }
 
         const hasRole = minRoles.some((role) => {
-            if (!isTeamRole(member.role) || !isTeamRole(role)) return false;
+            if (!isTeamRole(member.role) || !isTeamRole(role)) {
+                return false;
+            }
 
             const memberPriority = PROJECT_ROLE_PRIORITY[member.role] ?? -1;
             const rolePriority = PROJECT_ROLE_PRIORITY[role] ?? -1;

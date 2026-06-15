@@ -1,6 +1,6 @@
 import { createId } from '@paralleldrive/cuid2';
-import { varchar, text, timestamp, boolean, jsonb } from 'drizzle-orm/pg-core';
 import { baseSchema } from '@shared/entities';
+import { varchar, text, timestamp, boolean, jsonb } from 'drizzle-orm/pg-core';
 
 export const users = baseSchema.table('users', {
     id: text('id')
@@ -67,8 +67,12 @@ export const userNotifications = baseSchema.table('user_notifications', {
         .references(() => users.id, { onDelete: 'cascade' }),
     settings: jsonb('settings')
         .$type<{
-            email: { task_assigned: boolean; mentions: boolean; daily_summary: boolean };
-            push: { task_assigned: boolean; reminders: boolean };
+            readonly email: {
+                readonly task_assigned: boolean;
+                readonly mentions: boolean;
+                readonly daily_summary: boolean;
+            };
+            readonly push: { readonly task_assigned: boolean; readonly reminders: boolean };
         }>()
         .default({
             email: { task_assigned: true, mentions: true, daily_summary: false },

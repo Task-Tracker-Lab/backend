@@ -1,28 +1,28 @@
-import { Module } from '@nestjs/common';
 import { ConfigModule } from '@libs/config';
-import { DatabaseModule } from '@libs/database';
-import { ConfigService } from '@nestjs/config';
-import * as schema from './shared/entities';
-import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { ZodValidationPipe } from 'nestjs-zod';
+import { DatabaseModule, DatabaseHealthService } from '@libs/database';
 import { HealthModule } from '@libs/health';
-import { UserModule } from './user';
-import { GlobalExceptionFilter } from '@shared/error';
-import { AuthModule } from './auth/auth.module';
-import { BullModule } from '@nestjs/bullmq';
-import { MailModule } from '@shared/adapters/mail';
-import { TeamsModule } from './teams';
-import { ProjectsModule } from './projects';
-import { HttpModule } from '@nestjs/axios';
-import { MediaModule } from '@shared/media';
-import { CacheModule } from '@shared/adapters/cache/module';
-import { S3Service } from '@libs/s3';
-import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
-import { ICacheService } from '@shared/adapters/cache/ports';
-import { DatabaseHealthService } from '@libs/database';
-import { ZodValidationInterceptor } from '@shared/interceptors';
-import { AreaModule } from './area';
 import { MetricsModule } from '@libs/metrics';
+import { S3Service } from '@libs/s3';
+import { HttpModule } from '@nestjs/axios';
+import { BullModule } from '@nestjs/bullmq';
+import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { CacheModule } from '@shared/adapters/cache/module';
+import { ICacheService } from '@shared/adapters/cache/ports';
+import { MailModule } from '@shared/adapters/mail';
+import { GlobalExceptionFilter } from '@shared/error';
+import { ZodValidationInterceptor } from '@shared/interceptors';
+import { MediaModule } from '@shared/media';
+import { ZodValidationPipe } from 'nestjs-zod';
+
+import { AreaModule } from './area';
+import { AuthModule } from './auth/auth.module';
+import { ProjectsModule } from './projects';
+import * as schema from './shared/entities';
+import { TeamsModule } from './teams';
+import { UserModule } from './user';
 
 @Module({
     imports: [
@@ -30,14 +30,12 @@ import { MetricsModule } from '@libs/metrics';
         DatabaseModule.registerAsync({
             global: true,
             inject: [ConfigService],
-            useFactory: (cfg: ConfigService) => {
-                return {
-                    schema,
-                    schemaName: cfg.getOrThrow('DB_SCHEMA'),
-                    logging: true,
-                    // runMigrations: false,
-                };
-            },
+            useFactory: (cfg: ConfigService) => ({
+                schema,
+                schemaName: cfg.getOrThrow('DB_SCHEMA'),
+                logging: true,
+                // runMigrations: false,
+            }),
         }),
         BullModule.forRootAsync({
             inject: [ConfigService],
@@ -68,9 +66,9 @@ import { MetricsModule } from '@libs/metrics';
                     serviceName: 'gateway',
                     version,
                     indicators: {
-                        database: async () => db.isAlive(),
-                        cache: async () => cache.isAlive(),
-                        storage: async () => s3.isAlive(),
+                        database: () => db.isAlive(),
+                        cache: () => cache.isAlive(),
+                        storage: () => s3.isAlive(),
                     },
                 };
             },

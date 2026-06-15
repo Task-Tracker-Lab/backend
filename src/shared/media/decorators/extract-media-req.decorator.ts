@@ -1,12 +1,16 @@
 import { createParamDecorator, type ExecutionContext, HttpStatus } from '@nestjs/common';
-import type { FastifyRequest } from 'fastify';
-import { IMAGE_MIME_TYPES } from '../../constants';
 import { BaseException } from '@shared/error';
 import { formatBytes } from '@shared/utils/format-bytes.util';
 
+import { IMAGE_MIME_TYPES } from '../../constants';
+
+import type { FastifyRequest } from 'fastify';
+
 export const ExtractMediaReq = createParamDecorator(
     async (
-        { allowedMimetypes = IMAGE_MIME_TYPES }: { allowedMimetypes?: string[] } = {},
+        {
+            allowedMimetypes = IMAGE_MIME_TYPES,
+        }: { readonly allowedMimetypes?: readonly string[] } = {},
         ctx: ExecutionContext,
     ) => {
         const maxFileSize = 5 * 1024 * 1024;
@@ -48,8 +52,10 @@ export const ExtractMediaReq = createParamDecorator(
 
             const fields: Record<string, string> = {};
 
-            for (const key in file.fields) {
-                if (key === 'file') continue;
+            for (const key of Object.keys(file.fields)) {
+                if (key === 'file') {
+                    continue;
+                }
 
                 const field = file.fields[key];
                 if (field && !Array.isArray(field) && 'value' in field) {
@@ -66,9 +72,8 @@ export const ExtractMediaReq = createParamDecorator(
                 ...fields,
             };
         } catch (e) {
-            const hasCode = (err: unknown): err is { code: string } => {
-                return err !== null && typeof err === 'object' && 'code' in err;
-            };
+            const hasCode = (err: unknown): err is { readonly code: string } =>
+                err !== null && typeof err === 'object' && 'code' in err;
 
             if (hasCode(e) && e?.code === 'FST_REQ_FILE_TOO_LARGE') {
                 throw new BaseException(

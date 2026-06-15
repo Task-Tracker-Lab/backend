@@ -14,7 +14,7 @@ export class GetMyInvitesUseCase {
         const userKey = `user:invites:${email.toLowerCase()}`;
         const codes = await this.cacheService.getCollection(userKey);
 
-        if (!codes.length)
+        if (!codes.length) {
             return {
                 // TODO: реализовать полноценную пагинацию для инвайтов пользователя.
                 items: [],
@@ -27,13 +27,16 @@ export class GetMyInvitesUseCase {
                     hasNextPage: false,
                 },
             };
+        }
 
         const inviteKeys = codes.map((c) => `inv:code:${c}`);
         const results = await this.cacheService.getMany(inviteKeys);
         const { active, expired } = results.reduce(
             (acc: { active: any[]; expired: string[] }, raw, i) => {
                 const code = codes[i];
-                if (!code) return acc;
+                if (!code) {
+                    return acc;
+                }
 
                 if (raw) {
                     acc.active.push(TeamMemberMapper.toPublicInvite(raw, code));

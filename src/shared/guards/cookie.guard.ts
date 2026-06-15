@@ -1,6 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { BaseException } from '@shared/error';
+
 import type { JwtPayload } from '@shared/types';
 
 @Injectable()

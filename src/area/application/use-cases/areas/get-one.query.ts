@@ -4,7 +4,9 @@ import { ProjectAccessPolicy } from '@core/projects/domain/policy';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
 
-export type GetOneAreaParams = { projectSlug: string; key: string } | { key: string };
+export type GetOneAreaParams =
+    | { readonly projectSlug: string; readonly key: string }
+    | { readonly key: string };
 
 @Injectable()
 export class GetAreaQuery {

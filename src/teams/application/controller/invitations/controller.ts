@@ -1,5 +1,9 @@
 import { Body, Get, Param, Delete, Patch, Post } from '@nestjs/common';
 import { ApiBaseController, GetUser, GetUserId } from '@shared/decorators';
+
+import { InviteMemberDto, UpdateInvitationDto } from '../../dtos';
+import { TeamsFacade } from '../../team.facade';
+
 import {
     AcceptInviteSwagger,
     DeleteTeamInvitationSwagger,
@@ -8,9 +12,8 @@ import {
     InviteMemberSwagger,
     UpdateTeamInvitationSwagger,
 } from './swagger';
+
 import type { JwtPayload } from '@shared/types';
-import { InviteMemberDto, UpdateInvitationDto } from '../../dtos';
-import { TeamsFacade } from '../../team.facade';
 
 @ApiBaseController('teams/:teamId/invitations', 'Teams Invitations', true)
 export class TeamsInvitationsController {

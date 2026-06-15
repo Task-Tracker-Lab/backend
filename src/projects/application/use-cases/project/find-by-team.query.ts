@@ -1,7 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ProjectMapper } from '../../mappers';
-import { IProjectRepository } from '@core/projects/domain/repository';
 import { ProjectAccessPolicy } from '@core/projects/domain/policy';
+import { IProjectRepository } from '@core/projects/domain/repository';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { ProjectMapper } from '../../mappers';
 
 @Injectable()
 export class FindProjectsByTeamQuery {

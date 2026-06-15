@@ -1,26 +1,26 @@
 import type { Team, NewTeam, NewTeamMember } from '../entities';
 
-type TResponse = { success: boolean; teamId: string };
+type TResponse = { readonly success: boolean; readonly teamId: string };
 
 export type RawMemberRow = {
-    userId: string;
-    role: string;
-    status: string;
-    joinedAt: string | null;
-    firstName: string | null;
-    lastName: string | null;
-    middleName: string | null;
-    avatarUrl: string | null;
-    email?: string;
+    readonly userId: string;
+    readonly role: string;
+    readonly status: string;
+    readonly joinedAt: string | null;
+    readonly firstName: string | null;
+    readonly lastName: string | null;
+    readonly middleName: string | null;
+    readonly avatarUrl: string | null;
+    readonly email?: string;
 };
 
 export type RawMemberTeams = {
-    id: string;
-    name: string;
-    description: string | null;
-    avatarUrl: string | null;
-    role: string;
-    joinedAt: string | null;
+    readonly id: string;
+    readonly name: string;
+    readonly description: string | null;
+    readonly avatarUrl: string | null;
+    readonly role: string;
+    readonly joinedAt: string | null;
 };
 
 export interface ITeamsRepository {
@@ -29,13 +29,13 @@ export interface ITeamsRepository {
     remove(id: string, userId: string): Promise<boolean>;
 
     findMember(teamId: string, userId: string): Promise<RawMemberRow | null>;
-    findMembers(teamId: string): Promise<RawMemberRow[]>;
+    findMembers(teamId: string): Promise<readonly RawMemberRow[]>;
     findById(teamId: string): Promise<Team | null>;
     findByUser(
         userId: string,
         // TODO: ADD ZOD QUERY
-        pagination: { search?: string; limit?: number; offset?: number },
-    ): Promise<RawMemberTeams[]>;
+        pagination: { readonly search?: string; readonly limit?: number; readonly offset?: number },
+    ): Promise<readonly RawMemberTeams[]>;
 
     updateTeamAvatar(teamId: string, url: string): Promise<boolean>;
     updateTeamBanner(teamId: string, url: string): Promise<boolean>;
@@ -44,7 +44,7 @@ export interface ITeamsRepository {
     updateMember(
         teamId: string,
         userId: string,
-        dto: { role?: string; status?: string },
+        dto: { readonly role?: string; readonly status?: string },
     ): Promise<boolean>;
     removeMember(teamId: string, userId: string): Promise<boolean>;
 }

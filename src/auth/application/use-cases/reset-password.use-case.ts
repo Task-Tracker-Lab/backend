@@ -1,19 +1,20 @@
-import { InjectQueue } from '@nestjs/bullmq';
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { Queue } from 'bullmq';
-import { generate, generateSecret } from 'otplib';
-import { BaseException } from '@shared/error';
-import { AuthMailJobs, AuthQueues } from '../../domain/enums';
-import { ResetPasswordEvent } from '../../domain/events';
-import { ResetPasswordDto } from '../dtos';
-import { FindUserQuery } from '@core/user';
-import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
-import { ICacheService } from '@shared/adapters/cache/ports';
+import { ResetPasswordCacheData } from '@core/auth/application/interfaces';
 import {
     EMAIL_CODE_TTL_SECONDS,
     RESET_PASSWORD_CACHE_KEY,
 } from '@core/auth/infrastructure/constants';
-import { ResetPasswordCacheData } from '@core/auth/application/interfaces';
+import { FindUserQuery } from '@core/user';
+import { InjectQueue } from '@nestjs/bullmq';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
+import { BaseException } from '@shared/error';
+import { Queue } from 'bullmq';
+import { generate, generateSecret } from 'otplib';
+
+import { AuthMailJobs, AuthQueues } from '../../domain/enums';
+import { ResetPasswordEvent } from '../../domain/events';
+import { ResetPasswordDto } from '../dtos';
 
 @Injectable()
 export class ResetPasswordUseCase {

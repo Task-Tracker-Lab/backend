@@ -1,5 +1,6 @@
-import type { RawMemberRow, RawMemberTeams } from '../../domain/repository';
 import { ImageHelper } from '@shared/utils';
+
+import type { RawMemberRow, RawMemberTeams } from '../../domain/repository';
 
 export class TeamMemberMapper {
     public static toDetail(row: RawMemberRow, cdn: string) {
@@ -22,7 +23,7 @@ export class TeamMemberMapper {
         };
     }
 
-    public static toList(rows: RawMemberRow[], cdn: string) {
+    public static toList(rows: readonly RawMemberRow[], cdn: string) {
         return rows.map((row) => this.toDetail(row, cdn));
     }
 
@@ -36,7 +37,7 @@ export class TeamMemberMapper {
             name: row.name,
             description: row.description,
             avatar,
-            role: role,
+            role,
             joinedAt: row.joinedAt,
             permissions: {
                 canEdit: ['owner', 'admin'].includes(role),
@@ -49,7 +50,9 @@ export class TeamMemberMapper {
     }
 
     public static toPublicInvite(raw: string | null, code: string) {
-        if (!raw) return null;
+        if (!raw) {
+            return null;
+        }
         try {
             const p = JSON.parse(raw);
             return {

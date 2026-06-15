@@ -1,9 +1,10 @@
-import { ApiBody, ApiExtraModels, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { UpdateProfileDto, UserActivityResponse, UserResponse } from '../../dtos';
 import { applyDecorators, SetMetadata } from '@nestjs/common';
-import { ApiUnauthorized, ApiValidationError } from '@shared/error';
+import { ApiBody, ApiExtraModels, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { ActionResponse } from '@shared/dtos';
+import { ApiUnauthorized, ApiValidationError } from '@shared/error';
 import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
+
+import { UpdateProfileDto, UserActivityResponse, UserResponse } from '../../dtos';
 
 export const GetMeSwagger = () =>
     applyDecorators(

@@ -1,13 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import type { ProjectStatus } from '../domain/entities';
-import { CheckSlugAvailabilityQuery } from './use-cases/project/check-slug.use-case';
-import type {
+
+import {
     AddProjectMemberDto,
     CreateProjectDto,
     CreateShareTokenDto,
     UpdateProjectDto,
     UpdateProjectMemberDto,
 } from './dtos';
+import {
+    AddProjectMemberUseCase,
+    DeleteProjectMemberUseCase,
+    FindAllProjectMembersQuery,
+    GetAvailableTeamMemberQuery,
+    UpdateProjectMemberUseCase,
+} from './use-cases';
 import {
     CreateProjectUseCase,
     DeleteProjectUseCase,
@@ -17,13 +23,9 @@ import {
     FindProjectsByTeamQuery,
     GetProjectDetailQuery,
 } from './use-cases/project';
-import {
-    AddProjectMemberUseCase,
-    DeleteProjectMemberUseCase,
-    FindAllProjectMembersQuery,
-    GetAvailableTeamMemberQuery,
-    UpdateProjectMemberUseCase,
-} from './use-cases';
+import { CheckSlugAvailabilityQuery } from './use-cases/project/check-slug.use-case';
+
+import type { ProjectStatus } from '../domain/entities';
 
 @Injectable()
 export class ProjectFacade {

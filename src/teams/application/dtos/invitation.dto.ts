@@ -1,7 +1,8 @@
-import { z } from 'zod/v4';
-import { createZodDto } from 'nestjs-zod';
-import { roleEnum, TeamRole } from '../../infrastructure/persistence/models/enums';
 import { createPaginationSchema } from '@shared/schemas';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod/v4';
+
+import { roleEnum, type TeamRole } from '../../infrastructure/persistence/models/enums';
 
 export const UpdateInvitationSchema = z.object({
     role: z
@@ -41,13 +42,13 @@ export class TeamInvitationsResponse extends createZodDto(
 ) {}
 
 export interface TeamInvite {
-    teamId: string;
-    teamName: string;
-    teamAvatar: string | null;
-    email: string;
-    role: TeamRole;
-    inviterId: string;
-    inviterName: string;
-    createdAt: string;
-    expiresAt: string;
+    readonly teamId: string;
+    readonly teamName: string;
+    readonly teamAvatar: string | null;
+    readonly email: string;
+    readonly role: TeamRole;
+    readonly inviterId: string;
+    readonly inviterName: string;
+    readonly createdAt: string;
+    readonly expiresAt: string;
 }

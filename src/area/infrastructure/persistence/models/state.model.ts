@@ -1,3 +1,6 @@
+import { createId } from '@paralleldrive/cuid2';
+import { baseSchema, users } from '@shared/entities';
+import { isNotNull, isNull } from 'drizzle-orm';
 import {
     text,
     boolean,
@@ -7,11 +10,9 @@ import {
     uniqueIndex,
     index,
 } from 'drizzle-orm/pg-core';
-import { createId } from '@paralleldrive/cuid2';
-import { isNotNull, isNull } from 'drizzle-orm';
-import { stateCategoryEnum, stateTypeEnum } from './enum';
-import { baseSchema, users } from '@shared/entities';
+
 import { areas } from './area.model';
+import { stateCategoryEnum, stateTypeEnum } from './enum';
 
 export const states = baseSchema.table(
     'states',

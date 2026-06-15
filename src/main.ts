@@ -1,4 +1,5 @@
 import { bootstrapApp } from '@libs/bootstrap';
+
 import { AppModule } from './app.module';
 
 bootstrapApp({
@@ -22,4 +23,7 @@ RESTful API сервиса управления задачами (Task Tracker).
     },
     useCors: true,
     useCookieParser: true,
+}).catch((error) => {
+    console.error('Failed to bootstrap app:', error);
+    process.exit(1);
 });

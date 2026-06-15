@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { BaseException, type IErrorOptions } from '@shared/error';
+
+import { OAuthResponse } from '../../dtos';
+
+import { ConnectOAuthProviderUseCase } from './connect-oauth-provider.use-case';
 import { ProcessOAuthLoginUseCase } from './process-oauth-login.use-case';
 import { ProcessOAuthRegistrationUseCase } from './process-oauth-registration.use-case';
-import { ConnectOAuthProviderUseCase } from './connect-oauth-provider.use-case';
-import { OAuthResponse } from '../../dtos';
-import { BaseException, type IErrorOptions } from '@shared/error';
 
 // TODO: ADD TO GLOBAL
 function isBaseException(error: unknown): error is BaseException {
@@ -25,7 +27,7 @@ export class OAuthOrchestratorUseCase {
     async execute(dto: OAuthResponse, state?: string) {
         if (state) {
             try {
-                return await this.connectProvider.execute(dto, state);
+                return this.connectProvider.execute(dto, state);
             } catch (error) {
                 if (!isBaseExceptionWithCode(error, 'INVALID_ACTION')) {
                     throw error;
@@ -33,14 +35,18 @@ export class OAuthOrchestratorUseCase {
             }
         }
 
-        try {
-            return await this.processLogin.execute(dto);
-        } catch (error) {
-            if (!isBaseExceptionWithCode(error, 'OAUTH_LOGIN_NOT_FOUND')) {
-                throw error;
+        const login = await this.processLogin.execute(dto).catch((err) => {
+            if (isBaseExceptionWithCode(err, 'OAUTH_LOGIN_NOT_FOUND')) {
+                return null;
             }
+
+            throw err;
+        });
+
+        if (login) {
+            return login;
         }
 
-        return await this.processRegistration.execute(dto);
+        return this.processRegistration.execute(dto);
     }
 }

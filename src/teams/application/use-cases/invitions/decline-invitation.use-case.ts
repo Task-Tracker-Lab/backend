@@ -1,9 +1,10 @@
 import { ITeamsRepository } from '@core/teams/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { BaseException } from '@shared/error';
-import type { TeamInvite } from '../../dtos/invitation.dto';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
+import { BaseException } from '@shared/error';
+
+import type { TeamInvite } from '../../dtos/invitation.dto';
 
 @Injectable()
 export class DeclineInvitationUseCase {
@@ -58,11 +59,12 @@ export class DeclineInvitationUseCase {
 
     private async getTeamOrThrow(teamId: string) {
         const team = await this.teamsRepo.findById(teamId);
-        if (!team)
+        if (!team) {
             throw new BaseException(
                 { code: 'TEAM_NOT_FOUND', message: 'Команда не найдена' },
                 HttpStatus.NOT_FOUND,
             );
+        }
         return team;
     }
 

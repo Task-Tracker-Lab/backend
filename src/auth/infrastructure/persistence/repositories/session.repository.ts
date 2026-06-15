@@ -1,8 +1,9 @@
+import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
 import { Inject, Injectable } from '@nestjs/common';
 import { eq, and, ne, lt, desc } from 'drizzle-orm';
-import * as schema from '../models/session.model';
-import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
+
 import { ISessionRepository, type SessionInsert } from '../../../domain/repository';
+import * as schema from '../models/session.model';
 
 @Injectable()
 export class SessionRepository implements ISessionRepository {

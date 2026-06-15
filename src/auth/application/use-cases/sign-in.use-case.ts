@@ -1,12 +1,13 @@
+import { FindUserQuery } from '@core/user';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import * as argon from 'argon2';
+import { createId } from '@paralleldrive/cuid2';
 import { BaseException } from '@shared/error';
+import * as argon from 'argon2';
+
 import { ISessionRepository } from '../../domain/repository';
 import { TokenService } from '../../infrastructure/security';
 import { DeviceMetadata } from '../../infrastructure/utils/get-device-meta';
 import { SignInDto } from '../dtos';
-import { FindUserQuery } from '@core/user';
-import { createId } from '@paralleldrive/cuid2';
 
 @Injectable()
 export class SignInUseCase {

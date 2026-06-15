@@ -1,5 +1,8 @@
+import type {
+    projects,
+    projectShares,
+} from '../../infrastructure/persistence/models/project.model';
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
-import { projects, projectShares } from '../../infrastructure/persistence/models/project.model';
 
 export type Project = InferSelectModel<typeof projects>;
 export type NewProject = InferInsertModel<typeof projects>;

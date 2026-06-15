@@ -1,8 +1,8 @@
 export interface JwtPayload {
-    sub: string;
-    email: string;
-    role: string;
-    iss: string;
-    aud: string;
-    jti: string;
+    readonly sub: string;
+    readonly email: string;
+    readonly role: string;
+    readonly iss: string;
+    readonly aud: string;
+    readonly jti: string;
 }

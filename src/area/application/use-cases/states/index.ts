@@ -1,7 +1,7 @@
 import { CreateStateUseCase } from './create.use-case';
 import { DeleteStateUseCase } from './delete.use-case';
-import { GetStateQuery } from './get-one.query';
 import { GetStatesQuery } from './get-all.query';
+import { GetStateQuery } from './get-one.query';
 import { ReorderStateUseCase } from './reorder.use-case';
 import { RestoreStateUseCase } from './restore.use-state';
 import { UpdateStateUseCase } from './update.use-case';

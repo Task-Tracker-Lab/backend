@@ -1,7 +1,7 @@
-import { z } from 'zod/v4';
-import { createZodDto } from 'nestjs-zod';
-import { ActionResponseSchema } from '@shared/dtos';
 import { STATE_CATEGORIES, STATE_TYPES } from '@core/area/domain/entities';
+import { ActionResponseSchema } from '@shared/dtos';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod/v4';
 
 export const StateTypeSchema = z
     .enum(STATE_TYPES)

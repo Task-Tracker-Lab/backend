@@ -1,8 +1,8 @@
 import { ITeamsRepository } from '@core/teams/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { BaseException } from '@shared/error';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
+import { BaseException } from '@shared/error';
 
 @Injectable()
 export class GetInvitationsQuery {
@@ -20,7 +20,7 @@ export class GetInvitationsQuery {
 
         const teamKey = this.TEAM_INVITES_KEY(team.id);
         const codes = await this.cacheService.getCollection(teamKey);
-        if (!codes.length)
+        if (!codes.length) {
             return {
                 // TODO: реализовать полноценную пагинацию для инвайтов команды.
                 items: [],
@@ -33,13 +33,16 @@ export class GetInvitationsQuery {
                     hasNextPage: false,
                 },
             };
+        }
 
         const results = await this.cacheService.getMany(codes.map(this.INVITES_KEY));
 
         const { active, expired } = results.reduce(
             (acc: { active: any[]; expired: string[] }, raw, i) => {
                 const code = codes[i];
-                if (!code) return acc;
+                if (!code) {
+                    return acc;
+                }
 
                 if (raw) {
                     acc.active.push({ code, ...JSON.parse(raw) });
@@ -73,11 +76,12 @@ export class GetInvitationsQuery {
 
     private async getTeamOrThrow(teamId: string) {
         const team = await this.teamsRepo.findById(teamId);
-        if (!team)
+        if (!team) {
             throw new BaseException(
                 { code: 'TEAM_NOT_FOUND', message: 'Команда не найдена' },
                 HttpStatus.NOT_FOUND,
             );
+        }
         return team;
     }
 

@@ -1,8 +1,9 @@
-import type { NewUser } from '@core/user/domain/entities';
 import { IUserRepository } from '@core/user/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
 import { BaseException } from '@shared/error';
+
+import type { NewUser } from '@core/user/domain/entities';
 
 @Injectable()
 export class RegisterUserUseCase {
@@ -11,7 +12,7 @@ export class RegisterUserUseCase {
         private readonly repository: IUserRepository,
     ) {}
 
-    async execute(dto: NewUser & { password: string | null }) {
+    async execute(dto: NewUser & { readonly password: string | null }) {
         const existingUser = await this.repository.findByEmail(dto.email);
 
         if (existingUser?.user) {

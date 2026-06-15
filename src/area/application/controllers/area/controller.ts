@@ -1,7 +1,9 @@
-import { ApiBaseController, GetUserId } from '@shared/decorators';
-import { AreaFacade } from '../../area.facade';
 import { Post, Body, Get, Query, Param, Delete, Put } from '@nestjs/common';
+import { ApiBaseController, GetUserId } from '@shared/decorators';
+
+import { AreaFacade } from '../../area.facade';
 import { CreateAreaDto, UpdateAreaDto } from '../../dtos';
+
 import {
     CreateAreaSwagger,
     DeleteAreaSwagger,

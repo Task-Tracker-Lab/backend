@@ -1,6 +1,6 @@
-import { z } from 'zod/v4';
-import { createZodDto } from 'nestjs-zod';
 import { DEFAULT_VIEWS } from '@core/area/domain/entities';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod/v4';
 
 export const DefaultViewSchema = z
     .enum(DEFAULT_VIEWS)

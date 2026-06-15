@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
-import { makeHistogramProvider, PrometheusModule } from '@willsoto/nestjs-prometheus';
-import { MetricsController } from './metrics.controller';
-import { HttpMetricsInterceptor } from '@shared/interceptors';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { HttpMetricsInterceptor } from '@shared/interceptors';
+import { makeHistogramProvider, PrometheusModule } from '@willsoto/nestjs-prometheus';
+
+import { MetricsController } from './metrics.controller';
 
 @Module({
     imports: [

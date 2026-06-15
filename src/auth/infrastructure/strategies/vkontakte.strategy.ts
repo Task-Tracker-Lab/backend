@@ -1,83 +1,83 @@
+import { HttpService } from '@nestjs/axios';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-oauth2';
 import { BaseException } from '@shared/error';
-import { HttpService } from '@nestjs/axios';
+import { Strategy } from 'passport-oauth2';
 import { firstValueFrom } from 'rxjs';
 
 export interface IVKUserInfo {
-    id: number;
-    first_name: string;
-    last_name: string;
-    screen_name: string;
-    sex: 0 | 1 | 2;
-    photo_50?: string;
-    photo_100?: string;
-    photo_200?: string;
-    photo_200_orig?: string;
-    photo_400_orig?: string;
-    photo_max?: string;
-    photo_max_orig?: string;
-    city?: { id: number; title: string };
-    country?: { id: number; title: string };
-    bdate?: string;
-    about?: string;
-    activities?: string;
-    interests?: string;
-    music?: string;
-    movies?: string;
-    tv?: string;
-    books?: string;
-    games?: string;
-    status?: string;
-    online?: number;
-    domain?: string;
-    has_mobile?: number;
-    mobile_phone?: string;
-    home_phone?: string;
-    can_post?: number;
-    can_see_all_posts?: number;
-    can_see_audio?: number;
-    contacts?: {
-        mobile_phone?: string;
-        home_phone?: string;
+    readonly id: number;
+    readonly first_name: string;
+    readonly last_name: string;
+    readonly screen_name: string;
+    readonly sex: 0 | 1 | 2;
+    readonly photo_50?: string;
+    readonly photo_100?: string;
+    readonly photo_200?: string;
+    readonly photo_200_orig?: string;
+    readonly photo_400_orig?: string;
+    readonly photo_max?: string;
+    readonly photo_max_orig?: string;
+    readonly city?: { readonly id: number; readonly title: string };
+    readonly country?: { readonly id: number; readonly title: string };
+    readonly bdate?: string;
+    readonly about?: string;
+    readonly activities?: string;
+    readonly interests?: string;
+    readonly music?: string;
+    readonly movies?: string;
+    readonly tv?: string;
+    readonly books?: string;
+    readonly games?: string;
+    readonly status?: string;
+    readonly online?: number;
+    readonly domain?: string;
+    readonly has_mobile?: number;
+    readonly mobile_phone?: string;
+    readonly home_phone?: string;
+    readonly can_post?: number;
+    readonly can_see_all_posts?: number;
+    readonly can_see_audio?: number;
+    readonly contacts?: {
+        readonly mobile_phone?: string;
+        readonly home_phone?: string;
     };
-    site?: string;
-    education?: {
-        university?: number;
-        university_name?: string;
-        faculty?: number;
-        faculty_name?: string;
-        graduation?: number;
+    readonly site?: string;
+    readonly education?: {
+        readonly university?: number;
+        readonly university_name?: string;
+        readonly faculty?: number;
+        readonly faculty_name?: string;
+        readonly graduation?: number;
     };
-    universities?: Array<{
-        id: number;
-        name: string;
-        faculty: number;
-        faculty_name: string;
-        graduation: number;
+    readonly universities?: ReadonlyArray<{
+        readonly id: number;
+        readonly name: string;
+        readonly faculty: number;
+        readonly faculty_name: string;
+        readonly graduation: number;
     }>;
 }
 
 export interface IVKProfile {
-    provider: 'vkontakte';
-    id: string;
-    displayName: string;
-    name: {
-        familyName: string;
-        givenName: string;
+    readonly provider: 'vkontakte';
+    readonly id: string;
+    readonly displayName: string;
+    readonly name: {
+        readonly familyName: string;
+        readonly givenName: string;
     };
-    gender: 'male' | 'female' | undefined;
-    emails?: Array<{ value: string }>;
-    photos: Array<{ value: string }>;
-    city?: string;
-    country?: string;
-    birthday?: string;
-    about?: string;
-    _raw: string;
-    _json: IVKUserInfo;
-    [key: string]: unknown;
+    readonly gender: 'male' | 'female' | undefined;
+    readonly emails?: ReadonlyArray<{ readonly value: string }>;
+    readonly photos: ReadonlyArray<{ readonly value: string }>;
+    readonly city?: string;
+    readonly country?: string;
+    readonly birthday?: string;
+    readonly about?: string;
+    readonly _raw: string;
+    readonly _json: IVKUserInfo;
+    readonly [key: string]: unknown;
 }
 
 @Injectable()
@@ -111,12 +111,12 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
         });
     }
 
-    async validate(
+    validate(
         _req: never,
         _at: never,
         _rt: never,
         profile: IVKProfile,
-        done: (...args: unknown[]) => void,
+        done: (...args: readonly unknown[]) => void,
     ) {
         const user = {
             id: profile.id,
@@ -134,7 +134,7 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
         done(null, user);
     }
 
-    private async getUserProfile(accessToken: string): Promise<any> {
+    private async getUserProfile(accessToken: string) {
         try {
             const fields = [
                 'uid',
@@ -200,7 +200,9 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
 
             return this.parseProfile(data.response[0]);
         } catch (error) {
-            if (error instanceof BaseException) throw error;
+            if (error instanceof BaseException) {
+                throw error;
+            }
 
             console.error('Failed to get VK user info:', error);
 
@@ -216,23 +218,20 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
     }
 
     private parseProfile(json: IVKUserInfo): IVKProfile {
-        let gender: 'male' | 'female' | undefined;
-        if (json.sex === 2) gender = 'male';
-        else if (json.sex === 1) gender = 'female';
+        const gender: 'male' | 'female' | undefined = json.sex === 2 ? 'male' : 'female';
 
-        const photos: Array<{ value: string }> = [];
         const photoSizes = ['photo_50', 'photo_100', 'photo_200', 'photo_400_orig', 'photo_max'];
 
-        for (const size of photoSizes) {
+        const photos = photoSizes.reduce<{ value: string }[]>((acc, size) => {
             const photoUrl = json[size as keyof IVKUserInfo];
             if (photoUrl && typeof photoUrl === 'string') {
-                photos.push({ value: photoUrl });
+                return [...acc, { value: photoUrl }];
             }
-        }
+            return acc;
+        }, []);
 
-        if (photos.length === 0 && json.photo_max) {
-            photos.push({ value: json.photo_max });
-        }
+        const finalPhotos =
+            photos.length === 0 && json.photo_max ? [...photos, { value: json.photo_max }] : photos;
 
         const profile: IVKProfile = {
             provider: 'vkontakte',
@@ -242,35 +241,23 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
                 familyName: json.last_name || '',
                 givenName: json.first_name || '',
             },
-            gender: gender,
+            gender,
             emails: [],
-            photos: photos,
+            photos: finalPhotos,
             _raw: JSON.stringify(json),
             _json: json,
+            ...(json.city?.title && { city: json.city.title }),
+            ...(json.country?.title && { country: json.country.title }),
+            ...(json.bdate && { birthday: json.bdate }),
+            ...(json.about && { about: json.about }),
         };
-
-        if (json.city && json.city.title) {
-            profile.city = json.city.title;
-        }
-
-        if (json.country && json.country.title) {
-            profile.country = json.country.title;
-        }
-
-        if (json.bdate) {
-            profile.birthday = json.bdate;
-        }
-
-        if (json.about) {
-            profile.about = json.about;
-        }
 
         return profile;
     }
 
     override userProfile(
         accessToken: string,
-        done: (err?: Error | null, profile?: any) => void,
+        done: (err?: Error | null, profile?: unknown) => void,
     ): void {
         this.getUserProfile(accessToken)
             .then((profile) => done(null, profile))
@@ -282,10 +269,9 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
     ): Record<string, string> {
         const params: Record<string, string> = {};
 
-        if (options.display) {
-            params['display'] = options.display;
-        }
-
-        return params;
+        return {
+            ...params,
+            ...(options.display && { display: options.display }),
+        };
     }
 }

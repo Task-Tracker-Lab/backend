@@ -1,10 +1,12 @@
 import { ISessionRepository } from '@core/auth/domain/repository';
 import { TokenService } from '@core/auth/infrastructure/security';
 import { Inject, Injectable } from '@nestjs/common';
+import { createId } from '@paralleldrive/cuid2';
+
+import { OAuthOrchestratorUseCase } from './oauth-orchestrator.use-case';
+
 import type { OAuthResponse } from '../../dtos';
 import type { DeviceMetadata } from '@core/auth/infrastructure/utils';
-import { createId } from '@paralleldrive/cuid2';
-import { OAuthOrchestratorUseCase } from './oauth-orchestrator.use-case';
 
 @Injectable()
 export class AuthenticateOAuthUseCase {
