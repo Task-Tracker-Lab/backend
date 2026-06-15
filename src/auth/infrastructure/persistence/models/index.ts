@@ -1,2 +1,2 @@
 export { sessions } from './session.model';
-export { userIdentities } from './identities.model';
+export { userIdentities } from './identity.model';

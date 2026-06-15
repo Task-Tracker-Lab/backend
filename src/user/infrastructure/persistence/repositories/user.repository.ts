@@ -27,34 +27,47 @@ export class UserRepository implements IUserRepository {
             .leftJoin(sc.userNotifications, eq(sc.users.id, sc.userNotifications.userId));
     }
 
-    async findProfile(id: string) {
+    public findProfile = async (id: string) => {
         const [rows] = await this.fullUserQuery
             .leftJoin(sc.userPreferences, eq(sc.users.id, sc.userPreferences.userId))
             .where(eq(sc.users.id, id));
 
-        if (!rows || !rows.users) {
-            return null;
+        if (!rows || !rows.users || !rows.user_security) {
+            throw new Error(`User with id ${id} not found`);
         }
 
         const { lastPasswordChange, is2faEnabled } = rows.user_security;
-        const { settings } = rows.user_notifications;
-        const preferences = rows.user_preferences;
+
+        const defaultNotifications = {
+            email: {
+                task_assigned: true,
+                mentions: true,
+                daily_summary: false,
+            },
+            push: {
+                task_assigned: true,
+                reminders: true,
+            },
+        };
 
         return {
             user: rows.users,
-            security: { lastPasswordChange, is2faEnabled },
-            preferences,
-            notifications: settings,
+            security: {
+                lastPasswordChange: lastPasswordChange ?? null,
+                is2faEnabled: is2faEnabled ?? false,
+            },
+            preferences: rows.user_preferences ?? null,
+            notifications: rows.user_notifications?.settings ?? defaultNotifications,
         };
-    }
+    };
 
-    async findByIds(ids: string[]) {
+    public findByIds = async (ids: string[]) => {
         if (ids.length === 0) return [];
 
         return this.db.select().from(sc.users).where(inArray(sc.users.id, ids));
-    }
+    };
 
-    async findById(id: string) {
+    public findById = async (id: string) => {
         const [row] = await this.fullUserQuery.where(eq(sc.users.id, id));
         if (!row || !row.user_security) return null;
         return {
@@ -63,9 +76,9 @@ export class UserRepository implements IUserRepository {
                 passwordHash: row.user_security.passwordHash,
             },
         };
-    }
+    };
 
-    async findByEmail(email: string) {
+    public findByEmail = async (email: string) => {
         const [row] = await this.fullUserQuery.where(eq(sc.users.email, email.toLowerCase()));
         if (!row || !row.user_security) return null;
         return {
@@ -74,19 +87,23 @@ export class UserRepository implements IUserRepository {
                 passwordHash: row.user_security.passwordHash,
             },
         };
-    }
+    };
 
-    async findSecurityByUserId(userId: string) {
+    public findSecurityByUserId = async (userId: string) => {
         const [result] = await this.db
             .select()
             .from(sc.userSecurity)
             .where(eq(sc.userSecurity.userId, userId));
         return result || null;
-    }
+    };
 
-    async create(data: NewUser) {
-        return await this.db.transaction(async (tx) => {
+    public create = async (data: NewUser) => {
+        return this.db.transaction(async (tx) => {
             const [newUser] = await tx.insert(sc.users).values(data).returning();
+
+            if (!newUser) {
+                throw new Error('Failed to create user');
+            }
 
             await tx.insert(sc.userNotifications).values({
                 userId: newUser.id,
@@ -94,30 +111,36 @@ export class UserRepository implements IUserRepository {
 
             return newUser;
         });
-    }
+    };
 
-    async updateProfile(id: string, user: Partial<User>, preferences?: Partial<UserPreferences>) {
-        const [userRes, preferencesRes] = await Promise.all([
+    public updateProfile = async (
+        id: string,
+        user: Partial<User>,
+        preferences?: Partial<UserPreferences>,
+    ) => {
+        const results = await Promise.all([
             this.updateUser(id, user),
             this.upsertPreferences(id, preferences),
         ]);
 
-        return userRes || preferencesRes;
-    }
+        return results.some((result) => result === true);
+    };
 
     private async updateUser(id: string, data: Partial<User>) {
         if (Object.keys(data).length === 0) return null;
 
-        const [result] = await this.db
+        const result = await this.db
             .update(sc.users)
             .set({ ...data, updatedAt: new Date().toISOString() })
             .where(eq(sc.users.id, id));
 
-        return result;
+        return (result?.count ?? 0) > 0;
     }
 
-    private async upsertPreferences(userId: string, data: Partial<UserPreferences>) {
-        if (Object.keys(data).length === 0) return null;
+    private async upsertPreferences(userId: string, data?: Partial<UserPreferences>) {
+        if (!data || Object.keys(data).length === 0) {
+            return false;
+        }
 
         const existing = await this.db
             .select({ id: sc.userPreferences.userId })
@@ -131,14 +154,14 @@ export class UserRepository implements IUserRepository {
                 ...data,
             });
 
-            return result.count ?? 0 > 0;
+            return (result.count ?? 0) > 0;
         } else {
             const result = await this.db
                 .update(sc.userPreferences)
                 .set(data)
                 .where(eq(sc.userPreferences.userId, userId));
 
-            return result.count ?? 0 > 0;
+            return (result.count ?? 0) > 0;
         }
     }
 

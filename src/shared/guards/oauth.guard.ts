@@ -31,12 +31,12 @@ export class OAuthGuard implements CanActivate {
         const passportOptions: Record<string, boolean | string> = { session: false };
 
         if (query) {
-            passportOptions.state = query;
+            passportOptions['state'] = query;
         }
 
         if (provider === 'google') {
-            passportOptions.accessType = 'offline';
-            passportOptions.prompt = 'consent';
+            passportOptions['accessType'] = 'offline';
+            passportOptions['prompt'] = 'consent';
         }
 
         const targetGuard = new GuardClass(passportOptions);

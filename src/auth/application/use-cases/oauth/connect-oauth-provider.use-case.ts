@@ -1,4 +1,4 @@
-import { IIdentitiesRepository } from '@core/auth/domain/repository';
+import { IIdentityRepository } from '@core/auth/domain/repository';
 import { FindUserQuery } from '@core/user';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
@@ -9,11 +9,11 @@ import { BaseException } from '@shared/error';
 @Injectable()
 export class ConnectOAuthProviderUseCase {
     constructor(
-        @Inject('IIdentitiesRepository')
-        private readonly identitiesRepo: IIdentitiesRepository,
+        @Inject('IIdentityRepository')
+        private readonly identityRepo: IIdentityRepository,
         @Inject(CACHE_SERVICE)
         private readonly cacheService: ICacheService,
-        private readonly findUserQuery: FindUserQuery,
+        private readonly findUserQ: FindUserQuery,
     ) {}
 
     async execute(dto: OAuthResponse, state: string) {
@@ -25,7 +25,7 @@ export class ConnectOAuthProviderUseCase {
 
         await this.validateProviderNotConnected(user.id, dto.provider, dto.id);
 
-        await this.identitiesRepo.create({
+        await this.identityRepo.create({
             userId: user.id,
             avatarUrl: dto.avatar_url,
             provider: dto.provider as any,
@@ -78,7 +78,7 @@ export class ConnectOAuthProviderUseCase {
     }
 
     private async getUser(userId: string) {
-        const result = await this.findUserQuery.execute({ id: userId });
+        const result = await this.findUserQ.execute({ id: userId });
 
         if (!result?.user) {
             throw new BaseException(
@@ -98,7 +98,7 @@ export class ConnectOAuthProviderUseCase {
         provider: string,
         providerUserId: string,
     ) {
-        const existingIdentity = await this.identitiesRepo.findByProvider(
+        const existingIdentity = await this.identityRepo.findByProvider(
             provider as any,
             providerUserId,
         );
@@ -113,7 +113,7 @@ export class ConnectOAuthProviderUseCase {
             );
         }
 
-        const userIdentities = await this.identitiesRepo.findAllByUserId(userId);
+        const userIdentities = await this.identityRepo.findAllByUserId(userId);
         const alreadyConnected = userIdentities.some((i) => i.provider === provider);
 
         if (alreadyConnected) {

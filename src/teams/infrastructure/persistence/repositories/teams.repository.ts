@@ -25,13 +25,17 @@ export class TeamsRepository implements ITeamsRepository {
 
     public create = async (ownerId: string, dto: NewTeam) => {
         return this.db.transaction(async (tx) => {
-            const [{ teamId }] = await tx
+            const [team] = await tx
                 .insert(schema.teams)
                 .values({ ...dto, ownerId })
                 .returning({ teamId: schema.teams.id });
 
+            if (!team?.teamId) {
+                throw new Error('Failed to create team: no team returned');
+            }
+
             await tx.insert(schema.teamMembers).values({
-                teamId,
+                teamId: team.teamId,
                 userId: ownerId,
                 role: 'owner',
                 status: 'active',
@@ -40,22 +44,26 @@ export class TeamsRepository implements ITeamsRepository {
 
             return {
                 success: true,
-                teamId,
+                teamId: team.teamId,
             };
         });
     };
 
     public update = async (id: string, dto: Partial<Team>) => {
         return this.db.transaction(async (tx) => {
-            const [{ teamId }] = await tx
+            const [team] = await tx
                 .update(schema.teams)
                 .set(dto)
                 .where(eq(schema.teams.id, id))
                 .returning({ teamId: schema.teams.id });
 
+            if (!team?.teamId) {
+                throw new Error('Failed to create team: no team returned');
+            }
+
             return {
                 success: true,
-                teamId,
+                teamId: team.teamId,
             };
         });
     };

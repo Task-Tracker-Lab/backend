@@ -12,8 +12,8 @@ export class BearerStrategy extends PassportStrategy(Strategy, 'bearer') {
 
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: cfg.get<string>('JWT_ACCESS_SECRET'),
-            issuer: cfg.get<string>('JWT_ISSUER'),
+            secretOrKey: cfg.getOrThrow('JWT_ACCESS_SECRET'),
+            issuer: cfg.getOrThrow('JWT_ISSUER'),
             audience,
         });
     }

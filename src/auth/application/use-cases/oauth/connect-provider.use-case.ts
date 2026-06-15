@@ -4,16 +4,16 @@ import { createId } from '@paralleldrive/cuid2';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { BaseException } from '@shared/error';
-import { IIdentitiesRepository } from '@core/auth/domain/repository';
+import { IIdentityRepository } from '@core/auth/domain/repository';
 
 @Injectable()
 export class ConnectProviderUseCase {
     constructor(
         @Inject(CACHE_SERVICE)
         private readonly cacheService: ICacheService,
-        @Inject('IIdentitiesRepository')
-        private readonly identitiesRepo: IIdentitiesRepository,
-        private readonly findUserQuery: FindUserQuery,
+        @Inject('IIdentityRepository')
+        private readonly identityRepo: IIdentityRepository,
+        private readonly findUserQ: FindUserQuery,
     ) {}
 
     private readonly STATE_TTL = 180; // 3 минуты
@@ -57,7 +57,7 @@ export class ConnectProviderUseCase {
     }
 
     private async validateUser(userId: string) {
-        const entity = await this.findUserQuery.execute({ id: userId });
+        const entity = await this.findUserQ.execute({ id: userId });
         if (!entity?.user) {
             throw new BaseException(
                 {
@@ -70,7 +70,7 @@ export class ConnectProviderUseCase {
     }
 
     private async validateProviderNotConnected(userId: string, provider: string) {
-        const identities = await this.identitiesRepo.findAllByUserId(userId);
+        const identities = await this.identityRepo.findAllByUserId(userId);
         const isConnected = identities.some((identity) => identity.provider === provider);
 
         if (isConnected) {

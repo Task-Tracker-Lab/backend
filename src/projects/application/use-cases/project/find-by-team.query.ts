@@ -16,8 +16,6 @@ export class FindProjectsByTeamQuery {
         const projects = await this.projectsRepo.findByTeam(team.id);
         const items = projects.map((p) => ProjectMapper.toListResponse(p, member));
 
-        console.log(items);
-
         return {
             // TODO: реализовать полноценную пагинацию для проектов команды.
             items,

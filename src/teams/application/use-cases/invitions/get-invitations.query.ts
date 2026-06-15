@@ -37,11 +37,14 @@ export class GetInvitationsQuery {
         const results = await this.cacheService.getMany(codes.map(this.INVITES_KEY));
 
         const { active, expired } = results.reduce(
-            (acc, raw, i) => {
+            (acc: { active: any[]; expired: string[] }, raw, i) => {
+                const code = codes[i];
+                if (!code) return acc;
+
                 if (raw) {
-                    acc.active.push({ code: codes[i], ...JSON.parse(raw) });
+                    acc.active.push({ code, ...JSON.parse(raw) });
                 } else {
-                    acc.expired.push(codes[i]);
+                    acc.expired.push(code);
                 }
                 return acc;
             },

@@ -27,7 +27,7 @@ export class SignUpVerifyUseCase {
         @Inject('ISessionRepository')
         private readonly sessionRepo: ISessionRepository,
         private readonly tokenService: TokenService,
-        private readonly registerUserUseCase: RegisterUserUseCase,
+        private readonly registerUserUC: RegisterUserUseCase,
     ) {}
 
     async execute(dto: VerifyDto, meta: DeviceMetadata) {
@@ -87,7 +87,7 @@ export class SignUpVerifyUseCase {
             );
         }
 
-        const user = await this.registerUserUseCase.execute({
+        const user = await this.registerUserUC.execute({
             ...userData.user,
             emailVerified: true,
             emailVerifiedAt: new Date().toISOString(),

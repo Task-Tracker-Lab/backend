@@ -10,13 +10,14 @@ import fastifyCompress from '@fastify/compress';
 import fastifyMultipart from '@fastify/multipart';
 import fastifyCsrf from '@fastify/csrf-protection';
 import { createId } from '@paralleldrive/cuid2';
+import type { IncomingMessage } from 'http';
 
 export async function bootstrapApp(options: BootstrapOptions) {
     const startTime = performance.now();
     const adapter = new FastifyAdapter({
         requestIdHeader: 'x-request-id',
         requestIdLogLabel: 'request',
-        genReqId: (req) => {
+        genReqId: (req: IncomingMessage) => {
             return (req.headers['x-request-id'] as string) || createId();
         },
     });
@@ -46,7 +47,7 @@ export async function bootstrapApp(options: BootstrapOptions) {
         bufferLogs: false,
     });
 
-    const logger = new Logger(serviceName[0].toUpperCase() + serviceName.slice(1));
+    const logger = new Logger(serviceName?.[0]?.toUpperCase() + serviceName.slice(1));
     const configService = app.get(ConfigService);
     const port = configService.getOrThrow<number>(portEnvKey, defaultPort);
     const origins = configService.getOrThrow('CORS_ALLOWED_ORIGINS');
@@ -152,7 +153,7 @@ export async function bootstrapApp(options: BootstrapOptions) {
         }
 
         const startupTime = (performance.now() - startTime).toFixed(2);
-        logger.verbose(`Environment:     ${process.env.NODE_ENV || 'development'}`);
+        logger.verbose(`Environment:     ${process.env['NODE_ENV'] || 'development'}`);
         logger.verbose(`API Endpoint:    ${baseUrl}`);
         logger.verbose(`Health Check:    ${baseUrl}/health`);
         logger.verbose(`Swagger UI:      ${swaggerBase}/${swaggerPath}`);

@@ -11,7 +11,17 @@ export class SignOutUseCase {
         private readonly tokenService: TokenService,
     ) {}
 
-    async execute(token: string) {
+    async execute(token?: string) {
+        if (!token) {
+            throw new BaseException(
+                {
+                    code: 'SESSION_REQUIRED',
+                    message: 'Session required',
+                },
+                HttpStatus.UNAUTHORIZED,
+            );
+        }
+
         const payload = await this.tokenService.validateToken(token, 'refresh');
 
         if (!payload?.jti) {

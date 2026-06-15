@@ -20,7 +20,7 @@ export class SignUpUseCase {
         private readonly cacheService: ICacheService,
         @InjectQueue(AuthQueues.AUTH_MAIL)
         private readonly mailQueue: Queue,
-        private readonly findUserQuery: FindUserQuery,
+        private readonly findUserQ: FindUserQuery,
     ) {}
 
     async execute(dto: SignUpDto) {
@@ -37,7 +37,7 @@ export class SignUpUseCase {
             );
         }
 
-        const isExists = await this.findUserQuery.execute({ email: dto.email });
+        const isExists = await this.findUserQ.execute({ email: dto.email });
 
         if (isExists) {
             throw new BaseException(

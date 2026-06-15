@@ -13,7 +13,7 @@ export const ApiBaseController = (path: string, tag: string, hasJWTGuard?: boole
             'INTERNAL_SERVER_ERROR',
             'Произошла критическая ошибка на стороне сервера',
         ),
-    ].filter(Boolean);
+    ].filter((decorator): decorator is Exclude<typeof decorator, null> => decorator !== null);
 
     return applyDecorators(...decorators);
 };

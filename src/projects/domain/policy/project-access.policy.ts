@@ -6,6 +6,7 @@ import { ROLE_PRIORITY, PROJECT_ROLE_PRIORITY } from '@shared/constants';
 import type { MemberRole } from '../entities';
 import { MemberErrorCodes, MemberErrorMessages } from '../errors/member.errors';
 import { ProjectErrorCodes, ProjectErrorMessages } from '../errors';
+import { isTeamRole } from '../../../shared/constants/roles.constant';
 
 @Injectable()
 export class ProjectAccessPolicy {
@@ -42,7 +43,7 @@ export class ProjectAccessPolicy {
             );
         }
 
-        if (ROLE_PRIORITY[member.role] < ROLE_PRIORITY[minRole]) {
+        if (isTeamRole(member.role) && ROLE_PRIORITY[member.role] < ROLE_PRIORITY[minRole]) {
             throw new BaseException(
                 {
                     code: 'INSUFFICIENT_PERMISSIONS',
@@ -87,9 +88,14 @@ export class ProjectAccessPolicy {
             );
         }
 
-        const hasRole = minRoles.some(
-            (role) => PROJECT_ROLE_PRIORITY[member.role] >= PROJECT_ROLE_PRIORITY[role],
-        );
+        const hasRole = minRoles.some((role) => {
+            if (!isTeamRole(member.role) || !isTeamRole(role)) return false;
+
+            const memberPriority = PROJECT_ROLE_PRIORITY[member.role] ?? -1;
+            const rolePriority = PROJECT_ROLE_PRIORITY[role] ?? -1;
+
+            return memberPriority >= rolePriority;
+        });
 
         if (!hasRole) {
             throw new BaseException(
@@ -137,7 +143,7 @@ export class ProjectAccessPolicy {
             );
         }
 
-        if (ROLE_PRIORITY[member.role] < ROLE_PRIORITY[minRole]) {
+        if (isTeamRole(member.role) && ROLE_PRIORITY[member.role] < ROLE_PRIORITY[minRole]) {
             throw new BaseException(
                 {
                     code: 'INSUFFICIENT_PERMISSIONS',

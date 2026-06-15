@@ -20,10 +20,15 @@ export class FindAllProjectMembersQuery {
         const users = await this.findUsersQ.execute(userIds);
 
         const map = new Map(users.map((u) => [u.id, u]));
-        const result = members.map((m) => ({
-            ...m,
-            user: map.get(m.userId),
-        }));
+        const result = members
+            .map((m) => ({
+                ...m,
+                user: map.get(m.userId),
+            }))
+            .filter(
+                (item): item is typeof item & { user: NonNullable<typeof item.user> } =>
+                    item.user !== undefined,
+            );
 
         return MemberMapper.toMemberListResponse(result);
     }

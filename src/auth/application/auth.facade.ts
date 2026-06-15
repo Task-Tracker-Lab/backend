@@ -62,11 +62,11 @@ export class AuthFacade {
         return this.signUpVerifyUseCase.execute(dto, device);
     }
 
-    async signOut(userId: string) {
-        return this.signOutUseCase.execute(userId);
+    async signOut(token?: string) {
+        return this.signOutUseCase.execute(token);
     }
 
-    async refreshTokens(token: string, device: DeviceMetadata) {
+    async refreshTokens(token: string | undefined, device: DeviceMetadata) {
         return this.refreshTokensUseCase.execute(token, device);
     }
 

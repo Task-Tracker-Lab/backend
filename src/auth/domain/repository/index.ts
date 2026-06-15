@@ -1,2 +1,2 @@
 export * from './session.repository.interface';
-export * from './identities.repository.interface';
+export * from './identity.repository.interface';

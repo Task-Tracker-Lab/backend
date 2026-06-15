@@ -3,6 +3,7 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
 import { UpdateNotificationsDto } from '../dtos';
 import { createId } from '@paralleldrive/cuid2';
+import { removeUndefined } from '@shared/utils';
 
 @Injectable()
 export class UpdateNotificationsUseCase {
@@ -22,11 +23,13 @@ export class UpdateNotificationsUseCase {
         }
 
         try {
-            const isUpdated = await this.userRepo.updateNotifications(id, {
-                email: dto.email,
-                push: dto.push,
-            });
-
+            const isUpdated = await this.userRepo.updateNotifications(
+                id,
+                removeUndefined({
+                    email: dto.email,
+                    push: dto.push,
+                }),
+            );
             if (!isUpdated) {
                 throw new BaseException(
                     {

@@ -53,7 +53,7 @@ export class TeamsFacade {
     public removeMember = (teamId: string, curr: string, target: string) =>
         this.removeMemberUc.execute(teamId, curr, target);
 
-    public getInvitations = (teamId: string, userId?: string) =>
+    public getInvitations = (teamId: string, userId: string) =>
         this.getInvitationsQ.execute(teamId, userId);
 
     public invite = (teamId: string, inviterId: string, dto: InviteMemberDto) =>

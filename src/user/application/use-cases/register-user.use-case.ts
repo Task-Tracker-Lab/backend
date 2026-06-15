@@ -11,7 +11,7 @@ export class RegisterUserUseCase {
         private readonly repository: IUserRepository,
     ) {}
 
-    async execute(dto: NewUser & { password: string }) {
+    async execute(dto: NewUser & { password: string | null }) {
         const existingUser = await this.repository.findByEmail(dto.email);
 
         if (existingUser?.user) {
@@ -28,14 +28,16 @@ export class RegisterUserUseCase {
         try {
             const user = await this.repository.create(dto);
 
-            await Promise.all([
-                this.repository.logActivity({
-                    eventType: 'registered',
-                    userId: user.id,
-                    id: createId(),
-                }),
-                this.repository.updatePasswordHash(user.id, dto.password),
-            ]);
+            if (dto.password) {
+                await Promise.all([
+                    this.repository.logActivity({
+                        eventType: 'registered',
+                        userId: user.id,
+                        id: createId(),
+                    }),
+                    this.repository.updatePasswordHash(user.id, dto.password),
+                ]);
+            }
 
             return user;
         } catch (error) {

@@ -7,7 +7,11 @@ import type {
     UserPreferences,
     UserProfile,
     UserWithSecurity,
-} from '../entities/user.domain';
+} from '../entities';
+
+type DeepPartial<T> = {
+    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
 
 export interface IUserRepository {
     create(data: NewUser): Promise<User>;
@@ -29,6 +33,9 @@ export interface IUserRepository {
         preferences?: Partial<UserPreferences>,
     ): Promise<boolean>;
     updatePasswordHash(id: string, hash: string): Promise<boolean>;
-    updateNotifications(id: string, settings: UserNotifications['settings']): Promise<boolean>;
+    updateNotifications(
+        id: string,
+        settings: DeepPartial<UserNotifications['settings']>,
+    ): Promise<boolean>;
     logActivity(data: NewUserActivity): Promise<boolean>;
 }

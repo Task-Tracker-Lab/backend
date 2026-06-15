@@ -1,4 +1,4 @@
-import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
+import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 import {
     users,
     userSecurity,
@@ -17,19 +17,24 @@ export type UserSecurity = InferSelectModel<typeof userSecurity>;
 export type NewUserSecurity = InferInsertModel<typeof userSecurity>;
 
 export type UserNotifications = InferSelectModel<typeof userNotifications>;
-export type NotificationSettings = Pick<UserNotifications, 'settings'>;
+export type NotificationSettings = NonNullable<UserNotifications['settings']>;
 
 export type UserActivity = InferSelectModel<typeof userActivity>;
 export type NewUserActivity = InferInsertModel<typeof userActivity>;
 
 export type UserProfile = {
     user: User;
-    security: Pick<UserSecurity, 'lastPasswordChange' | 'is2faEnabled'>;
-    notifications: NotificationSettings['settings'];
-    preferences: UserPreferences;
+    security: {
+        lastPasswordChange: string | null;
+        is2faEnabled: boolean;
+    };
+    preferences: UserPreferences | null;
+    notifications: NotificationSettings;
 };
 
 export type UserWithSecurity = {
     user: User;
-    security: Pick<UserSecurity, 'passwordHash'>;
+    security: {
+        passwordHash: string | null;
+    };
 };

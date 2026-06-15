@@ -102,8 +102,8 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
         super({
             authorizationURL: 'https://oauth.vk.com/authorize',
             tokenURL: 'https://oauth.vk.com/access_token',
-            clientID: cfg.getOrThrow('VKONTAKTE_CLIENT_ID'),
-            clientSecret: cfg.getOrThrow('VKONTAKTE_CLIENT_SECRET'),
+            clientID: cfg.getOrThrow<string>('VKONTAKTE_CLIENT_ID'),
+            clientSecret: cfg.getOrThrow<string>('VKONTAKTE_CLIENT_SECRET'),
             callbackURL,
             scope: ['email', 'photos', 'status', 'wall', 'groups'],
             scopeSeparator: ',',
@@ -120,7 +120,7 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
     ) {
         const user = {
             id: profile.id,
-            email: `${profile.screen_name}@vk.placholder.internal`,
+            email: `${profile.displayName}@vk.placholder.internal`,
             first_name: profile.name.givenName,
             last_name: profile.name.familyName,
             sex: profile.gender === 'male' ? 'male' : profile.gender === 'female' ? 'female' : null,
@@ -268,19 +268,22 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
         return profile;
     }
 
-    userProfile(accessToken: string, done: (err?: Error | null, profile?: any) => void): void {
+    override userProfile(
+        accessToken: string,
+        done: (err?: Error | null, profile?: any) => void,
+    ): void {
         this.getUserProfile(accessToken)
             .then((profile) => done(null, profile))
             .catch((err) => done(err, null));
     }
 
-    authorizationParams(
+    override authorizationParams(
         options: { display?: 'page' | 'popup' | 'mobile' } = {},
     ): Record<string, string> {
         const params: Record<string, string> = {};
 
         if (options.display) {
-            params.display = options.display;
+            params['display'] = options.display;
         }
 
         return params;

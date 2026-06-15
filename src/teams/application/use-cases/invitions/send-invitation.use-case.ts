@@ -4,10 +4,9 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
-import { InviteMemberDto } from '../../dtos';
+import { InviteMemberDto, type TeamInvite } from '../../dtos';
 import { BaseException } from '@shared/error';
 import { generateSecret } from 'otplib';
-import type { TeamInvite } from '../../dtos/invitation.dto';
 import { TeamInvitationEvent } from '@core/teams/domain/events';
 import { TeamMemberPolicy } from '@core/teams/domain/policy';
 import type { TeamRole } from '@shared/entities';
@@ -108,12 +107,12 @@ export class SendInvitationUseCase {
         const expiresAt = new Date(Date.now() + this.INVITE_TTL * 1000);
 
         const cdn = this.getCdnBaseUrl();
-        const { small } = ImageHelper.buildResponsiveUrls(cdn, team.avatarUrl);
+        const images = ImageHelper.buildResponsiveUrls(cdn, team.avatarUrl);
 
         return {
             teamId: team.id,
             teamName: team.name,
-            teamAvatar: small,
+            teamAvatar: images?.small ?? null,
             email: dto.email.toLowerCase(),
             role: (dto.role || 'member') as TeamRole,
             inviterId: inviter.userId,

@@ -21,7 +21,11 @@ export class HealthService {
 
         const results = await Promise.all(
             Object.entries(indicators).map(async ([name, check]) => {
-                let timeoutId: NodeJS.Timeout;
+                if (!check || typeof check !== 'function') {
+                    return { name, ok: false, error: 'Health check not configured' };
+                }
+
+                let timeoutId: NodeJS.Timeout | undefined;
 
                 const timeoutPromise = new Promise((_, reject) => {
                     timeoutId = setTimeout(() => reject(new Error('Timeout')), 5000);
@@ -42,6 +46,8 @@ export class HealthService {
         const isAllOk = results.every((r) => r.ok);
         const components = Object.fromEntries(results.map((r) => [r.name, r.ok ? 'up' : 'down']));
 
+        const loaded = os.loadavg()[0];
+
         return {
             service: serviceName,
             status: isAllOk,
@@ -56,7 +62,7 @@ export class HealthService {
                 uptime: this.formatUptime(uptimeSeconds),
                 uptimeSeconds: uptimeSeconds,
             },
-            loaded: os.loadavg()[0].toFixed(2),
+            loaded: loaded?.toFixed(2),
         };
     }
 

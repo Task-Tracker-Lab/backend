@@ -1,18 +1,18 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { IIdentitiesRepository } from '@core/auth/domain/repository';
+import { IIdentityRepository } from '@core/auth/domain/repository';
 import { FindUserQuery } from '@core/user';
 import { BaseException } from '@shared/error';
 
 @Injectable()
 export class DisconnectProviderUseCase {
     constructor(
-        @Inject('IIdentitiesRepository')
-        private readonly identitiesRepo: IIdentitiesRepository,
-        private readonly findUserQuery: FindUserQuery,
+        @Inject('IIdentityRepository')
+        private readonly identityRepo: IIdentityRepository,
+        private readonly findUserQ: FindUserQuery,
     ) {}
 
     async execute(provider: string, userId: string) {
-        const entity = await this.findUserQuery.execute({ id: userId });
+        const entity = await this.findUserQ.execute({ id: userId });
 
         if (!entity?.user) {
             throw new BaseException(
@@ -24,7 +24,7 @@ export class DisconnectProviderUseCase {
             );
         }
 
-        const providers = await this.identitiesRepo.findAllByUserId(entity.user.id);
+        const providers = await this.identityRepo.findAllByUserId(entity.user.id);
         const targetProvider = providers.find((p) => p.provider === provider);
 
         if (!targetProvider) {
@@ -52,7 +52,7 @@ export class DisconnectProviderUseCase {
             );
         }
 
-        await this.identitiesRepo.delete(targetProvider.id);
+        await this.identityRepo.delete(targetProvider.id);
 
         return {
             success: true,

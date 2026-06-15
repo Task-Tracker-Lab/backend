@@ -6,3 +6,5 @@ export const MEDIA_STRATEGIES = {
     'team.avatar': new TeamMediaStrategy(),
     'team.banner': new TeamMediaStrategy(),
 } as const;
+
+export type MediaStrategyKey = keyof typeof MEDIA_STRATEGIES;

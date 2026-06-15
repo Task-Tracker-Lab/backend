@@ -5,7 +5,7 @@ import type { JwtPayload } from '@shared/types';
 
 @Injectable()
 export class CookieAuthGuard extends AuthGuard('cookie') {
-    handleRequest<TUser = JwtPayload>(err: unknown, user: TUser, info: any): TUser {
+    override handleRequest<TUser = JwtPayload>(err: unknown, user: TUser, info: any): TUser {
         if (err || !user) {
             throw new BaseException(
                 {

@@ -9,7 +9,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
         PrometheusModule.register({
             controller: MetricsController,
             defaultMetrics: {
-                enabled: process.env.NODE_ENV !== 'test',
+                enabled: process.env['NODE_ENV'] !== 'test',
             },
         }),
     ],

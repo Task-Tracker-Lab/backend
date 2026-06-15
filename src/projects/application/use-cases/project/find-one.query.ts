@@ -2,7 +2,7 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { FindTeamMemberQuery, FindTeamQuery } from '@core/teams';
 import { createHash } from 'crypto';
 import { BaseException } from '@shared/error';
-import { ROLE_PRIORITY } from '@shared/constants';
+import { isTeamRole, ROLE_PRIORITY } from '@shared/constants';
 import { IProjectRepository } from '@core/projects/domain/repository';
 import type { Project } from '@core/projects/domain/entities';
 import { ProjectErrorCodes, ProjectErrorMessages } from '@core/projects/domain/errors';
@@ -78,7 +78,7 @@ export class FindProjectQuery {
             );
         }
 
-        if (ROLE_PRIORITY[member.role] < ROLE_PRIORITY[minRole]) {
+        if (isTeamRole(member.role) && ROLE_PRIORITY[member.role] < ROLE_PRIORITY[minRole]) {
             throw new BaseException(
                 {
                     code: 'INSUFFICIENT_PERMISSIONS',
