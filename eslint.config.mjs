@@ -1,7 +1,11 @@
 // @ts-check
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import pluginJsdoc from 'eslint-plugin-jsdoc';
+import pluginPerfectionist from 'eslint-plugin-perfectionist';
 import functional from 'eslint-plugin-functional';
+import pluginUnicorn from 'eslint-plugin-unicorn';
+import pluginSonarjs from 'eslint-plugin-sonarjs';
 
 export default tseslint.config(
     {
@@ -12,6 +16,10 @@ export default tseslint.config(
     {
         plugins: {
             functional,
+            perfectionist: pluginPerfectionist,
+            unicorn: pluginUnicorn,
+            sonarjs: pluginSonarjs,
+            jsdoc: pluginJsdoc,
         },
         languageOptions: {
             parserOptions: {
@@ -47,6 +55,65 @@ export default tseslint.config(
             'functional/immutable-data': 'warn',
             'functional/no-let': 'off',
             'functional/no-expression-statements': 'off',
+
+            'perfectionist/sort-imports': [
+                'error',
+                {
+                    type: 'natural',
+                    order: 'asc',
+                    groups: [
+                        'builtin', // node:fs
+                        'external', // @nestjs, rxjs
+                        'internal', // @core, @shared
+                        'parent', // ../
+                        'sibling', // ./
+                        'index', // index.ts
+                        'type', // type imports
+                    ],
+                },
+            ],
+            'no-duplicate-imports': 'error',
+
+            'unicorn/filename-case': [
+                'error',
+                {
+                    case: 'kebabCase',
+                    ignore: ['index.ts', '\\.d\\.ts$'],
+                },
+            ],
+            'unicorn/prefer-node-protocol': 'error',
+            'unicorn/no-array-method-this-argument': 'warn',
+            'unicorn/prefer-structured-clone': 'error',
+            'unicorn/no-useless-undefined': 'error',
+            'unicorn/prefer-export-from': 'error',
+            'unicorn/prefer-spread': 'warn',
+            'unicorn/no-array-reduce': 'warn',
+            'unicorn/no-array-push-push': 'warn',
+
+            'sonarjs/cognitive-complexity': ['error', 15],
+            'sonarjs/no-duplicate-string': ['warn', { threshold: 5 }],
+            'sonarjs/no-identical-functions': 'error',
+            'sonarjs/no-collapsible-if': 'error',
+            'sonarjs/no-unused-collection': 'error',
+
+            'jsdoc/require-description': ['warn', { descriptionStyle: 'body' }],
+            'jsdoc/check-param-names': 'error',
+            'jsdoc/check-types': 'error',
+            'jsdoc/require-param-type': 'error',
+            'jsdoc/require-returns-type': 'error',
+
+            eqeqeq: ['error', 'always'],
+            curly: ['error', 'all'],
+            'no-console': ['warn', { allow: ['warn', 'error'] }],
+            'no-return-await': 'error',
+            'require-await': 'error',
+            'no-var': 'error',
+            'prefer-const': 'error',
+            'prefer-template': 'error',
+            'object-shorthand': 'error',
+            'arrow-body-style': ['error', 'as-needed'],
+            '@typescript-eslint/no-floating-promises': 'error',
+            '@typescript-eslint/await-thenable': 'error',
 
             'no-restricted-syntax': [
                 'error',
