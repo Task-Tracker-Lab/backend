@@ -7,6 +7,8 @@ declare module '@nestjs/config' {
          * Переопределяем метод get, чтобы он предлагал ключи из нашей схемы
          */
         get<T extends keyof Config>(key: T): Config[T];
+        get<T extends keyof Config>(key: T, defaultValue: Config[T]): Config[T];
+
         /**
          * Переопределяем метод getOrThrow, чтобы он предлагал ключи из нашей схемы
          */

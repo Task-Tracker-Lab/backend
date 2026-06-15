@@ -1,4 +1,4 @@
-import { IIdentitiesRepository } from '@core/auth/domain/repository';
+import { IIdentityRepository } from '@core/auth/domain/repository';
 import { FindUserQuery, RegisterUserUseCase } from '@core/user';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { OAuthResponse } from '../../dtos';
@@ -6,17 +6,17 @@ import { BaseException } from '@shared/error';
 import { InjectQueue } from '@nestjs/bullmq';
 import { AuthQueues, AuthUserJobs } from '@core/auth/domain/enums';
 import { Queue } from 'bullmq';
-import { CreateUserWorkspaceEvent } from '@core/auth/domain/events/create-user-workspace.event';
+import { CreateUserWorkspaceEvent } from '@core/auth/domain/events';
 
 @Injectable()
 export class ProcessOAuthRegistrationUseCase {
     constructor(
         @InjectQueue(AuthQueues.AUTH_USER)
         private readonly queue: Queue,
-        @Inject('IIdentitiesRepository')
-        private readonly identitiesRepo: IIdentitiesRepository,
-        private readonly findUserQuery: FindUserQuery,
-        private readonly registerUserUseCase: RegisterUserUseCase,
+        @Inject('IIdentityRepository')
+        private readonly identityRepo: IIdentityRepository,
+        private readonly findUserQ: FindUserQuery,
+        private readonly registerUserUC: RegisterUserUseCase,
     ) {}
 
     async execute(dto: OAuthResponse) {
@@ -33,7 +33,7 @@ export class ProcessOAuthRegistrationUseCase {
             );
         }
 
-        const user = await this.registerUserUseCase.execute({
+        const user = await this.registerUserUC.execute({
             email: dto.email,
             firstName: dto.first_name || 'User',
             lastName: dto.last_name ?? '',
@@ -43,7 +43,7 @@ export class ProcessOAuthRegistrationUseCase {
             avatarUrl: dto.avatar_url,
         });
 
-        await this.identitiesRepo.create({
+        await this.identityRepo.create({
             userId: user.id,
             avatarUrl: dto.avatar_url,
             provider: dto.provider as any,
@@ -58,7 +58,7 @@ export class ProcessOAuthRegistrationUseCase {
     }
 
     private async findUserByEmail(email: string) {
-        const result = await this.findUserQuery.execute({ email });
+        const result = await this.findUserQ.execute({ email });
         return result?.user;
     }
 }

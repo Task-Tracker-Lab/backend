@@ -22,7 +22,7 @@ export class ResetPasswordUseCase {
         private readonly cacheService: ICacheService,
         @InjectQueue(AuthQueues.AUTH_MAIL)
         private readonly mailQueue: Queue,
-        private readonly findUserQuery: FindUserQuery,
+        private readonly findUserQ: FindUserQuery,
     ) {}
 
     async execute(dto: ResetPasswordDto) {
@@ -45,7 +45,7 @@ export class ResetPasswordUseCase {
             );
         }
 
-        const entity = await this.findUserQuery.execute({ email: dto.email });
+        const entity = await this.findUserQ.execute({ email: dto.email });
 
         if (!entity?.user) {
             throw new BaseException(

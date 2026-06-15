@@ -12,14 +12,14 @@ export class TokenService {
     ) {}
 
     async generateTokens(user: User, sessionId: string) {
-        const domain = this.cfg.get('DOMAIN');
+        const domain = this.cfg.get<string>('DOMAIN');
         const audConstraint = this.cfg.getOrThrow('JWT_AUDIENCE');
 
         const payload = {
             jti: sessionId,
             sub: user.id,
             email: user.email,
-            iss: btoa(domain),
+            iss: btoa(domain ?? 'localhost'),
             aud: btoa(audConstraint),
         };
 
@@ -42,15 +42,15 @@ export class TokenService {
         return { access, refresh, expiresAt: new Date(refreshDecodedData?.exp * 1000) };
     }
 
-    async validateToken(token: string, type: 'access' | 'refresh'): Promise<JwtPayload> {
+    async validateToken(token: string, type: 'access' | 'refresh'): Promise<JwtPayload | null> {
         try {
             const accessSecret = this.cfg.get('JWT_ACCESS_SECRET');
             const refreshSecret = this.cfg.get('JWT_REFRESH_SECRET');
 
             const secret = type === 'access' ? accessSecret : refreshSecret;
 
-            return this.jwtService.verifyAsync(token, { secret });
-        } catch (e) {
+            return this.jwtService.verifyAsync<JwtPayload>(token, { secret });
+        } catch {
             return null;
         }
     }

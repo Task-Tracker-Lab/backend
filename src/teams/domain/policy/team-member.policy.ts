@@ -15,7 +15,7 @@ export class TeamMemberPolicy {
      */
     public canManage(issuerRole: TeamRole, targetRole: TeamRole): boolean {
         // Минимальный порог для управления — администратор
-        if (this.getPriority(issuerRole) < ROLE_PRIORITY.admin) return false;
+        if (this.getPriority(issuerRole) < (ROLE_PRIORITY['admin'] ?? 3)) return false;
 
         // Нельзя редактировать того, кто равен или выше по рангу
         return this.getPriority(issuerRole) > this.getPriority(targetRole);
@@ -65,7 +65,7 @@ export class TeamMemberPolicy {
         const issuerPrio = this.getPriority(issuerRole);
         const targetPrio = this.getPriority(targetRole);
 
-        return issuerPrio >= ROLE_PRIORITY.admin && issuerPrio > targetPrio;
+        return issuerPrio >= (ROLE_PRIORITY['admin'] ?? 3) && issuerPrio > targetPrio;
     }
 
     /**
@@ -76,7 +76,7 @@ export class TeamMemberPolicy {
         const newRolePrio = this.getPriority(newMemberRole);
 
         // Только админы и выше могут приглашать
-        if (issuerPrio < ROLE_PRIORITY.admin) return false;
+        if (issuerPrio < (ROLE_PRIORITY['admin'] ?? 3)) return false;
 
         // Нельзя пригласить кого-то на роль выше или равную своей (кроме owner)
         if (issuerRole !== 'owner' && newRolePrio >= issuerPrio) return false;
@@ -100,6 +100,6 @@ export class TeamMemberPolicy {
      * const canUpdate = policy.canUpdateMedia('admin'); // true
      */
     public canUpdateMedia(issuerRole: TeamRole): boolean {
-        return this.getPriority(issuerRole) >= ROLE_PRIORITY.moderator;
+        return this.getPriority(issuerRole) >= (ROLE_PRIORITY['moderator'] ?? 2);
     }
 }

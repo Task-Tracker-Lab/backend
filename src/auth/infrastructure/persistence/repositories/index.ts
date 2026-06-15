@@ -1,7 +1,7 @@
-import { IdentitiesRepository } from './identities.repository';
+import { IdentitiyRepository } from './identity.repository';
 import { SessionRepository } from './session.repository';
 
 export const REPOSITORIES = [
     { provide: 'ISessionRepository', useClass: SessionRepository },
-    { provide: 'IIdentitiesRepository', useClass: IdentitiesRepository },
+    { provide: 'IIdentityRepository', useClass: IdentitiyRepository },
 ];

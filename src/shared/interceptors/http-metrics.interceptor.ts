@@ -1,9 +1,14 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import {
+    type CallHandler,
+    type ExecutionContext,
+    Injectable,
+    NestInterceptor,
+} from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { Histogram } from 'prom-client';
 import { InjectMetric } from '@willsoto/nestjs-prometheus';
-import { FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 @Injectable()
 export class HttpMetricsInterceptor implements NestInterceptor {

@@ -1,5 +1,5 @@
 import { Body, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
-import { ApiBaseController, GetUserId, SkipContractHandle } from '@shared/decorators';
+import { ApiBaseController, GetUserId, SkipContract } from '@shared/decorators';
 import { ProjectFacade } from '../../project.facade';
 import { AddProjectMemberDto, UpdateProjectMemberDto } from '../../dtos';
 import {
@@ -52,7 +52,7 @@ export class ProjectMembersController {
     }
 
     @Get('available')
-    @SkipContractHandle()
+    @SkipContract()
     @FindAvailableUsersSwagger()
     async getAvailableUsers(
         @Param('slug') slug: string,

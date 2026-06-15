@@ -30,32 +30,34 @@ export class GetMyInvitesUseCase {
 
         const inviteKeys = codes.map((c) => `inv:code:${c}`);
         const results = await this.cacheService.getMany(inviteKeys);
-        const { activeInvites, expiredCodes } = results.reduce(
-            (acc, raw, i) => {
+        const { active, expired } = results.reduce(
+            (acc: { active: any[]; expired: string[] }, raw, i) => {
+                const code = codes[i];
+                if (!code) return acc;
+
                 if (raw) {
-                    acc.activeInvites.push(TeamMemberMapper.toPublicInvite(raw, codes[i]));
+                    acc.active.push(TeamMemberMapper.toPublicInvite(raw, code));
                 } else {
-                    acc.expiredCodes.push(codes[i]);
+                    acc.expired.push(code);
                 }
                 return acc;
             },
-            { activeInvites: [], expiredCodes: [] },
+            { active: [], expired: [] },
         );
 
-        if (expiredCodes.length > 0) {
-            this.cacheService.removeManyFromCollection(userKey, expiredCodes).catch((err) => {
+        if (expired.length > 0) {
+            this.cacheService.removeManyFromCollection(userKey, expired).catch((err) => {
                 console.error('Failed to cleanup expired invites:', err);
             });
         }
 
         return {
-            // TODO: реализовать полноценную пагинацию для инвайтов пользователя.
-            items: activeInvites,
+            items: active,
             meta: {
-                total: activeInvites.length,
-                totalPages: activeInvites.length ? 1 : 0,
+                total: active.length,
+                totalPages: active.length ? 1 : 0,
                 page: 1,
-                limit: activeInvites.length,
+                limit: active.length,
                 hasPrevPage: false,
                 hasNextPage: false,
             },

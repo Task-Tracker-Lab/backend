@@ -62,7 +62,7 @@ import { MetricsModule } from '@libs/metrics';
         HealthModule.registerAsync({
             inject: [DatabaseHealthService, S3Service, CACHE_SERVICE],
             useFactory: (db: DatabaseHealthService, s3: S3Service, cache: ICacheService) => {
-                const version = process.env.npm_package_version;
+                const version = process.env['npm_package_version'] ?? '';
 
                 return {
                     serviceName: 'gateway',

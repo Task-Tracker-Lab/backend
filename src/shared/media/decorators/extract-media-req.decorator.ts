@@ -66,7 +66,11 @@ export const ExtractMediaReq = createParamDecorator(
                 ...fields,
             };
         } catch (e) {
-            if (e?.code === 'FST_REQ_FILE_TOO_LARGE') {
+            const hasCode = (err: unknown): err is { code: string } => {
+                return err !== null && typeof err === 'object' && 'code' in err;
+            };
+
+            if (hasCode(e) && e?.code === 'FST_REQ_FILE_TOO_LARGE') {
                 throw new BaseException(
                     {
                         code: 'FILE_TOO_LARGE',

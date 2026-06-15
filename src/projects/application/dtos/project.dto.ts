@@ -131,15 +131,13 @@ export const ProjectFilterSchema = z
     .partial()
     .describe('Фильтры для списка проектов');
 
-export const CreateShareTokenSchema = z
-    .object({
-        ttl: z
-            .string()
-            .datetime()
-            .nullish()
-            .describe('Дата истечения ссылки. Если не указана — ставится дефолт 3 месяца'),
-    })
-    .optional();
+export const CreateShareTokenSchema = z.object({
+    ttl: z
+        .string()
+        .datetime()
+        .nullish()
+        .describe('Дата истечения ссылки. Если не указана — ставится дефолт 3 месяца'),
+});
 
 export const CreateShareTokenResponseSchema = ActionResponseSchema.extend({
     payload: z.object({

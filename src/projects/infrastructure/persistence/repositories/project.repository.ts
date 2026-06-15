@@ -19,6 +19,10 @@ export class ProjectRepository implements IProjectRepository {
                 .values(data)
                 .returning({ slug: schema.projects.slug, id: schema.projects.id });
 
+            if (!project[0]) {
+                throw new Error('Failed to create project: no project returned');
+            }
+
             const member = await tx
                 .insert(schema.projectMembers)
                 .values({
@@ -163,6 +167,6 @@ export class ProjectRepository implements IProjectRepository {
                 ),
             );
 
-        return result.count;
+        return result?.count ?? 0;
     };
 }

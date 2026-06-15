@@ -13,10 +13,10 @@ export class CookieStrategy extends PassportStrategy(Strategy, 'cookie') {
             jwtFromRequest: ExtractJwt.fromExtractors([
                 (request: FastifyRequest) => {
                     const token = request?.cookies?.['refresh'];
-                    return token;
+                    return token ?? null;
                 },
             ]),
-            secretOrKey: configService.get<string>('JWT_REFRESH_SECRET'),
+            secretOrKey: configService.getOrThrow('JWT_REFRESH_SECRET'),
             passReqToCallback: true,
         });
     }

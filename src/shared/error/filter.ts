@@ -17,7 +17,7 @@ import { DATABASE_ERRORS } from './swagger';
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
     private readonly logger = new Logger(GlobalExceptionFilter.name);
-    private isDev = process.env.NODE_ENV === 'development';
+    private isDev = process.env['NODE_ENV'] === 'development';
 
     catch(exception: unknown, host: ArgumentsHost) {
         if (exception instanceof ZodValidationException) {
@@ -129,12 +129,15 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         const res = exception.getResponse();
 
         const message =
-            typeof res === 'object' && res['message'] ? res['message'] : exception.message;
+            typeof res === 'object' && res !== null && 'message' in res
+                ? String(res.message)
+                : exception.message;
 
-        const code =
-            typeof res === 'object' && res['error']
-                ? res['error'].toUpperCase().replace(/\s+/g, '_')
-                : 'HTTP_EXCEPTION';
+        const errorCode =
+            typeof res === 'object' && res !== null && 'error' in res && res.error
+                ? String(res.error)
+                : null;
+        const code = errorCode ? errorCode.toUpperCase().replace(/\s+/g, '_') : 'HTTP_EXCEPTION';
 
         this.log(exception, host, status, {
             httpCode: code,

@@ -74,15 +74,6 @@ export class AcceptInvitationUseCase {
         return { success: true, message: 'Вы успешно присоединились к команде' };
     }
 
-    private checkMemberStatus(member: any) {
-        if (member?.status === 'banned') {
-            // throw new BaseException({ code: 'MEMBER_BANNED' }, 403);
-        }
-        if (member?.status === 'active') {
-            // throw new BaseException({ code: 'ALREADY_MEMBER' }, 400);
-        }
-    }
-
     private async cleanupInvite(code: string, teamId: string, email: string) {
         await this.cacheService
             .transaction()

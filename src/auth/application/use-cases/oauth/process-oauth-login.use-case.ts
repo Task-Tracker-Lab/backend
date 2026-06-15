@@ -1,19 +1,19 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { OAuthResponse } from '../../dtos';
-import { IIdentitiesRepository } from '@core/auth/domain/repository';
+import { IIdentityRepository } from '@core/auth/domain/repository';
 import { FindUserQuery } from '@core/user';
 import { BaseException } from '@shared/error';
 
 @Injectable()
 export class ProcessOAuthLoginUseCase {
     constructor(
-        @Inject('IIdentitiesRepository')
-        private readonly identitiesRepo: IIdentitiesRepository,
-        private readonly findUserQuery: FindUserQuery,
+        @Inject('IIdentityRepository')
+        private readonly identityRepo: IIdentityRepository,
+        private readonly findUserQ: FindUserQuery,
     ) {}
 
     async execute(dto: OAuthResponse) {
-        const identity = await this.identitiesRepo.findByProvider(dto.provider as any, dto.id);
+        const identity = await this.identityRepo.findByProvider(dto.provider as any, dto.id);
 
         if (!identity) {
             throw new BaseException(
@@ -25,7 +25,7 @@ export class ProcessOAuthLoginUseCase {
             );
         }
 
-        const result = await this.findUserQuery.execute({ id: identity.userId });
+        const result = await this.findUserQ.execute({ id: identity.userId });
 
         if (!result?.user) {
             throw new BaseException(

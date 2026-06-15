@@ -14,11 +14,11 @@ export class SignInUseCase {
         @Inject('ISessionRepository')
         private readonly sessionRepo: ISessionRepository,
         private readonly tokenService: TokenService,
-        private readonly findUserQuery: FindUserQuery,
+        private readonly findUserQ: FindUserQuery,
     ) {}
 
     async execute(dto: SignInDto, meta: DeviceMetadata) {
-        const entities = await this.findUserQuery.execute({ email: dto.email });
+        const entities = await this.findUserQ.execute({ email: dto.email });
 
         if (!entities?.user || !entities?.security) {
             throw new BaseException(
@@ -31,7 +31,8 @@ export class SignInUseCase {
         }
 
         const { security, user } = entities;
-        const isPasswordValid = await argon.verify(security.passwordHash, dto.password);
+        // TODO: FIX
+        const isPasswordValid = await argon.verify(security.passwordHash ?? '', dto.password);
 
         if (!isPasswordValid) {
             throw new BaseException(

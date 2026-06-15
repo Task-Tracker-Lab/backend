@@ -18,6 +18,10 @@ export class StateRepository implements IStateRepository {
             .values(data)
             .returning({ id: schema.states.id });
 
+        if (!result) {
+            throw new Error('Failed to create state: no state returned');
+        }
+
         return result;
     }
 
@@ -107,12 +111,12 @@ export class StateRepository implements IStateRepository {
         return result ?? null;
     }
 
-    public async countByArea(areaId: string) {
+    public countByArea = async (areaId: string) => {
         const [result] = await this.db
             .select({ count: count() })
             .from(schema.states)
             .where(and(eq(schema.states.areaId, areaId), isNull(schema.states.deletedAt)));
 
-        return result.count;
-    }
+        return result?.count ?? 0;
+    };
 }

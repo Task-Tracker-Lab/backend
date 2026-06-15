@@ -59,8 +59,8 @@ export class YandexStrategy extends PassportStrategy(Strategy, 'yandex-oauth') {
         super({
             authorizationURL: 'https://oauth.yandex.ru/authorize',
             tokenURL: 'https://oauth.yandex.ru/token',
-            clientID: cfg.getOrThrow('YANDEX_CLIENT_ID'),
-            clientSecret: cfg.getOrThrow('YANDEX_CLIENT_SECRET'),
+            clientID: cfg.getOrThrow<string>('YANDEX_CLIENT_ID'),
+            clientSecret: cfg.getOrThrow<string>('YANDEX_CLIENT_SECRET'),
             callbackURL,
             scope: ['login:email', 'login:info'],
             passReqToCallback: true,
@@ -140,7 +140,10 @@ export class YandexStrategy extends PassportStrategy(Strategy, 'yandex-oauth') {
         }
     }
 
-    userProfile(accessToken: string, done: (err?: Error | null, profile?: any) => void): void {
+    override userProfile(
+        accessToken: string,
+        done: (err?: Error | null, profile?: any) => void,
+    ): void {
         this.getUserProfile(accessToken)
             .then((profile) => done(null, profile))
             .catch((err) => done(err, null));

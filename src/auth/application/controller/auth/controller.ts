@@ -18,7 +18,7 @@ import { ConfigService } from '@nestjs/config';
 @ApiBaseController('auth', 'Auth')
 export class AuthController {
     private readonly isProduction: boolean = false;
-    private readonly domain: string | null = null;
+    private readonly domain?: string | null = null;
 
     constructor(
         private readonly facade: AuthFacade,
@@ -79,6 +79,7 @@ export class AuthController {
     @PostLogoutSwagger()
     async logout(@Res({ passthrough: true }) res: FastifyReply, @Req() req: FastifyRequest) {
         const session = req.cookies?.['refresh'];
+
         const response = await this.facade.signOut(session);
 
         res.clearCookie('refresh', {

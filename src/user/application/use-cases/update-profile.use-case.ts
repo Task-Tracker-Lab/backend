@@ -3,6 +3,7 @@ import { Injectable, Inject, HttpStatus } from '@nestjs/common';
 import { UpdateProfileDto } from '../dtos';
 import { BaseException } from '@shared/error';
 import { createId } from '@paralleldrive/cuid2';
+import { removeUndefined } from '@shared/utils';
 
 @Injectable()
 export class UpdateProfileUseCase {
@@ -14,7 +15,7 @@ export class UpdateProfileUseCase {
     async execute(id: string, dto: UpdateProfileDto) {
         const entity = await this.userRepo.findById(id);
 
-        if (!entity.user) {
+        if (!entity?.user) {
             throw new BaseException(
                 { code: 'USER_NOT_FOUND', message: 'Пользователь не найден' },
                 HttpStatus.NOT_FOUND,
@@ -31,7 +32,11 @@ export class UpdateProfileUseCase {
             theme,
         };
 
-        const isUpdated = await this.userRepo.updateProfile(entity.user.id, profile, preferences);
+        const isUpdated = await this.userRepo.updateProfile(
+            entity.user.id,
+            removeUndefined(profile),
+            preferences,
+        );
 
         if (!isUpdated) {
             throw new BaseException(

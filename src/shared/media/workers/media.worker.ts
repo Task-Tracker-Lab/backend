@@ -29,7 +29,10 @@ export class MediaProcessor extends WorkerHost {
             const progressStep = Math.floor(90 / resizeSpecs.length);
 
             for (let i = 0; i < resizeSpecs.length; i++) {
-                const { name, ...dimensions } = resizeSpecs[i];
+                const spec = resizeSpecs[i];
+                if (!spec) continue;
+
+                const { name, ...dimensions } = spec;
                 const targetFileName = `${name}.webp`;
 
                 const processedImage = await this.imagor.get(`/${originalFilePath}`, dimensions);

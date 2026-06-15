@@ -13,6 +13,11 @@ export class SessionRepository implements ISessionRepository {
 
     async create(data: SessionInsert) {
         const [result] = await this.db.insert(schema.sessions).values(data).returning();
+
+        if (!result) {
+            throw new Error('Failed to create session: no session returned');
+        }
+
         return result;
     }
 

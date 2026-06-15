@@ -2,7 +2,7 @@ import type { RawMemberRow } from '@core/teams/domain/repository';
 import type { Project } from '@core/projects/domain/entities';
 
 export class ProjectMapper {
-    public static toDetailResponse(project: Project, member?: RawMemberRow, token?: string) {
+    public static toDetailResponse(project: Project, member?: RawMemberRow | null, token?: string) {
         const {
             id,
             slug,

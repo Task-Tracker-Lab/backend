@@ -43,16 +43,16 @@ export class UpdateProjectUseCase {
 
         const data: Record<string, unknown> = {};
 
-        if (dto.slug) data.slug = slugify(dto.slug, { lower: true, strict: true });
-        if (dto.name) data.name = dto.name.trim();
-        if (dto.description !== undefined) data.description = dto.description?.trim() || null;
+        if (dto.slug) data['slug'] = slugify(dto.slug, { lower: true, strict: true });
+        if (dto.name) data['name'] = dto.name.trim();
+        if (dto.description !== undefined) data['description'] = dto.description?.trim() || null;
         if (dto.descriptionHtml !== undefined) {
-            data.descriptionHtml = dto.descriptionHtml?.trim() || null;
+            data['descriptionHtml'] = dto.descriptionHtml?.trim() || null;
         }
-        if (dto.icon !== undefined) data.icon = dto.icon || null;
-        if (dto.color !== undefined) data.color = dto.color || null;
-        if (dto.sequence !== undefined) data.sequence = dto.sequence;
-        if (dto.visibility) data.visibility = dto.visibility;
+        if (dto.icon !== undefined) data['icon'] = dto.icon || null;
+        if (dto.color !== undefined) data['color'] = dto.color || null;
+        if (dto.sequence !== undefined) data['sequence'] = dto.sequence;
+        if (dto.visibility) data['visibility'] = dto.visibility;
 
         if (Object.keys(data).length === 0 && !dto.settings) {
             return {

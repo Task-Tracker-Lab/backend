@@ -20,6 +20,10 @@ export class AreaRepository implements IAreaRepository {
                 .values(data)
                 .returning({ id: schema.areas.id, slug: schema.areas.slug });
 
+            if (!area) {
+                throw new Error('Failed to create area: no area returned');
+            }
+
             const statesData = DEFAULT_STATES.map((state) => ({
                 areaId: area.id,
                 title: state.title,

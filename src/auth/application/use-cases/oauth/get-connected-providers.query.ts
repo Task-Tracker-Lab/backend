@@ -1,11 +1,11 @@
-import { IIdentitiesRepository } from '@core/auth/domain/repository';
+import { IIdentityRepository } from '@core/auth/domain/repository';
 import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class GetConnectedProvidersQuery {
     constructor(
-        @Inject('IIdentitiesRepository')
-        private readonly identityRepo: IIdentitiesRepository,
+        @Inject('IIdentityRepository')
+        private readonly identityRepo: IIdentityRepository,
     ) {}
 
     async execute(userId: string) {

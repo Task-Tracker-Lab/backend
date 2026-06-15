@@ -94,26 +94,26 @@ export class LoggingInterceptor implements NestInterceptor {
         );
     }
 
-    private sanitize<T>(data: T) {
+    private sanitize<T>(data: T): T {
         if (!data || typeof data !== 'object') return data;
-        if (Array.isArray(data)) return data.map((v) => this.sanitize(v));
+        if (Array.isArray(data)) return data.map((v) => this.sanitize(v)) as T;
 
-        const cleanData = JSON.parse(JSON.stringify(data));
+        const cleanData = JSON.parse(JSON.stringify(data)) as Record<string, unknown>;
 
-        return Object.keys(cleanData).reduce((acc, key) => {
+        return Object.keys(cleanData).reduce<Record<string, unknown>>((acc, key) => {
             const isSensitive = this.sensitiveFields.some((field) =>
                 key.toLowerCase().includes(field),
             );
 
             if (isSensitive) {
                 acc[key] = '***';
-            } else if (typeof cleanData[key] === 'object') {
+            } else if (typeof cleanData[key] === 'object' && cleanData[key] !== null) {
                 acc[key] = this.sanitize(cleanData[key]);
             } else {
                 acc[key] = cleanData[key];
             }
             return acc;
-        }, {});
+        }, {}) as T;
     }
 }
 

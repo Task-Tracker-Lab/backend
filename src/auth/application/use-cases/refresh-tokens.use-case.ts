@@ -12,10 +12,20 @@ export class RefreshTokensUseCase {
         @Inject('ISessionRepository')
         private readonly sessionRepo: ISessionRepository,
         private readonly tokenService: TokenService,
-        private readonly findUserQuery: FindUserQuery,
+        private readonly findUserQ: FindUserQuery,
     ) {}
 
-    async execute(token: string, metadata: DeviceMetadata) {
+    async execute(token: string | undefined, metadata: DeviceMetadata) {
+        if (!token) {
+            throw new BaseException(
+                {
+                    code: 'SESSION_REQUIRED',
+                    message: 'Session required',
+                },
+                HttpStatus.UNAUTHORIZED,
+            );
+        }
+
         const payload = await this.tokenService.validateToken(token, 'refresh');
 
         if (!payload?.jti) {
@@ -40,7 +50,7 @@ export class RefreshTokensUseCase {
             );
         }
 
-        const entity = await this.findUserQuery.execute({ id: session.userId });
+        const entity = await this.findUserQ.execute({ id: session.userId });
 
         if (!entity?.user) {
             await this.sessionRepo.revoke(session.id);

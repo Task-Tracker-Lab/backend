@@ -12,7 +12,7 @@ export class BearerAuthGuard extends AuthGuard('bearer') {
         super();
     }
 
-    async canActivate(context: ExecutionContext): Promise<boolean> {
+    override async canActivate(context: ExecutionContext): Promise<boolean> {
         try {
             return super.canActivate(context) as Promise<boolean>;
         } catch (e) {
@@ -24,7 +24,7 @@ export class BearerAuthGuard extends AuthGuard('bearer') {
         }
     }
 
-    handleRequest<TUser = JwtPayload>(
+    override handleRequest<TUser = JwtPayload>(
         err: unknown,
         user: TUser,
         info: unknown,
@@ -35,7 +35,7 @@ export class BearerAuthGuard extends AuthGuard('bearer') {
         }
 
         if (this.isPublicOrHasToken(context)) {
-            return null;
+            return null as TUser;
         }
 
         throw new BaseException(

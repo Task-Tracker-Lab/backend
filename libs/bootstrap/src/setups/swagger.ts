@@ -15,7 +15,13 @@ async function getCustomCSS() {
 }
 
 export async function setupSwagger(app: NestFastifyApplication, options: SwaggerOptions = {}) {
-    const { title, description, version, path, server } = {
+    const {
+        title = 'Api',
+        description = '',
+        version = 'v0.0.1',
+        path = 'api',
+        server,
+    } = {
         ...SWAGGER_DEFAULTS,
         ...options,
     };

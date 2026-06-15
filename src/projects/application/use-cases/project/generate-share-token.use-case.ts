@@ -73,7 +73,7 @@ export class GenerateShareTokenUseCase {
      * Вычисляет дату истечения токена.
      * Если ttl передан — использует его, иначе +3 месяца от текущей даты.
      */
-    private resolveExpiration(ttl?: string): Date {
+    private resolveExpiration(ttl?: string | null): Date {
         if (ttl) {
             const date = new Date(ttl);
 

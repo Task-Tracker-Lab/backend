@@ -18,7 +18,11 @@ export class MemberRepository implements IMemberRepository {
             .values(data)
             .returning({ id: schema.projectMembers.id });
 
-        return { id: result.id };
+        if (!result) {
+            throw new Error('Failed to create member: no member returned');
+        }
+
+        return { id: result?.id };
     };
 
     public findById = async (memberId: string) => {
@@ -68,7 +72,7 @@ export class MemberRepository implements IMemberRepository {
         return result || null;
     };
 
-    async getUserRole(projectId: string, userId: string) {
+    public getUserRole = async (projectId: string, userId: string) => {
         const [result] = await this.db
             .select({ role: schema.projectMembers.role })
             .from(schema.projectMembers)
@@ -81,18 +85,18 @@ export class MemberRepository implements IMemberRepository {
             .limit(1);
 
         return (result?.role as MemberRole) ?? null;
-    }
+    };
 
-    async countByProject(projectId: string) {
+    public countByProject = async (projectId: string) => {
         const [result] = await this.db
             .select({ count: sql<number>`count(*)` })
             .from(schema.projectMembers)
             .where(eq(schema.projectMembers.projectId, projectId));
 
-        return result.count;
-    }
+        return result?.count ?? 0;
+    };
 
-    async updateRole(memberId: string, role: MemberRole) {
+    public updateRole = async (memberId: string, role: MemberRole) => {
         const [result] = await this.db
             .update(schema.projectMembers)
             .set({ role })
@@ -100,14 +104,14 @@ export class MemberRepository implements IMemberRepository {
             .returning();
 
         return result ?? null;
-    }
+    };
 
-    async delete(memberId: string): Promise<boolean> {
+    public delete = async (memberId: string) => {
         const [result] = await this.db
             .delete(schema.projectMembers)
             .where(eq(schema.projectMembers.id, memberId))
             .returning({ id: schema.projectMembers.id });
 
         return result !== undefined;
-    }
+    };
 }

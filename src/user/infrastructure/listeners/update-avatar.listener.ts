@@ -43,6 +43,7 @@ export class UpdateAvatarListener extends WorkerHost {
             await job.updateProgress(100);
 
             await job.log(`Successfully updated avatar for user ${userAccount.user.id}`);
+            return;
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             await job.log(`Critical failure: ${errorMessage}`);

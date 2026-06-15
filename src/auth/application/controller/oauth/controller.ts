@@ -12,13 +12,13 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import { BearerAuthGuard, OAuthGuard } from '@shared/guards';
 import { AuthFacade } from '../../auth.facade';
 import { getDeviceMeta } from '@core/auth/infrastructure/utils';
-import { ApiBaseController, GetUserId, SkipContractHandle } from '@shared/decorators';
+import { ApiBaseController, GetUserId, SkipContract } from '@shared/decorators';
 import { ConfigService } from '@nestjs/config';
 
 @ApiBaseController('auth/oauth', 'OAuth')
 export class OAuthController {
     private readonly isProduction: boolean = false;
-    private readonly domain: string | null = null;
+    private readonly domain?: string | null = null;
 
     constructor(
         private readonly facade: AuthFacade,
@@ -31,13 +31,13 @@ export class OAuthController {
     @Get(':provider')
     @OAuthLoginSwagger()
     @UseGuards(OAuthGuard)
-    @SkipContractHandle()
+    @SkipContract()
     async oauthLogin() {}
 
     @Get(':provider/callback')
     @OAuthCallbackSwagger()
     @UseGuards(OAuthGuard)
-    @SkipContractHandle()
+    @SkipContract()
     async oauthCallback(
         @Query() query: { code?: string; state?: string },
         @Param('provider') provider: 'google' | 'yandex' | 'github' | 'vkontakte',
@@ -63,7 +63,7 @@ export class OAuthController {
 
         const baseUrl = `https://dev.${this.domain}`;
 
-        if (result.isSign) {
+        if (result.isSign && result.refresh) {
             this.setRefreshCookie(res, result.refresh, result.expiresAt);
             res.redirect(`${baseUrl}/oauth?${result.query.toString()}`, 302);
         } else {

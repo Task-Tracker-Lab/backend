@@ -4,9 +4,9 @@ import type { UploadMediaDto } from './dtos';
 import { BaseException } from '@shared/error';
 import { FlowProducer } from 'bullmq';
 import { InjectFlowProducer } from '@nestjs/bullmq';
-import { MEDIA_STRATEGIES } from './strategies';
+import { MEDIA_STRATEGIES, MediaStrategyKey } from './strategies';
 import { MEDIA_FLOW, MEDIA_JOBS, MEDIA_QUEUES } from './media.constant';
-import { MediaDispatchStrategy } from './strategies/media.strategy';
+import type { MediaDispatchStrategy } from './strategies/media.strategy';
 import { extname } from 'path';
 
 @Injectable()
@@ -85,14 +85,17 @@ export class MediaService {
     }
 
     private getStrategy(context: string) {
-        const strategy = MEDIA_STRATEGIES[context];
-        if (!strategy) {
+        if (!this.isValidStrategyKey(context)) {
             throw new BaseException(
                 { code: 'STRATEGY_NOT_FOUND', message: `No strategy for ${context}` },
                 HttpStatus.BAD_REQUEST,
             );
         }
-        return strategy;
+        return MEDIA_STRATEGIES[context];
+    }
+
+    private isValidStrategyKey(key: string): key is MediaStrategyKey {
+        return key in MEDIA_STRATEGIES;
     }
 
     private handleError(error: unknown): never {

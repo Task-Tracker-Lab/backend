@@ -11,7 +11,7 @@ export class ConfirmResetPasswordUseCase {
     constructor(
         @Inject(CACHE_SERVICE)
         private readonly cacheService: ICacheService,
-        private readonly updatePasswordUserUseCase: UpdatePasswordUseCase,
+        private readonly updatePasswordUserUC: UpdatePasswordUseCase,
     ) {}
 
     async execute(dto: PasswordResetConfirmDto) {
@@ -43,7 +43,7 @@ export class ConfirmResetPasswordUseCase {
         }
 
         const hashed = await argon.hash(dto.password);
-        const isUpdated = await this.updatePasswordUserUseCase.execute(dto.email, hashed);
+        const isUpdated = await this.updatePasswordUserUC.execute(dto.email, hashed);
 
         if (!isUpdated) {
             throw new BaseException(

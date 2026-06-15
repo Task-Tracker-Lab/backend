@@ -20,7 +20,7 @@ export type RawMemberTeams = {
     description: string | null;
     avatarUrl: string | null;
     role: string;
-    joinedAt: string;
+    joinedAt: string | null;
 };
 
 export interface ITeamsRepository {
