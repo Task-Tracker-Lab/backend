@@ -1,7 +1,7 @@
-import { z } from 'zod/v4';
-import { createZodDto } from 'nestjs-zod';
-import { AvatarResponseSchema } from '@shared/schemas';
 import { ActionResponseSchema } from '@shared/dtos';
+import { AvatarResponseSchema } from '@shared/schemas';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod/v4';
 
 export const CreateTeamSchema = z.object({
     name: z.string().min(2).max(100).describe('Название команды, отображаемое в интерфейсе'),

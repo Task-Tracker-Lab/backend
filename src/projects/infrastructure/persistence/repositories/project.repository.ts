@@ -1,8 +1,10 @@
 import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
 import { Injectable, Inject } from '@nestjs/common';
-import * as schema from '../models';
-import { IProjectRepository } from '../../../domain/repository';
 import { and, count, eq, gt, isNull, or } from 'drizzle-orm';
+
+import { IProjectRepository } from '../../../domain/repository';
+import * as schema from '../models';
+
 import type { NewProject, NewProjectShare } from '@core/projects/domain/entities';
 
 @Injectable()
@@ -108,12 +110,11 @@ export class ProjectRepository implements IProjectRepository {
         return project || null;
     };
 
-    public readonly findByTeam = async (teamId: string) => {
-        return this.db
+    public readonly findByTeam = async (teamId: string) =>
+        this.db
             .select()
             .from(schema.projects)
             .where(and(eq(schema.projects.teamId, teamId), isNull(schema.projects.deletedAt)));
-    };
 
     public readonly createShare = async (data: NewProjectShare) => {
         const [result] = await this.db

@@ -1,9 +1,9 @@
+import { HttpService } from '@nestjs/axios';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-oauth2';
 import { BaseException } from '@shared/error';
-import { HttpService } from '@nestjs/axios';
+import { Strategy } from 'passport-oauth2';
 import { firstValueFrom } from 'rxjs';
 
 export interface IVKUserInfo {
@@ -111,7 +111,7 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
         });
     }
 
-    async validate(
+    validate(
         _req: never,
         _at: never,
         _rt: never,
@@ -200,7 +200,9 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
 
             return this.parseProfile(data.response[0]);
         } catch (error) {
-            if (error instanceof BaseException) throw error;
+            if (error instanceof BaseException) {
+                throw error;
+            }
 
             console.error('Failed to get VK user info:', error);
 
@@ -239,7 +241,7 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
                 familyName: json.last_name || '',
                 givenName: json.first_name || '',
             },
-            gender: gender,
+            gender,
             emails: [],
             photos: finalPhotos,
             _raw: JSON.stringify(json),

@@ -1,9 +1,10 @@
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { UploadMediaDto } from '../dtos';
-import { ApiUnauthorized, ApiValidationError } from '@shared/error';
 import { ActionResponse } from '@shared/dtos';
+import { ApiUnauthorized, ApiValidationError } from '@shared/error';
 import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
+
+import { UploadMediaDto } from '../dtos';
 
 export const UploadMediaSwagger = () =>
     applyDecorators(

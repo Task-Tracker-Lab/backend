@@ -5,13 +5,14 @@ import {
     type CallHandler,
     Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { WinstonModule, utilities } from 'nest-winston';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
-import type { FastifyRequest } from 'fastify';
-import { WinstonModule, utilities } from 'nest-winston';
 import { format, transports } from 'winston';
+
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
-import { ConfigService } from '@nestjs/config';
+import type { FastifyRequest } from 'fastify';
 
 export function setupLogger(app: NestFastifyApplication, service: string) {
     const cfg = app.get(ConfigService);
@@ -95,10 +96,14 @@ export class LoggingInterceptor implements NestInterceptor {
     }
 
     private sanitize<T>(data: T): T {
-        if (!data || typeof data !== 'object') return data;
-        if (Array.isArray(data)) return data.map((v) => this.sanitize(v)) as T;
+        if (!data || typeof data !== 'object') {
+            return data;
+        }
+        if (Array.isArray(data)) {
+            return data.map((v) => this.sanitize(v)) as T;
+        }
 
-        const cleanData = JSON.parse(JSON.stringify(data)) as Record<string, unknown>;
+        const cleanData = structuredClone(data) as Record<string, unknown>;
 
         return Object.keys(cleanData).reduce<Record<string, unknown>>((acc, key) => {
             const isSensitive = this.sensitiveFields.some((field) =>
@@ -121,7 +126,7 @@ export class LoggingInterceptor implements NestInterceptor {
  * Represents a structured application log payload for Grafana Loki.
  * This object is flattened to ensure each property is indexed as a top-level label/column.
  *
- * @typedef {Object} TLog
+ * @typedef {object} TLog
  */
 export type TLog = {
     /**

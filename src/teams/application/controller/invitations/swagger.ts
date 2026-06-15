@@ -9,6 +9,8 @@ import {
     ApiUnauthorized,
     ApiValidationError,
 } from '@shared/error';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
+
 import {
     InviteMemberDto,
     TeamInvitationResponse,
@@ -16,7 +18,6 @@ import {
     TeamInvitationsResponse,
     UserInvitesResponse,
 } from '../../dtos';
-import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
 
 export const FindInvitesSwagger = () =>
     applyDecorators(

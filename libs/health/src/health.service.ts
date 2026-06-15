@@ -1,6 +1,9 @@
+import * as os from 'node:os';
+
 import { Inject, Injectable } from '@nestjs/common';
-import * as os from 'os';
+
 import { MODULE_OPTIONS_TOKEN } from './health.module-definition';
+
 import type { HealthModuleOptions } from './interfaces';
 
 @Injectable()
@@ -60,7 +63,7 @@ export class HealthService {
                 now: new Date().toISOString(),
                 startedAt: this.startTime.toISOString(),
                 uptime: this.formatUptime(uptimeSeconds),
-                uptimeSeconds: uptimeSeconds,
+                uptimeSeconds,
             },
             loaded: loaded?.toFixed(2),
         };

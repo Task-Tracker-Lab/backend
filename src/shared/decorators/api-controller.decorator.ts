@@ -1,6 +1,7 @@
 import { Controller, UseGuards, applyDecorators } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiErrorResponse } from '@shared/error';
+
 import { BearerAuthGuard } from '../guards';
 
 export const ApiBaseController = (path: string, tag: string, hasJWTGuard?: boolean) => {

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import * as UC from './use-cases';
+
 import {
     CreateTeamDto,
     InviteMemberDto,
@@ -7,6 +7,7 @@ import {
     UpdateMemberDto,
     UpdateTeamDto,
 } from './dtos';
+import * as UC from './use-cases';
 
 @Injectable()
 export class TeamsFacade {

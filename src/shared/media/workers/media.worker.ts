@@ -1,9 +1,11 @@
+import { dirname } from 'node:path';
+
 import { ImagorService } from '@libs/imagor';
-import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { MEDIA_JOBS, MEDIA_QUEUES, MEDIA_SPECS } from '../media.constant';
-import { Job } from 'bullmq';
 import { S3Service } from '@libs/s3';
-import { dirname } from 'path';
+import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Job } from 'bullmq';
+
+import { MEDIA_JOBS, MEDIA_QUEUES, MEDIA_SPECS } from '../media.constant';
 
 @Processor(MEDIA_QUEUES.RESIZE)
 export class MediaProcessor extends WorkerHost {
@@ -17,7 +19,9 @@ export class MediaProcessor extends WorkerHost {
     async process(
         job: Job<{ readonly original: string; readonly context: string; readonly userId: string }>,
     ) {
-        if (job.name !== MEDIA_JOBS.RESIZE_IMAGES) return;
+        if (job.name !== MEDIA_JOBS.RESIZE_IMAGES) {
+            return;
+        }
 
         const { original: originalFilePath, context } = job.data;
 
@@ -32,7 +36,9 @@ export class MediaProcessor extends WorkerHost {
 
             for (let i = 0; i < resizeSpecs.length; i++) {
                 const spec = resizeSpecs[i];
-                if (!spec) continue;
+                if (!spec) {
+                    continue;
+                }
 
                 const { name, ...dimensions } = spec;
                 const targetFileName = `${name}.webp`;

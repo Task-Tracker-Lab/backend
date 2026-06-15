@@ -1,10 +1,12 @@
-import { Inject } from '@nestjs/common';
-import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
-import * as schema from '../models';
-import * as scUsers from '@core/user/infrastructure/persistence/models';
-import { and, desc, eq, ilike, isNull } from 'drizzle-orm';
-import type { NewTeam, NewTeamMember, Team, TeamMember } from '@core/teams/domain/entities';
 import { ITeamsRepository } from '@core/teams/domain/repository';
+import * as scUsers from '@core/user/infrastructure/persistence/models';
+import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
+import { Inject } from '@nestjs/common';
+import { and, desc, eq, ilike, isNull } from 'drizzle-orm';
+
+import * as schema from '../models';
+
+import type { NewTeam, NewTeamMember, Team, TeamMember } from '@core/teams/domain/entities';
 
 export class TeamsRepository implements ITeamsRepository {
     constructor(
@@ -23,8 +25,8 @@ export class TeamsRepository implements ITeamsRepository {
         return (result?.count ?? 0) > 0;
     };
 
-    public readonly create = async (ownerId: string, dto: NewTeam) => {
-        return this.db.transaction(async (tx) => {
+    public readonly create = async (ownerId: string, dto: NewTeam) =>
+        this.db.transaction(async (tx) => {
             const [team] = await tx
                 .insert(schema.teams)
                 .values({ ...dto, ownerId })
@@ -47,10 +49,9 @@ export class TeamsRepository implements ITeamsRepository {
                 teamId: team.teamId,
             };
         });
-    };
 
-    public readonly update = async (id: string, dto: Partial<Team>) => {
-        return this.db.transaction(async (tx) => {
+    public readonly update = async (id: string, dto: Partial<Team>) =>
+        this.db.transaction(async (tx) => {
             const [team] = await tx
                 .update(schema.teams)
                 .set(dto)
@@ -66,7 +67,6 @@ export class TeamsRepository implements ITeamsRepository {
                 teamId: team.teamId,
             };
         });
-    };
 
     public readonly remove = async (teamId: string, userId: string) => {
         const result = await this.db
@@ -87,11 +87,10 @@ export class TeamsRepository implements ITeamsRepository {
         return member || null;
     };
 
-    public readonly findMembers = async (teamId: string) => {
-        return this.membersQuery
+    public readonly findMembers = async (teamId: string) =>
+        this.membersQuery
             .where(eq(schema.teamMembers.teamId, teamId))
             .orderBy(desc(schema.teamMembers.joinedAt));
-    };
 
     public readonly findByUser = async (
         userId: string,
@@ -130,7 +129,9 @@ export class TeamsRepository implements ITeamsRepository {
 
     public readonly findById = async (teamId: string) => {
         const [team] = await this.db.select().from(schema.teams).where(eq(schema.teams.id, teamId));
-        if (!team) return null;
+        if (!team) {
+            return null;
+        }
         return team;
     };
 

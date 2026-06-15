@@ -1,13 +1,16 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { extname } from 'node:path';
+
 import { S3Service } from '@libs/s3';
-import { UploadMediaDto } from './dtos';
+import { InjectFlowProducer } from '@nestjs/bullmq';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
 import { FlowProducer } from 'bullmq';
-import { InjectFlowProducer } from '@nestjs/bullmq';
-import { MEDIA_STRATEGIES, MediaStrategyKey } from './strategies';
+
+import { UploadMediaDto } from './dtos';
 import { MEDIA_FLOW, MEDIA_JOBS, MEDIA_QUEUES } from './media.constant';
+import { MEDIA_STRATEGIES, MediaStrategyKey } from './strategies';
+
 import type { MediaDispatchStrategy } from './strategies/media.strategy';
-import { extname } from 'path';
 
 @Injectable()
 export class MediaService {
@@ -99,7 +102,9 @@ export class MediaService {
     }
 
     private handleError(error: unknown): never {
-        if (error instanceof BaseException) throw error;
+        if (error instanceof BaseException) {
+            throw error;
+        }
 
         throw new BaseException(
             {

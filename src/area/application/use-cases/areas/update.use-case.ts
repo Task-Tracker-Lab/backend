@@ -1,10 +1,11 @@
-import { IAreaRepository } from '@core/area/domain/repository';
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { UpdateAreaDto } from '../../dtos';
-import { ProjectAccessPolicy } from '@core/projects/domain/policy';
-import { BaseException } from '@shared/error';
 import { AreaErrorCodes, AreaErrorMessages } from '@core/area/domain/errors';
+import { IAreaRepository } from '@core/area/domain/repository';
+import { ProjectAccessPolicy } from '@core/projects/domain/policy';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { BaseException } from '@shared/error';
 import slugify from 'slugify';
+
+import { UpdateAreaDto } from '../../dtos';
 
 @Injectable()
 export class UpdateAreaUseCase {
@@ -117,7 +118,9 @@ export class UpdateAreaUseCase {
                 message: `Пространство ${dto.title || area.title} успешно обновлено`,
             };
         } catch (e) {
-            if (e instanceof BaseException) throw e;
+            if (e instanceof BaseException) {
+                throw e;
+            }
 
             throw new BaseException(
                 {

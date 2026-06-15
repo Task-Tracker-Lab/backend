@@ -1,7 +1,7 @@
 import { Controller, Get, Res } from '@nestjs/common';
-import * as client from 'prom-client';
-import { FastifyReply } from 'fastify';
 import { SkipContract } from '@shared/decorators';
+import { FastifyReply } from 'fastify';
+import * as client from 'prom-client';
 
 @Controller('metrics')
 export class MetricsController {

@@ -1,10 +1,11 @@
+import { StateErrorCodes, StateErrorMessages } from '@core/area/domain/errors';
+import { IStateRepository } from '@core/area/domain/repository';
+import { MAX_STATES_PER_PROJECT } from '@core/area/infrastructure/constants';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
-import { IStateRepository } from '@core/area/domain/repository';
+
 import { CreateStateDto } from '../../dtos';
-import { StateErrorCodes, StateErrorMessages } from '@core/area/domain/errors';
 import { GetAreaQuery } from '../areas';
-import { MAX_STATES_PER_PROJECT } from '@core/area/infrastructure/constants';
 
 @Injectable()
 export class CreateStateUseCase {
@@ -72,7 +73,9 @@ export class CreateStateUseCase {
                 stateId: result.id,
             };
         } catch (err) {
-            if (err instanceof BaseException) throw err;
+            if (err instanceof BaseException) {
+                throw err;
+            }
 
             throw new BaseException(
                 {

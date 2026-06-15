@@ -1,11 +1,12 @@
-import { Module } from '@nestjs/common';
-import { MediaService } from './media.service';
+import { ImagorModule } from '@libs/imagor';
 import { S3Module } from '@libs/s3';
+import { BullModule } from '@nestjs/bullmq';
+import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+
 import { MediaController } from './controller';
 import { MEDIA_FLOW, MEDIA_QUEUES } from './media.constant';
-import { BullModule } from '@nestjs/bullmq';
-import { ImagorModule } from '@libs/imagor';
+import { MediaService } from './media.service';
 import { MediaProcessor } from './workers/media.worker';
 
 @Module({

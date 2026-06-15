@@ -4,10 +4,11 @@ import {
     Injectable,
     NestInterceptor,
 } from '@nestjs/common';
+import { InjectMetric } from '@willsoto/nestjs-prometheus';
+import { Histogram } from 'prom-client';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
-import { Histogram } from 'prom-client';
-import { InjectMetric } from '@willsoto/nestjs-prometheus';
+
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 @Injectable()
@@ -43,7 +44,9 @@ export class HttpMetricsInterceptor implements NestInterceptor {
     ) {
         const route = req.routeOptions?.url || req.url;
 
-        if (route === '/metrics') return;
+        if (route === '/metrics') {
+            return;
+        }
 
         const statusCode = err ? err.status || err.statusCode || 500 : res.statusCode;
 

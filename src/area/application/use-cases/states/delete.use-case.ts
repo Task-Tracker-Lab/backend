@@ -2,6 +2,7 @@ import { StateErrorCodes, StateErrorMessages } from '@core/area/domain/errors';
 import { IStateRepository } from '@core/area/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
+
 import { GetAreaQuery } from '../areas';
 
 @Injectable()
@@ -60,8 +61,6 @@ export class DeleteStateUseCase {
             //      );
             //  }
 
-            console.log(area, state);
-
             const result = await this.stateRepo.delete(area.id, state.id);
 
             return {
@@ -71,7 +70,9 @@ export class DeleteStateUseCase {
                     : 'Не удалось удалить состояние: запись не найдена или уже удалена',
             };
         } catch (err) {
-            if (err instanceof BaseException) throw err;
+            if (err instanceof BaseException) {
+                throw err;
+            }
 
             throw new BaseException(
                 {

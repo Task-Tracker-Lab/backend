@@ -1,10 +1,11 @@
+import { FindUserQuery } from '@core/user';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { createId } from '@paralleldrive/cuid2';
 import { BaseException } from '@shared/error';
+
 import { ISessionRepository } from '../../domain/repository';
 import { TokenService } from '../../infrastructure/security';
 import { DeviceMetadata } from '../../infrastructure/utils/get-device-meta';
-import { FindUserQuery } from '@core/user';
-import { createId } from '@paralleldrive/cuid2';
 
 @Injectable()
 export class RefreshTokensUseCase {

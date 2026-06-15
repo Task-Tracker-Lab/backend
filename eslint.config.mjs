@@ -186,4 +186,20 @@ export default tseslint.config(
             'functional/immutable-data': 'off',
         },
     },
+    {
+        files: [
+            '**/*.{facade,repository,service,controller,query,use-case,adapter}.ts',
+            '**/controller.ts',
+            '**/adapter.ts',
+        ],
+        rules: {
+            'require-await': 'off',
+            '@typescript-eslint/no-unused-vars': 'off',
+            'no-useless-constructor': 'off',
+            'sonarjs/cognitive-complexity': 'off',
+            'unicorn/no-useless-undefined': 'off',
+            'unicorn/prefer-export-from': 'off',
+            'functional/immutable-data': 'off',
+        },
+    },
 );

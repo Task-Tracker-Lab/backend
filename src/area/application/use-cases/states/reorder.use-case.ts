@@ -1,8 +1,9 @@
+import { StateErrorCodes, StateErrorMessages } from '@core/area/domain/errors';
+import { IStateRepository } from '@core/area/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
+
 import { ReordersStatesDto } from '../../dtos';
-import { IStateRepository } from '@core/area/domain/repository';
-import { StateErrorCodes, StateErrorMessages } from '@core/area/domain/errors';
 import { GetAreaQuery } from '../areas';
 
 @Injectable()
@@ -38,7 +39,9 @@ export class ReorderStateUseCase {
                     : 'Не удалось восстановить состояние: запись не найдена или уже активна',
             };
         } catch (err) {
-            if (err instanceof BaseException) throw err;
+            if (err instanceof BaseException) {
+                throw err;
+            }
 
             throw new BaseException(
                 {

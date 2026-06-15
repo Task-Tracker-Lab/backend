@@ -10,9 +10,7 @@ export const ROLE_PRIORITY: Record<TeamRole, number> = {
     viewer: 0,
 };
 
-export const isTeamRole = (role: string): role is TeamRole => {
-    return TEAM_ROLES.includes(role as TeamRole);
-};
+export const isTeamRole = (role: string): role is TeamRole => TEAM_ROLES.includes(role as TeamRole);
 
 export const PROJECT_ROLE_PRIORITY: Record<string, number> = {
     owner: 4,

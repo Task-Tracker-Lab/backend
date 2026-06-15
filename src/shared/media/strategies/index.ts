@@ -1,5 +1,5 @@
-import { UserAvatarStrategy } from './user-avatar.strategy';
 import { TeamMediaStrategy } from './team-media.strategy';
+import { UserAvatarStrategy } from './user-avatar.strategy';
 
 export const MEDIA_STRATEGIES = {
     'user.avatar': new UserAvatarStrategy(),

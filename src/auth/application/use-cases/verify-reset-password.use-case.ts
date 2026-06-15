@@ -1,9 +1,10 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { verify as verifyOTP } from 'otplib';
-import { BaseException } from '@shared/error';
-import { VerifyResetCodeDto } from '../dtos';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
+import { BaseException } from '@shared/error';
+import { verify as verifyOTP } from 'otplib';
+
+import { VerifyResetCodeDto } from '../dtos';
 
 @Injectable()
 export class VerifyResetPasswordUseCase {

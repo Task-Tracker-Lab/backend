@@ -1,8 +1,9 @@
-import type { NewUser } from '@core/user/domain/entities';
 import { IUserRepository } from '@core/user/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
 import { BaseException } from '@shared/error';
+
+import type { NewUser } from '@core/user/domain/entities';
 
 @Injectable()
 export class RegisterUserUseCase {

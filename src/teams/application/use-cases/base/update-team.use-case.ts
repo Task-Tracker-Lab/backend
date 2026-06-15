@@ -1,7 +1,8 @@
 import { Inject, Injectable, HttpStatus } from '@nestjs/common';
+import { BaseException } from '@shared/error';
+
 import { ITeamsRepository } from '../../../domain/repository';
 import { UpdateTeamDto } from '../../dtos';
-import { BaseException } from '@shared/error';
 
 @Injectable()
 export class UpdateTeamUseCase {
@@ -45,7 +46,9 @@ export class UpdateTeamUseCase {
                 message: 'Данные команды успешно обновлены',
             };
         } catch (error) {
-            if (error instanceof BaseException) throw error;
+            if (error instanceof BaseException) {
+                throw error;
+            }
 
             throw new BaseException(
                 {

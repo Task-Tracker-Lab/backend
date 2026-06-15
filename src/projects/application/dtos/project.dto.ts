@@ -1,10 +1,11 @@
-import { z } from 'zod/v4';
-import { createZodDto } from 'nestjs-zod';
+import { PROJECT_STATUSES, PROJECT_VISIBILITIES } from '@core/projects/domain/entities';
 import { ActionResponseSchema } from '@shared/dtos';
 import { createPaginationSchema } from '@shared/schemas';
-import { PROJECT_STATUSES, PROJECT_VISIBILITIES } from '@core/projects/domain/entities';
-import { CreateProjectSettingsSchema, ProjectSettingsSchema } from './settings.dto';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod/v4';
+
 import { ProjectMemberRoleSchema } from './member.dto';
+import { CreateProjectSettingsSchema, ProjectSettingsSchema } from './settings.dto';
 
 export const ProjectStatusSchema = z.enum(PROJECT_STATUSES);
 export const ProjectVisibilitySchema = z.enum(PROJECT_VISIBILITIES);

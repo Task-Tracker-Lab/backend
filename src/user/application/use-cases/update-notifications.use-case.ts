@@ -1,9 +1,10 @@
 import { IUserRepository } from '@core/user/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { BaseException } from '@shared/error';
-import { UpdateNotificationsDto } from '../dtos';
 import { createId } from '@paralleldrive/cuid2';
+import { BaseException } from '@shared/error';
 import { removeUndefined } from '@shared/utils';
+
+import { UpdateNotificationsDto } from '../dtos';
 
 @Injectable()
 export class UpdateNotificationsUseCase {
@@ -51,7 +52,9 @@ export class UpdateNotificationsUseCase {
                 message: 'Настройки уведомлений обновлены',
             };
         } catch (error) {
-            if (error instanceof BaseException) throw error;
+            if (error instanceof BaseException) {
+                throw error;
+            }
 
             throw new BaseException(
                 {

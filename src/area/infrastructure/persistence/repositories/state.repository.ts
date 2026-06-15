@@ -1,8 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
-import * as schema from '../models';
-import { and, count, eq, isNotNull, isNull } from 'drizzle-orm';
 import { IStateRepository } from '@core/area/domain/repository';
+import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
+import { Inject, Injectable } from '@nestjs/common';
+import { and, count, eq, isNotNull, isNull } from 'drizzle-orm';
+
+import * as schema from '../models';
+
 import type { NewState } from '@core/area/domain/entities';
 
 @Injectable()

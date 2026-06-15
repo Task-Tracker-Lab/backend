@@ -1,3 +1,7 @@
+import {
+    CheckSlugResponse,
+    CreateShareTokenResponse,
+} from '@core/projects/application/dtos/project.dto';
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiOperation, ApiBody, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { ActionResponse } from '@shared/dtos';
@@ -8,6 +12,8 @@ import {
     ApiNotFound,
     ApiConflict,
 } from '@shared/error';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
+
 import {
     CreateProjectDto,
     CreateProjectResponse,
@@ -16,11 +22,6 @@ import {
     ProjectListResponse,
     ProjectDetailResponse,
 } from '../../dtos';
-import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
-import {
-    CheckSlugResponse,
-    CreateShareTokenResponse,
-} from '@core/projects/application/dtos/project.dto';
 
 export const CreateProjectSwagger = () =>
     applyDecorators(

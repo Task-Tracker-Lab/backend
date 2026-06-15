@@ -1,7 +1,7 @@
-import { z } from 'zod/v4';
-import { createZodDto } from 'nestjs-zod';
 import { roleEnum } from '@core/teams/infrastructure/persistence/models';
 import { AvatarResponseSchema, createPaginationSchema } from '@shared/schemas';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod/v4';
 
 export const InviteMemberSchema = z.object({
     email: z.string().email().describe('Email пользователя, которого нужно пригласить'),

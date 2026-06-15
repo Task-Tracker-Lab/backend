@@ -3,8 +3,9 @@ import { FindUserQuery } from '@core/user';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
-import { OAuthResponse } from '../../dtos';
 import { BaseException } from '@shared/error';
+
+import { OAuthResponse } from '../../dtos';
 
 @Injectable()
 export class ConnectOAuthProviderUseCase {

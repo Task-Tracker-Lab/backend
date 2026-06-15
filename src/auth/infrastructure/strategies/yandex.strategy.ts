@@ -1,9 +1,9 @@
+import { HttpService } from '@nestjs/axios';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-oauth2';
 import { BaseException } from '@shared/error';
-import { HttpService } from '@nestjs/axios';
+import { Strategy } from 'passport-oauth2';
 import { firstValueFrom } from 'rxjs';
 
 export interface IUserInfo {
@@ -67,7 +67,7 @@ export class YandexStrategy extends PassportStrategy(Strategy, 'yandex-oauth') {
         });
     }
 
-    async validate(
+    validate(
         _req: never,
         _at: string,
         _rt: string,

@@ -3,8 +3,10 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '@shared/decorators';
 import { BaseException } from '@shared/error';
+
 import type { JwtPayload } from '@shared/types';
 import type { FastifyRequest } from 'fastify';
+import type { Observable } from 'rxjs';
 
 @Injectable()
 export class BearerAuthGuard extends AuthGuard('bearer') {
@@ -12,9 +14,11 @@ export class BearerAuthGuard extends AuthGuard('bearer') {
         super();
     }
 
-    override async canActivate(context: ExecutionContext): Promise<boolean> {
+    override canActivate(
+        context: ExecutionContext,
+    ): boolean | Promise<boolean> | Observable<boolean> {
         try {
-            return super.canActivate(context) as Promise<boolean>;
+            return super.canActivate(context);
         } catch (e) {
             if (this.isPublicOrHasToken(context)) {
                 return true;

@@ -1,12 +1,15 @@
 import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
-import type { FastifyRequest } from 'fastify';
+
 import type { JwtPayload } from '@shared/types';
+import type { FastifyRequest } from 'fastify';
 
 export const GetUser = createParamDecorator(
     (data: keyof JwtPayload | undefined, ctx: ExecutionContext) => {
         const request = ctx.switchToHttp().getRequest<FastifyRequest>();
         const user = request.user;
-        if (!user) return null;
+        if (!user) {
+            return null;
+        }
         return data ? user[data] : user;
     },
 );

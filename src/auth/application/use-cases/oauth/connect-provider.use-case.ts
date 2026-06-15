@@ -1,10 +1,10 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { IIdentityRepository } from '@core/auth/domain/repository';
 import { FindUserQuery } from '@core/user';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { BaseException } from '@shared/error';
-import { IIdentityRepository } from '@core/auth/domain/repository';
 
 @Injectable()
 export class ConnectProviderUseCase {

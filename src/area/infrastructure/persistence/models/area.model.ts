@@ -1,7 +1,7 @@
-import { text, boolean, varchar, timestamp, integer, index } from 'drizzle-orm/pg-core';
 import { createId } from '@paralleldrive/cuid2';
-import { isNotNull, isNull } from 'drizzle-orm';
 import { baseSchema, projects, users } from '@shared/entities';
+import { isNotNull, isNull } from 'drizzle-orm';
+import { text, boolean, varchar, timestamp, integer, index } from 'drizzle-orm/pg-core';
 
 export const areas = baseSchema.table(
     'areas',

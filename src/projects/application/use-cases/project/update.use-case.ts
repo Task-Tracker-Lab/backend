@@ -1,10 +1,11 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { UpdateProjectDto } from '../../dtos';
-import { BaseException } from '@shared/error';
-import { IProjectRepository } from '@core/projects/domain/repository';
-import { ProjectAccessPolicy } from '@core/projects/domain/policy';
 import { ProjectErrorCodes, ProjectErrorMessages } from '@core/projects/domain/errors';
+import { ProjectAccessPolicy } from '@core/projects/domain/policy';
+import { IProjectRepository } from '@core/projects/domain/repository';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { BaseException } from '@shared/error';
 import slugify from 'slugify';
+
+import { UpdateProjectDto } from '../../dtos';
 
 @Injectable()
 export class UpdateProjectUseCase {

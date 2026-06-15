@@ -1,11 +1,5 @@
-import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
-import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
-import { ICacheService } from '@shared/adapters/cache/ports';
-import { BaseException } from '@shared/error';
-import { InjectQueue } from '@nestjs/bullmq';
-import { AuthQueues } from '@core/auth/domain/enums';
-import { Queue } from 'bullmq';
 import { ResendCodeDto } from '@core/auth/application/dtos';
+import { AuthQueues } from '@core/auth/domain/enums';
 import {
     EMAIL_CODE_TTL_SECONDS,
     MAX_ATTEMPTS,
@@ -13,6 +7,13 @@ import {
     RESEND_COOLDOWN_KEY,
     SECONDS_BETWEEN_ATTEMPTS,
 } from '@core/auth/infrastructure/constants';
+import { InjectQueue } from '@nestjs/bullmq';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
+import { BaseException } from '@shared/error';
+import { Queue } from 'bullmq';
+
 import { RESEND_CODE_STRATEGIES, ResendCodeStrategy } from '../strategies';
 
 @Injectable()

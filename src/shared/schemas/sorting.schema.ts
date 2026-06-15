@@ -4,8 +4,8 @@ export const createSortingSchema = <T extends readonly [string, ...(readonly str
     fields: T,
     defaultField?: T[number],
     defaultOrder: 'asc' | 'desc' = 'asc',
-) => {
-    return z.object({
+) =>
+    z.object({
         sortBy: z
             .enum(fields)
             .optional()
@@ -25,4 +25,3 @@ export const createSortingSchema = <T extends readonly [string, ...(readonly str
             .default(() => defaultOrder)
             .describe('Направление сортировки: asc - по возрастанию, desc - по убыванию'),
     });
-};

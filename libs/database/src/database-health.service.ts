@@ -1,5 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
 import { SQL_CLIENT } from '@libs/database/constants';
+import { Inject, Injectable } from '@nestjs/common';
 import { Sql } from 'postgres';
 
 @Injectable()

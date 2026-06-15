@@ -1,12 +1,13 @@
+import { AuthQueues, AuthUserJobs } from '@core/auth/domain/enums';
+import { CreateUserWorkspaceEvent } from '@core/auth/domain/events';
 import { IIdentityRepository } from '@core/auth/domain/repository';
 import { FindUserQuery, RegisterUserUseCase } from '@core/user';
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { OAuthResponse } from '../../dtos';
-import { BaseException } from '@shared/error';
 import { InjectQueue } from '@nestjs/bullmq';
-import { AuthQueues, AuthUserJobs } from '@core/auth/domain/enums';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { BaseException } from '@shared/error';
 import { Queue } from 'bullmq';
-import { CreateUserWorkspaceEvent } from '@core/auth/domain/events';
+
+import { OAuthResponse } from '../../dtos';
 
 @Injectable()
 export class ProcessOAuthRegistrationUseCase {

@@ -1,13 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-    CreateStateUseCase,
-    DeleteStateUseCase,
-    GetStateQuery,
-    GetStatesQuery,
-    ReorderStateUseCase,
-    RestoreStateUseCase,
-    UpdateStateUseCase,
-} from './use-cases/states';
+
 import {
     CreateStateDto,
     UpdateStateDto,
@@ -22,6 +14,15 @@ import {
     GetAreasQuery,
     UpdateAreaUseCase,
 } from './use-cases';
+import {
+    CreateStateUseCase,
+    DeleteStateUseCase,
+    GetStateQuery,
+    GetStatesQuery,
+    ReorderStateUseCase,
+    RestoreStateUseCase,
+    UpdateStateUseCase,
+} from './use-cases/states';
 
 @Injectable()
 export class AreaFacade {

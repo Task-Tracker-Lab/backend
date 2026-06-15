@@ -1,4 +1,5 @@
 import fastifyCors from '@fastify/cors';
+
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 
 export function setupCors(app: NestFastifyApplication, origins: readonly string[]) {

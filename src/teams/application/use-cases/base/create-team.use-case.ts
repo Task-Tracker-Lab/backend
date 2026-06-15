@@ -1,7 +1,8 @@
 import { ITeamsRepository } from '@core/teams/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { CreateTeamDto } from '../../dtos';
 import { BaseException } from '@shared/error';
+
+import { CreateTeamDto } from '../../dtos';
 
 @Injectable()
 export class CreateTeamUseCase {
@@ -19,7 +20,9 @@ export class CreateTeamUseCase {
                 message: 'Команда успешно создана',
             };
         } catch (error) {
-            if (error instanceof BaseException) throw error;
+            if (error instanceof BaseException) {
+                throw error;
+            }
 
             throw new BaseException(
                 {

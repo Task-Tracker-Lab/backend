@@ -1,5 +1,6 @@
 import { IStateRepository } from '@core/area/domain/repository';
 import { Inject, Injectable } from '@nestjs/common';
+
 import { GetAreaQuery } from '../areas';
 
 @Injectable()

@@ -1,8 +1,10 @@
-import { dirname } from 'path';
+import { dirname } from 'node:path';
 
 export class ImageHelper {
     public static buildResponsiveUrls(cdn: string, path?: string | null) {
-        if (!path) return null;
+        if (!path) {
+            return null;
+        }
 
         const folder = dirname(path);
         const base = `${cdn}/${folder}`;

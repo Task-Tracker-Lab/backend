@@ -1,3 +1,6 @@
+import { createId } from '@paralleldrive/cuid2';
+import { baseSchema, teams, users } from '@shared/entities';
+import { isNull } from 'drizzle-orm';
 import {
     text,
     varchar,
@@ -7,9 +10,7 @@ import {
     uniqueIndex,
     index,
 } from 'drizzle-orm/pg-core';
-import { baseSchema, teams, users } from '@shared/entities';
-import { createId } from '@paralleldrive/cuid2';
-import { isNull } from 'drizzle-orm';
+
 import { layoutEnum, projectStatusEnum, projectVisibilityEnum } from './enum';
 
 export const projects = baseSchema.table(

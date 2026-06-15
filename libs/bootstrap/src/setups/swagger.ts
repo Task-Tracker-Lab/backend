@@ -1,9 +1,11 @@
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { cleanupOpenApiDoc } from 'nestjs-zod';
-import type { NestFastifyApplication } from '@nestjs/platform-fastify';
-import type { SwaggerOptions } from '../interfaces';
-import { SWAGGER_DEFAULTS } from '../configs/swagger';
 import { GlobalErrorResponse } from '@shared/error/schema';
+import { cleanupOpenApiDoc } from 'nestjs-zod';
+
+import { SWAGGER_DEFAULTS } from '../configs/swagger';
+
+import type { SwaggerOptions } from '../interfaces';
+import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 
 async function getCustomCSS() {
     const rawUrl = 'https://gist.githubusercontent.com/soorq/f745e5c44cfe27aa928048d6d4ccb18a/raw';

@@ -43,7 +43,9 @@ export class DeleteTeamUseCase {
                 message: 'Команда успешно удалена',
             };
         } catch (error) {
-            if (error instanceof BaseException) throw error;
+            if (error instanceof BaseException) {
+                throw error;
+            }
 
             throw new BaseException(
                 {

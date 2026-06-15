@@ -1,9 +1,11 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import type { Job } from 'bullmq';
-import { IMailPort } from '@shared/adapters/mail';
 import { Inject } from '@nestjs/common';
-import { RegisterCodeEvent, ResetPasswordEvent } from '../../domain/events';
+import { IMailPort } from '@shared/adapters/mail';
+
 import { AuthMailJobs, AuthQueues } from '../../domain/enums';
+import { RegisterCodeEvent, ResetPasswordEvent } from '../../domain/events';
+
+import type { Job } from 'bullmq';
 
 @Processor(AuthQueues.AUTH_MAIL)
 export class MailProcessor extends WorkerHost {

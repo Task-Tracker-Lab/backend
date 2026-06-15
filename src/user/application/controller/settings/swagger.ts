@@ -1,9 +1,10 @@
-import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { applyDecorators, SetMetadata } from '@nestjs/common';
-import { ApiUnauthorized, ApiValidationError } from '@shared/error';
+import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ActionResponse } from '@shared/dtos';
-import { UpdateNotificationsDto } from '../../dtos';
+import { ApiUnauthorized, ApiValidationError } from '@shared/error';
 import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
+
+import { UpdateNotificationsDto } from '../../dtos';
 
 export const PatchMeNotificationsSwagger = () =>
     applyDecorators(

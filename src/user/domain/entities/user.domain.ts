@@ -1,4 +1,3 @@
-import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 import type {
     users,
     userSecurity,
@@ -6,6 +5,7 @@ import type {
     userActivity,
     userPreferences,
 } from '../../infrastructure/persistence/models/user.entity';
+import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 
 export type User = InferSelectModel<typeof users>;
 export type NewUser = InferInsertModel<typeof users>;

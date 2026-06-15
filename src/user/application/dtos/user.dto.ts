@@ -1,6 +1,6 @@
+import { AvatarResponseSchema, createPaginationSchema } from '@shared/schemas';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod/v4';
-import { AvatarResponseSchema, createPaginationSchema } from '@shared/schemas';
 
 const NotificationsSchema = z
     .object({

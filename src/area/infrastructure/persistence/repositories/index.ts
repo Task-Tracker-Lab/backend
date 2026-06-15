@@ -1,5 +1,5 @@
-import { StateRepository } from './state.repository';
 import { AreaRepository } from './area.repository';
+import { StateRepository } from './state.repository';
 
 export const REPOSITORIES = [
     {

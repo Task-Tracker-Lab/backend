@@ -1,5 +1,6 @@
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { ApiListQuery } from '@shared/decorators';
 import { ActionResponse } from '@shared/dtos';
 import {
     ApiUnauthorized,
@@ -9,6 +10,7 @@ import {
     ApiConflict,
 } from '@shared/error';
 import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
+
 import {
     CreateStateDto,
     UpdateStateDto,
@@ -17,7 +19,6 @@ import {
     StateResponse,
     StatesResponse,
 } from '../../dtos';
-import { ApiListQuery } from '@shared/decorators';
 
 export const FindAllStatesSwagger = () =>
     applyDecorators(

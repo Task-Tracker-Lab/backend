@@ -1,8 +1,9 @@
 import { ProjectAccessPolicy } from '@core/projects/domain/policy';
 import { IMemberRepository } from '@core/projects/domain/repository';
-import { Inject, Injectable } from '@nestjs/common';
-import { MemberMapper } from '../../mappers/member.mapper';
 import { FindByIdsQuery } from '@core/user/application/use-cases';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { MemberMapper } from '../../mappers/member.mapper';
 
 @Injectable()
 export class FindAllProjectMembersQuery {

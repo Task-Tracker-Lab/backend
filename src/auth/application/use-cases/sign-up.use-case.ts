@@ -1,17 +1,18 @@
+import { SignUpCacheData } from '@core/auth/application/interfaces';
+import { EMAIL_CODE_TTL_SECONDS, SIGNUP_CACHE_KEY } from '@core/auth/infrastructure/constants';
+import { FindUserQuery } from '@core/user';
 import { InjectQueue } from '@nestjs/bullmq';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
+import { BaseException } from '@shared/error';
 import * as argon from 'argon2';
 import { Queue } from 'bullmq';
 import { generate, generateSecret } from 'otplib';
-import { FindUserQuery } from '@core/user';
-import { BaseException } from '@shared/error';
+
 import { AuthQueues, AuthMailJobs } from '../../domain/enums';
 import { RegisterCodeEvent } from '../../domain/events';
 import { SignUpDto } from '../dtos';
-import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
-import { ICacheService } from '@shared/adapters/cache/ports';
-import { EMAIL_CODE_TTL_SECONDS, SIGNUP_CACHE_KEY } from '@core/auth/infrastructure/constants';
-import { SignUpCacheData } from '@core/auth/application/interfaces';
 
 @Injectable()
 export class SignUpUseCase {

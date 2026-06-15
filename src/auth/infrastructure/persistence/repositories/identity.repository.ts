@@ -1,8 +1,9 @@
-import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
-import * as schema from '../models/identity.model';
-import { Inject, Injectable } from '@nestjs/common';
 import { IIdentityRepository } from '@core/auth/domain/repository';
+import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
+import { Inject, Injectable } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
+
+import * as schema from '../models/identity.model';
 
 @Injectable()
 export class IdentitiyRepository implements IIdentityRepository {
@@ -29,12 +30,11 @@ export class IdentitiyRepository implements IIdentityRepository {
         return result.count.valueOf() > 0;
     };
 
-    public readonly findAllByUserId = async (userId: string) => {
-        return this.db
+    public readonly findAllByUserId = async (userId: string) =>
+        this.db
             .select()
             .from(schema.userIdentities)
             .where(eq(schema.userIdentities.userId, userId));
-    };
 
     public readonly findByProvider = async (
         provider: 'google' | 'yandex' | 'github',

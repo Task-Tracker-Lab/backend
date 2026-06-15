@@ -1,9 +1,10 @@
 import { IUserRepository } from '@core/user/domain/repository';
 import { Injectable, Inject, HttpStatus } from '@nestjs/common';
-import { UpdateProfileDto } from '../dtos';
-import { BaseException } from '@shared/error';
 import { createId } from '@paralleldrive/cuid2';
+import { BaseException } from '@shared/error';
 import { removeUndefined } from '@shared/utils';
+
+import { UpdateProfileDto } from '../dtos';
 
 @Injectable()
 export class UpdateProfileUseCase {

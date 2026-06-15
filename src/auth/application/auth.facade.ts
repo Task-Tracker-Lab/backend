@@ -1,4 +1,15 @@
 import { Injectable } from '@nestjs/common';
+
+import {
+    OAuthResponse,
+    PasswordResetConfirmDto,
+    ResendCodeDto,
+    ResetPasswordDto,
+    SignInDto,
+    SignUpDto,
+    VerifyDto,
+    VerifyResetCodeDto,
+} from './dtos';
 import {
     SignInUseCase,
     SignUpUseCase,
@@ -15,16 +26,7 @@ import {
     GetEnabledProvidersQuery,
     ResendCodeUseCase,
 } from './use-cases';
-import {
-    OAuthResponse,
-    PasswordResetConfirmDto,
-    ResendCodeDto,
-    ResetPasswordDto,
-    SignInDto,
-    SignUpDto,
-    VerifyDto,
-    VerifyResetCodeDto,
-} from './dtos';
+
 import type { DeviceMetadata } from '../infrastructure/utils';
 
 @Injectable()

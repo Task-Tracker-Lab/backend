@@ -1,8 +1,8 @@
-import { z } from 'zod/v4';
-import { createZodDto } from 'nestjs-zod';
-import type { TeamRole } from '../../infrastructure/persistence/models/enums';
-import { roleEnum } from '../../infrastructure/persistence/models/enums';
 import { createPaginationSchema } from '@shared/schemas';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod/v4';
+
+import { roleEnum, type TeamRole } from '../../infrastructure/persistence/models/enums';
 
 export const UpdateInvitationSchema = z.object({
     role: z

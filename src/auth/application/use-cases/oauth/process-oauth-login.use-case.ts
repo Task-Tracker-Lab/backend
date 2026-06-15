@@ -1,8 +1,9 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { OAuthResponse } from '../../dtos';
 import { IIdentityRepository } from '@core/auth/domain/repository';
 import { FindUserQuery } from '@core/user';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
+
+import { OAuthResponse } from '../../dtos';
 
 @Injectable()
 export class ProcessOAuthLoginUseCase {

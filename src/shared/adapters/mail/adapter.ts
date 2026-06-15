@@ -1,9 +1,11 @@
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
 import * as hbs from 'handlebars';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as nodemailer from 'nodemailer';
+
 import { IMailPort } from './port';
 
 @Injectable()
@@ -31,7 +33,7 @@ export class MailAdapter implements IMailPort {
         });
     }
 
-    private async sendMail(to: string, subject: string, templateName: string, context: any) {
+    private sendMail(to: string, subject: string, templateName: string, context: any) {
         const templatePath = path.join(process.cwd(), 'templates', `${templateName}.hbs`);
         const templateSource = fs.readFileSync(templatePath, 'utf8');
 
@@ -43,7 +45,7 @@ export class MailAdapter implements IMailPort {
         const template = hbs.compile(templateSource);
         const html = template(contextWithYear);
 
-        return await this.transporter.sendMail({
+        return this.transporter.sendMail({
             from: `"${this.cfg.get('MAIL_FROM_NAME')}" <${this.cfg.get('MAIL_FROM_EMAIL')}>`,
             to,
             subject,

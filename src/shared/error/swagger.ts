@@ -1,6 +1,7 @@
-import { ApiResponse, getSchemaPath } from '@nestjs/swagger';
-import { GlobalErrorResponse } from './schema';
 import { applyDecorators } from '@nestjs/common';
+import { ApiResponse, getSchemaPath } from '@nestjs/swagger';
+
+import { GlobalErrorResponse } from './schema';
 
 export const ApiErrorResponse = (
     status: number,

@@ -1,4 +1,12 @@
+import { getDeviceMeta } from '@core/auth/infrastructure/utils';
 import { Body, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ApiBaseController } from '@shared/decorators';
+import { BearerAuthGuard, CookieAuthGuard } from '@shared/guards';
+
+import { AuthFacade } from '../../auth.facade';
+import { ResendCodeDto, SignInDto, SignUpDto, VerifyDto } from '../../dtos';
+
 import {
     PostLoginSwagger,
     PostLogoutSwagger,
@@ -7,13 +15,8 @@ import {
     PostSignUpConfirmSwagger,
     ResendCodeSwagger,
 } from './swagger';
-import { ResendCodeDto, SignInDto, SignUpDto, VerifyDto } from '../../dtos';
+
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { BearerAuthGuard, CookieAuthGuard } from '@shared/guards';
-import { AuthFacade } from '../../auth.facade';
-import { getDeviceMeta } from '@core/auth/infrastructure/utils';
-import { ApiBaseController } from '@shared/decorators';
-import { ConfigService } from '@nestjs/config';
 
 @ApiBaseController('auth', 'Auth')
 export class AuthController {

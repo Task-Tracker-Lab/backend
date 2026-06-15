@@ -1,5 +1,5 @@
-import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 import type { teams, teamMembers } from '../../infrastructure/persistence/models';
+import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 
 export type Team = InferSelectModel<typeof teams>;
 export type NewTeam = InferInsertModel<typeof teams>;

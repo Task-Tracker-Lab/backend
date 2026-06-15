@@ -1,9 +1,11 @@
+import { IMemberRepository } from '@core/projects/domain/repository';
 import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
 import { Inject, Injectable } from '@nestjs/common';
-import * as schema from '../models';
 import { and, eq, sql } from 'drizzle-orm';
+
+import * as schema from '../models';
+
 import type { MemberRole } from '@core/projects/domain/entities';
-import { IMemberRepository } from '@core/projects/domain/repository';
 
 @Injectable()
 export class MemberRepository implements IMemberRepository {
@@ -35,13 +37,12 @@ export class MemberRepository implements IMemberRepository {
         return result ?? null;
     };
 
-    public readonly findByProject = async (projectId: string) => {
-        return this.db
+    public readonly findByProject = async (projectId: string) =>
+        this.db
             .select()
             .from(schema.projectMembers)
             .where(eq(schema.projectMembers.projectId, projectId))
             .orderBy(schema.projectMembers.createdAt);
-    };
 
     async isMember(projectId: string, userId: string) {
         const [result] = await this.db

@@ -1,4 +1,11 @@
+import { getDeviceMeta } from '@core/auth/infrastructure/utils';
 import { Delete, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ApiBaseController, GetUserId, SkipContract } from '@shared/decorators';
+import { BearerAuthGuard, OAuthGuard } from '@shared/guards';
+
+import { AuthFacade } from '../../auth.facade';
+
 import {
     DisconnectOAuthProviderSwagger,
     GetConnectedProvidersSwagger,
@@ -7,13 +14,9 @@ import {
     OAuthCallbackSwagger,
     OAuthLoginSwagger,
 } from './swagger';
+
 import type { TOAuthResponse } from '../../dtos';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { BearerAuthGuard, OAuthGuard } from '@shared/guards';
-import { AuthFacade } from '../../auth.facade';
-import { getDeviceMeta } from '@core/auth/infrastructure/utils';
-import { ApiBaseController, GetUserId, SkipContract } from '@shared/decorators';
-import { ConfigService } from '@nestjs/config';
 
 @ApiBaseController('auth/oauth', 'OAuth')
 export class OAuthController {

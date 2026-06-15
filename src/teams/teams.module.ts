@@ -1,13 +1,13 @@
+import { MailProcessor } from '@core/teams/infrastructure/workers';
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
+
 import {
     TeamsInvitationsController,
     TeamsMembersController,
     TeamsController,
     MeController,
 } from './application/controller';
-import { BullModule } from '@nestjs/bullmq';
-import { TeamsRepository } from './infrastructure/persistence/repositories';
-import { TeamQueues } from './domain/enums';
 import { TeamsFacade } from './application/team.facade';
 import {
     TeamQueries,
@@ -15,9 +15,10 @@ import {
     TEAM_EXTERNAL_QUERIES,
     TEAM_EXTERNAL_COMMANDS,
 } from './application/use-cases';
+import { TeamQueues } from './domain/enums';
 import { TeamMemberPolicy } from './domain/policy';
-import { MailProcessor } from '@core/teams/infrastructure/workers';
 import { LISTENERS } from './infrastructure/listeners';
+import { TeamsRepository } from './infrastructure/persistence/repositories';
 
 const REPOSITORY = { provide: 'ITeamsRepository', useClass: TeamsRepository };
 

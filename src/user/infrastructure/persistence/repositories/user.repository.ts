@@ -1,9 +1,11 @@
 import { IUserRepository } from '@core/user/domain/repository';
-import * as sc from '../models';
 import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
 import { Inject, Injectable } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
 import { desc, eq, count, inArray } from 'drizzle-orm';
+
+import * as sc from '../models';
+
 import type {
     NewUser,
     NewUserActivity,
@@ -62,14 +64,18 @@ export class UserRepository implements IUserRepository {
     };
 
     public readonly findByIds = async (ids: readonly string[]) => {
-        if (ids.length === 0) return [];
+        if (ids.length === 0) {
+            return [];
+        }
 
         return this.db.select().from(sc.users).where(inArray(sc.users.id, ids));
     };
 
     public readonly findById = async (id: string) => {
         const [row] = await this.fullUserQuery.where(eq(sc.users.id, id));
-        if (!row || !row.user_security) return null;
+        if (!row || !row.user_security) {
+            return null;
+        }
         return {
             user: row.users,
             security: {
@@ -80,7 +86,9 @@ export class UserRepository implements IUserRepository {
 
     public readonly findByEmail = async (email: string) => {
         const [row] = await this.fullUserQuery.where(eq(sc.users.email, email.toLowerCase()));
-        if (!row || !row.user_security) return null;
+        if (!row || !row.user_security) {
+            return null;
+        }
         return {
             user: row.users,
             security: {
@@ -97,8 +105,8 @@ export class UserRepository implements IUserRepository {
         return result || null;
     };
 
-    public readonly create = async (data: NewUser) => {
-        return this.db.transaction(async (tx) => {
+    public readonly create = async (data: NewUser) =>
+        this.db.transaction(async (tx) => {
             const [newUser] = await tx.insert(sc.users).values(data).returning();
 
             if (!newUser) {
@@ -111,7 +119,6 @@ export class UserRepository implements IUserRepository {
 
             return newUser;
         });
-    };
 
     public readonly updateProfile = async (
         id: string,
@@ -127,7 +134,9 @@ export class UserRepository implements IUserRepository {
     };
 
     private async updateUser(id: string, data: Partial<User>) {
-        if (Object.keys(data).length === 0) return null;
+        if (Object.keys(data).length === 0) {
+            return null;
+        }
 
         const result = await this.db
             .update(sc.users)

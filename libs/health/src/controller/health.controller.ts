@@ -1,9 +1,11 @@
 import { Controller, Get, HttpStatus } from '@nestjs/common';
-import { SkipThrottle } from '@nestjs/throttler';
-import { HealthService } from '../health.service';
-import { GetHealthSwagger, GetPingSwagger } from './health.swagger';
 import { ApiTags } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import { BaseException } from '@shared/error';
+
+import { HealthService } from '../health.service';
+
+import { GetHealthSwagger, GetPingSwagger } from './health.swagger';
 
 @SkipThrottle()
 @Controller()

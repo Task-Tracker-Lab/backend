@@ -1,5 +1,9 @@
-import { ApiBaseController, GetUserId, Public } from '@shared/decorators';
 import { Body, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { ApiBaseController, GetUserId, Public } from '@shared/decorators';
+
+import { CreateProjectDto, CreateShareTokenDto, UpdateProjectDto } from '../../dtos';
+import { ProjectFacade } from '../../project.facade';
+
 import {
     ArchiveProjectSwagger,
     CheckSlugSwagger,
@@ -10,8 +14,6 @@ import {
     RemoveProjectSwagger,
     UpdateProjectSwagger,
 } from './swagger';
-import { CreateProjectDto, CreateShareTokenDto, UpdateProjectDto } from '../../dtos';
-import { ProjectFacade } from '../../project.facade';
 
 @ApiBaseController('teams/:teamId/projects', 'Projects', true)
 export class ProjectsController {

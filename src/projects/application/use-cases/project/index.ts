@@ -1,12 +1,12 @@
+import { CheckSlugAvailabilityQuery } from './check-slug.use-case';
 import { CreateProjectUseCase } from './create.use-case';
 import { DeleteProjectUseCase } from './delete.use-case';
+import { FindProjectsByTeamQuery } from './find-by-team.query';
+import { FindProjectQuery } from './find-one.query';
 import { GenerateShareTokenUseCase } from './generate-share-token.use-case';
+import { GetProjectDetailQuery } from './get-detail.query';
 import { SetProjectStatusUseCase } from './set-status.use-case';
 import { UpdateProjectUseCase } from './update.use-case';
-import { FindProjectsByTeamQuery } from './find-by-team.query';
-import { GetProjectDetailQuery } from './get-detail.query';
-import { FindProjectQuery } from './find-one.query';
-import { CheckSlugAvailabilityQuery } from './check-slug.use-case';
 
 export * from './find-by-team.query';
 export * from './find-one.query';

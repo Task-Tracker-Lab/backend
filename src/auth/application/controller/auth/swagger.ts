@@ -1,5 +1,6 @@
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ActionResponse } from '@shared/dtos';
 import {
     ApiBadRequest,
     ApiConflict,
@@ -9,6 +10,8 @@ import {
     ApiUnauthorized,
     ApiValidationError,
 } from '@shared/error';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
+
 import {
     SignInDto,
     SignResponse,
@@ -19,8 +22,6 @@ import {
     ResendCodeDto,
     ResendCodeResponse,
 } from '../../dtos';
-import { ActionResponse } from '@shared/dtos';
-import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
 
 export const PostRegisterSwagger = () =>
     applyDecorators(

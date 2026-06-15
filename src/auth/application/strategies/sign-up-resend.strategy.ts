@@ -1,10 +1,12 @@
 import { AuthMailJobs } from '@core/auth/domain/enums';
 import { RegisterCodeEvent } from '@core/auth/domain/events';
-import type { SignUpCacheData } from '@core/auth/application/interfaces';
 import { EMAIL_CODE_TTL_SECONDS, SIGNUP_CACHE_KEY } from '@core/auth/infrastructure/constants';
-import type { Queue } from 'bullmq';
 import { generate, generateSecret } from 'otplib';
+
 import { ResendCodeStrategy } from './resend-code.strategy';
+
+import type { SignUpCacheData } from '@core/auth/application/interfaces';
+import type { Queue } from 'bullmq';
 
 export class SignUpResendStrategy extends ResendCodeStrategy<SignUpCacheData> {
     readonly context = 'sign-up' as const;

@@ -1,9 +1,10 @@
+import { MemberErrorCodes, MemberErrorMessages } from '@core/projects/domain/errors';
 import { ProjectAccessPolicy } from '@core/projects/domain/policy';
 import { IMemberRepository } from '@core/projects/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
+
 import { UpdateProjectMemberDto } from '../../dtos';
-import { MemberErrorCodes, MemberErrorMessages } from '@core/projects/domain/errors';
 
 @Injectable()
 export class UpdateProjectMemberUseCase {
@@ -40,16 +41,17 @@ export class UpdateProjectMemberUseCase {
             );
         }
 
-        if (targetMember.role === 'admin' || dto.role === 'admin') {
-            if (currentMember.role !== 'owner') {
-                throw new BaseException(
-                    {
-                        code: MemberErrorCodes.ADMIN_CHANGE_FORBIDDEN,
-                        message: MemberErrorMessages[MemberErrorCodes.ADMIN_CHANGE_FORBIDDEN],
-                    },
-                    HttpStatus.FORBIDDEN,
-                );
-            }
+        if (
+            (targetMember.role === 'admin' || dto.role === 'admin') &&
+            currentMember.role !== 'owner'
+        ) {
+            throw new BaseException(
+                {
+                    code: MemberErrorCodes.ADMIN_CHANGE_FORBIDDEN,
+                    message: MemberErrorMessages[MemberErrorCodes.ADMIN_CHANGE_FORBIDDEN],
+                },
+                HttpStatus.FORBIDDEN,
+            );
         }
 
         if (targetMember.role === dto.role) {

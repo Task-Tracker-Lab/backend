@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { UserRepository } from './infrastructure/persistence/repositories';
+
 import { UserController, UserSettingsController } from './application/controller';
-import { UserFacade } from './application/user.facade';
 import { USER_EXTERNAL_USE_CASES, UserQueries, UserUseCases } from './application/use-cases';
+import { UserFacade } from './application/user.facade';
 import { LISTENERS } from './infrastructure/listeners';
+import { UserRepository } from './infrastructure/persistence/repositories';
 
 const REPOSITORY = {
     provide: 'IUserRepository',

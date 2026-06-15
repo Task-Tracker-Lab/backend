@@ -46,7 +46,9 @@ export class DeleteAreaUseCase {
                 message: `Пространство ${area.title} успешно удалено.`,
             };
         } catch (e) {
-            if (e instanceof BaseException) throw e;
+            if (e instanceof BaseException) {
+                throw e;
+            }
 
             throw new BaseException(
                 {

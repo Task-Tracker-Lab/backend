@@ -2,6 +2,7 @@ import { StateErrorCodes, StateErrorMessages } from '@core/area/domain/errors';
 import { IStateRepository } from '@core/area/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
+
 import { GetAreaQuery } from '../areas';
 
 @Injectable()

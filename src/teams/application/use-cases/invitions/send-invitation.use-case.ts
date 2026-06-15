@@ -1,18 +1,20 @@
 import { TeamMailJobs, TeamQueues } from '@core/teams/domain/enums';
+import { TeamInvitationEvent } from '@core/teams/domain/events';
+import { TeamMemberPolicy } from '@core/teams/domain/policy';
 import { ITeamsRepository } from '@core/teams/domain/repository';
 import { InjectQueue } from '@nestjs/bullmq';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Queue } from 'bullmq';
-import { InviteMemberDto, type TeamInvite } from '../../dtos';
-import { BaseException } from '@shared/error';
-import { generateSecret } from 'otplib';
-import { TeamInvitationEvent } from '@core/teams/domain/events';
-import { TeamMemberPolicy } from '@core/teams/domain/policy';
-import type { TeamRole } from '@shared/entities';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
+import { BaseException } from '@shared/error';
 import { ImageHelper } from '@shared/utils';
+import { Queue } from 'bullmq';
+import { generateSecret } from 'otplib';
+
+import { InviteMemberDto, type TeamInvite } from '../../dtos';
+
+import type { TeamRole } from '@shared/entities';
 
 @Injectable()
 export class SendInvitationUseCase {
@@ -49,21 +51,23 @@ export class SendInvitationUseCase {
 
     private async getTeamOrThrow(teamId: string) {
         const team = await this.teamsRepo.findById(teamId);
-        if (!team)
+        if (!team) {
             throw new BaseException(
                 { code: 'TEAM_NOT_FOUND', message: 'Команда не найдена' },
                 HttpStatus.NOT_FOUND,
             );
+        }
         return team;
     }
 
     private async getInviterOrThrow(teamId: string, userId: string) {
         const inviter = await this.teamsRepo.findMember(teamId, userId);
-        if (!inviter)
+        if (!inviter) {
             throw new BaseException(
                 { code: 'NOT_A_MEMBER', message: 'Вы не член команды' },
                 HttpStatus.FORBIDDEN,
             );
+        }
         return inviter;
     }
 
@@ -78,16 +82,19 @@ export class SendInvitationUseCase {
 
     private async ensureNotAlreadyMember(teamId: string, email: string) {
         const member = await this.teamsRepo.findMember(teamId, email); // Тут лучше искать по email в репо
-        if (member)
+        if (member) {
             throw new BaseException(
                 { code: 'ALREADY_MEMBER', message: 'Уже в команде' },
                 HttpStatus.BAD_REQUEST,
             );
+        }
     }
 
     private async ensureNoPendingInvite(teamId: string, email: string) {
         const activeCodes = await this.cacheService.getCollection(this.USER_INVITES_KEY(email));
-        if (activeCodes.length === 0) return;
+        if (activeCodes.length === 0) {
+            return;
+        }
 
         const invitesData = await this.cacheService.getMany(activeCodes.map(this.INVITES_KEY));
         const hasDuplicate = invitesData

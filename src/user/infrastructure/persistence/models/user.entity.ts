@@ -1,6 +1,6 @@
 import { createId } from '@paralleldrive/cuid2';
-import { varchar, text, timestamp, boolean, jsonb } from 'drizzle-orm/pg-core';
 import { baseSchema } from '@shared/entities';
+import { varchar, text, timestamp, boolean, jsonb } from 'drizzle-orm/pg-core';
 
 export const users = baseSchema.table('users', {
     id: text('id')

@@ -1,8 +1,8 @@
-import { ITeamsRepository } from '@core/teams/domain/repository';
 import { TeamMemberMapper } from '@core/teams/application/mappers';
+import { ITeamsRepository } from '@core/teams/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { BaseException } from '@shared/error';
 import { ConfigService } from '@nestjs/config';
+import { BaseException } from '@shared/error';
 
 @Injectable()
 export class GetTeamMembersQuery {

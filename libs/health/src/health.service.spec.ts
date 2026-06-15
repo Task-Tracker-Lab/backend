@@ -1,14 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
+import { HealthService } from './health.service';
+
+import type { HealthModuleOptions } from './interfaces';
+
 vi.mock('os', async () => {
-    const actual = await vi.importActual<typeof import('os')>('os');
+    const actual = await vi.importActual<typeof import('node:os')>('os');
     return {
         ...actual,
         loadavg: () => [1.23, 0.5, 0.1],
     };
 });
-import { HealthService } from './health.service';
-import type { HealthModuleOptions } from './interfaces';
 
 describe('HealthService', () => {
     const BASE_TIME = new Date('2026-05-15T10:00:00.000Z');
@@ -30,7 +32,7 @@ describe('HealthService', () => {
             version: 'v2.0.0',
             indicators: {
                 database: () => true,
-                redis: async () => true,
+                redis: () => true,
             },
         };
 
@@ -75,7 +77,7 @@ describe('HealthService', () => {
         const options: HealthModuleOptions = {
             serviceName: 'MyService',
             indicators: {
-                http: () => new Promise<boolean>(() => undefined),
+                http: () => new Promise<boolean>(() => {}),
             },
         };
 

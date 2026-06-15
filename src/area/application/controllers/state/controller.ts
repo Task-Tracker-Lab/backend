@@ -1,5 +1,9 @@
 import { Body, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBaseController, GetUserId, Public } from '@shared/decorators';
+
+import { AreaFacade } from '../../area.facade';
+import { CreateStateDto, ReordersStatesDto, UpdateStateDto } from '../../dtos';
+
 import {
     CreateStateSwagger,
     FindAllStatesSwagger,
@@ -9,8 +13,6 @@ import {
     RestoreStateSwagger,
     UpdateStateSwagger,
 } from './swagger';
-import { CreateStateDto, ReordersStatesDto, UpdateStateDto } from '../../dtos';
-import { AreaFacade } from '../../area.facade';
 
 @ApiBaseController('area/:slug/states', 'Area States', true)
 export class StateController {

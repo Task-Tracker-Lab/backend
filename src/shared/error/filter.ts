@@ -6,13 +6,15 @@ import {
     HttpStatus,
     Logger,
 } from '@nestjs/common';
-import { ZodValidationException } from 'nestjs-zod';
-import type { FastifyReply, FastifyRequest } from 'fastify';
-import { PostgresError } from 'postgres';
-import { BaseException, type IErrorOptions } from './exception';
 import { DrizzleQueryError } from 'drizzle-orm';
-import type { ZodError, ZodIssue } from 'zod/v4';
+import { ZodValidationException } from 'nestjs-zod';
+import { PostgresError } from 'postgres';
+
+import { BaseException, type IErrorOptions } from './exception';
 import { DATABASE_ERRORS } from './swagger';
+
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { ZodError, ZodIssue } from 'zod/v4';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -39,15 +41,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         return this.handleUnknownError(exception, host);
     }
 
-    private readonly parseZodValidation = async (
-        exception: ZodValidationException,
-        host: ArgumentsHost,
-    ) => {
+    private parseZodValidation = (exception: ZodValidationException, host: ArgumentsHost) => {
         const { request, response } = this.getCtxBase(host);
         const status = exception.getStatus();
 
         const zodError = exception.getZodError() as ZodError;
-        const issues: readonly ZodIssue[] = zodError.issues || [];
+        const issues: ZodIssue[] = zodError.issues || [];
 
         this.log(exception, host, status, {
             validationIssues: issues,
@@ -64,7 +63,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         );
     };
 
-    private readonly parseDatabase = async (exception: DrizzleQueryError, host: ArgumentsHost) => {
+    private parseDatabase = (exception: DrizzleQueryError, host: ArgumentsHost) => {
         const { request, response } = this.getCtxBase(host);
 
         const error =
@@ -104,7 +103,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         );
     };
 
-    private readonly parseHttp = async (exception: BaseException, host: ArgumentsHost) => {
+    private parseHttp = (exception: BaseException, host: ArgumentsHost) => {
         const { request, response } = this.getCtxBase(host);
         const status = exception.getStatus();
 
@@ -126,7 +125,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         );
     };
 
-    private readonly parseNestHttp = async (exception: HttpException, host: ArgumentsHost) => {
+    private parseNestHttp = (exception: HttpException, host: ArgumentsHost) => {
         const { request, response } = this.getCtxBase(host);
         const status = exception.getStatus();
         const res = exception.getResponse();

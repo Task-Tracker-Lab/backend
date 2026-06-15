@@ -1,8 +1,11 @@
-import { ApiBaseController, GetUser, GetUserId } from '@shared/decorators';
 import { Get, Query } from '@nestjs/common';
-import { FindInvitesSwagger, FindTeamsSwagger } from './swagger';
-import type { JwtPayload } from '@shared/types';
+import { ApiBaseController, GetUser, GetUserId } from '@shared/decorators';
+
 import { TeamsFacade } from '../../team.facade';
+
+import { FindInvitesSwagger, FindTeamsSwagger } from './swagger';
+
+import type { JwtPayload } from '@shared/types';
 
 @ApiBaseController('users/me', 'Account Teams', true)
 export class MeController {

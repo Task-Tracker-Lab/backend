@@ -1,9 +1,10 @@
+import { TeamMemberPolicy } from '@core/teams/domain/policy';
 import { ITeamsRepository } from '@core/teams/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { UpdateMemberDto } from '../../dtos';
-import { BaseException } from '@shared/error';
-import { TeamMemberPolicy } from '@core/teams/domain/policy';
 import { TeamRole } from '@shared/entities';
+import { BaseException } from '@shared/error';
+
+import { UpdateMemberDto } from '../../dtos';
 
 @Injectable()
 export class UpdateTeamMemberUseCase {
@@ -63,28 +64,24 @@ export class UpdateTeamMemberUseCase {
             );
         }
 
-        if (dto.role) {
-            if (!this.teamMemberPolicy.canAssignRole(issuerRole, targetRole, dto.role)) {
-                throw new BaseException(
-                    {
-                        code: 'INVALID_ROLE_ASSIGNMENT',
-                        message: 'У вас нет прав назначить выбранную роль',
-                    },
-                    HttpStatus.FORBIDDEN,
-                );
-            }
+        if (dto.role && !this.teamMemberPolicy.canAssignRole(issuerRole, targetRole, dto.role)) {
+            throw new BaseException(
+                {
+                    code: 'INVALID_ROLE_ASSIGNMENT',
+                    message: 'У вас нет прав назначить выбранную роль',
+                },
+                HttpStatus.FORBIDDEN,
+            );
         }
 
-        if (dto.status) {
-            if (!this.teamMemberPolicy.canChangeStatus(issuerRole, targetRole)) {
-                throw new BaseException(
-                    {
-                        code: 'INVALID_STATUS_CHANGE',
-                        message: 'Вы не можете менять статус этого участника',
-                    },
-                    HttpStatus.FORBIDDEN,
-                );
-            }
+        if (dto.status && !this.teamMemberPolicy.canChangeStatus(issuerRole, targetRole)) {
+            throw new BaseException(
+                {
+                    code: 'INVALID_STATUS_CHANGE',
+                    message: 'Вы не можете менять статус этого участника',
+                },
+                HttpStatus.FORBIDDEN,
+            );
         }
 
         try {
@@ -94,7 +91,9 @@ export class UpdateTeamMemberUseCase {
                 message: `Данные участника команды ${team.name} успешно обновлены`,
             };
         } catch (error) {
-            if (error instanceof BaseException) throw error;
+            if (error instanceof BaseException) {
+                throw error;
+            }
 
             throw new BaseException(
                 {

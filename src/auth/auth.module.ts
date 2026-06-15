@@ -1,19 +1,20 @@
+import { ProjectsModule } from '@core/projects';
+import { TeamsModule } from '@core/teams';
+import { UserModule } from '@core/user';
 import { BullModule } from '@nestjs/bullmq';
 import { forwardRef, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { UserModule } from '@core/user';
-import { CONTROLLERS } from './application/controller';
+import { MailAdapter } from '@shared/adapters/mail';
+
 import { AuthFacade } from './application/auth.facade';
+import { CONTROLLERS } from './application/controller';
 import { AuthUseCases } from './application/use-cases';
 import { AuthQueues } from './domain/enums';
-import { TokenService } from './infrastructure/security';
-import { MailProcessor, UserProcessor } from './infrastructure/workers';
-import { MailAdapter } from '@shared/adapters/mail';
-import { STRATEGIES } from './infrastructure/strategies';
 import { REPOSITORIES } from './infrastructure/persistence/repositories';
-import { TeamsModule } from '@core/teams';
-import { ProjectsModule } from '@core/projects';
+import { TokenService } from './infrastructure/security';
+import { STRATEGIES } from './infrastructure/strategies';
+import { MailProcessor, UserProcessor } from './infrastructure/workers';
 
 const WORKERS = [MailProcessor, UserProcessor];
 
@@ -21,7 +22,7 @@ const WORKERS = [MailProcessor, UserProcessor];
     imports: [
         JwtModule.registerAsync({
             inject: [ConfigService],
-            useFactory: async (cfg: ConfigService) => ({
+            useFactory: (cfg: ConfigService) => ({
                 secret: cfg.get('JWT_ACCESS_SECRET'),
                 signOptions: {
                     /**

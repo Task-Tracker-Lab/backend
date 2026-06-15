@@ -58,9 +58,8 @@ export const paginationResponseSchema = z.object({
     limit: z.number().int().positive().describe('Количество элементов на одну страницу.'),
 });
 
-export const createPaginationSchema = <T extends z.ZodTypeAny>(itemSchema: T) => {
-    return z.object({
+export const createPaginationSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
+    z.object({
         items: z.array(itemSchema),
         meta: paginationResponseSchema,
     });
-};

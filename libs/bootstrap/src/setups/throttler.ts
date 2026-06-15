@@ -1,7 +1,6 @@
 import { Module, type Type } from '@nestjs/common';
-import type { ThrottlerModuleOptions } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerGuard, ThrottlerModule, type ThrottlerModuleOptions } from '@nestjs/throttler';
 
 export function setupThrottler(module: Type<unknown>, options: ThrottlerModuleOptions) {
     @Module({

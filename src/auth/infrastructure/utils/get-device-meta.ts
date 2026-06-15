@@ -1,5 +1,6 @@
-import type { FastifyRequest } from 'fastify';
 import { UAParser } from 'ua-parser-js';
+
+import type { FastifyRequest } from 'fastify';
 
 export interface DeviceMetadata {
     readonly ip: string;
@@ -17,8 +18,12 @@ export function getDeviceMeta(req: FastifyRequest): DeviceMetadata {
     const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.ip || '0.0.0.0';
 
     let deviceType: 'mobile' | 'desktop' | 'tablet' = 'desktop';
-    if (res.device.type === 'mobile') deviceType = 'mobile';
-    if (res.device.type === 'tablet') deviceType = 'tablet';
+    if (res.device.type === 'mobile') {
+        deviceType = 'mobile';
+    }
+    if (res.device.type === 'tablet') {
+        deviceType = 'tablet';
+    }
 
     return {
         ip,
