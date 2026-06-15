@@ -1,10 +1,22 @@
 import { getDeviceMeta } from '@core/auth/infrastructure/utils';
-import { Delete, Get, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Delete,
+    Get,
+    HttpCode,
+    Param,
+    Post,
+    Query,
+    Req,
+    Res,
+    UseGuards,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiBaseController, GetUserId, SkipContract } from '@shared/decorators';
 import { BearerAuthGuard, OAuthGuard } from '@shared/guards';
 
 import { AuthFacade } from '../../auth.facade';
+import { ExchangeDto, type TOAuthResponse } from '../../dtos';
 
 import {
     DisconnectOAuthProviderSwagger,
@@ -13,12 +25,12 @@ import {
     GetOAuthProvidersSwagger,
     OAuthCallbackSwagger,
     OAuthLoginSwagger,
+    ExchangeSwagger,
 } from './swagger';
 
-import type { TOAuthResponse } from '../../dtos';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-@ApiBaseController('auth/oauth', 'OAuth')
+@ApiBaseController('oauth', 'OAuth')
 export class OAuthController {
     private readonly isProduction: boolean = false;
     private readonly domain?: string | null = null;
@@ -66,12 +78,28 @@ export class OAuthController {
 
         const baseUrl = `https://dev.${this.domain}`;
 
-        if (result.isSign && result.refresh) {
-            this.setRefreshCookie(res, result.refresh, result.expiresAt);
+        if (result.isSign) {
             res.redirect(`${baseUrl}/oauth?${result.query.toString()}`, 302);
         } else {
             res.redirect(`${baseUrl}/user/profile?${result.query.toString()}`, 302);
         }
+    }
+
+    @Post('exchange')
+    @ExchangeSwagger()
+    @HttpCode(200)
+    async exchange(
+        @Body() dto: ExchangeDto,
+        @Res({ passthrough: true }) res: FastifyReply,
+        @Req() req: FastifyRequest,
+    ) {
+        const meta = getDeviceMeta(req);
+
+        const { expiresAt, refresh, ...result } = await this.facade.exchangeToken(dto, meta);
+
+        this.setRefreshCookie(res, refresh, expiresAt);
+
+        return result;
     }
 
     @Get('providers')

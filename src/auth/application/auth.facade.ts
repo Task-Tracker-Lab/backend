@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import {
+    ExchangeDto,
     OAuthResponse,
     PasswordResetConfirmDto,
     ResendCodeDto,
@@ -25,6 +26,7 @@ import {
     GetConnectedProvidersQuery,
     GetEnabledProvidersQuery,
     ResendCodeUseCase,
+    ExchangeUseCase,
 } from './use-cases';
 
 import type { DeviceMetadata } from '../infrastructure/utils';
@@ -46,6 +48,7 @@ export class AuthFacade {
         private readonly getConnectedProvidersQuery: GetConnectedProvidersQuery,
         private readonly confirmResetPasswordUseCase: ConfirmResetPasswordUseCase,
         private readonly resendCodeUseCase: ResendCodeUseCase,
+        private readonly exchangeTokenUC: ExchangeUseCase,
     ) {}
 
     public async signIn(dto: SignInDto, device: DeviceMetadata) {
@@ -82,6 +85,10 @@ export class AuthFacade {
 
     public async confirmNewPassword(dto: PasswordResetConfirmDto) {
         return this.confirmResetPasswordUseCase.execute(dto);
+    }
+
+    public async exchangeToken(dto: ExchangeDto, device: DeviceMetadata) {
+        return this.exchangeTokenUC.execute(dto, device);
     }
 
     public async authenticateOAuth(dto: OAuthResponse, device: DeviceMetadata, state?: string) {

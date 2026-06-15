@@ -1,6 +1,6 @@
 import { OAuthProvider } from '@core/auth/infrastructure/constants';
 import { applyDecorators, SetMetadata } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { ActionResponse } from '@shared/dtos';
 import {
     ApiBadRequest,
@@ -11,7 +11,13 @@ import {
 } from '@shared/error';
 import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
 
-import { ConnectedProviders, ConnectProviderResponse, ProvidersResponse } from '../../dtos';
+import {
+    ConnectedProviders,
+    ConnectProviderResponse,
+    ExchangeDto,
+    ExchangeResponse,
+    ProvidersResponse,
+} from '../../dtos';
 
 export const OAuthLoginSwagger = () =>
     applyDecorators(
@@ -150,4 +156,24 @@ export const GetConnectedProvidersSwagger = () =>
         ApiUnauthorized('Пользователь не авторизован'),
 
         SetMetadata(ZOD_RESPONSE_TOKEN, ConnectedProviders),
+    );
+export const ExchangeSwagger = () =>
+    applyDecorators(
+        ApiOperation({
+            summary: 'Обменять одноразовый токен на сессию',
+            description:
+                'Обменивает одноразовый exchange-токен, полученный после OAuth авторизации, на полноценную сессию с access и refresh токенами. Устанавливает refresh токен в httpOnly cookie.',
+        }),
+        ApiBody({
+            type: ExchangeDto.Output,
+        }),
+        ApiResponse({
+            status: 200,
+            description: 'Токен успешно обменян. Возвращает access токен и данные пользователя.',
+            type: ExchangeResponse.Output,
+        }),
+        ApiBadRequest('Неверный запрос. Токен отсутствует, истёк или имеет неверный формат.'),
+        ApiUnauthorized(),
+        ApiValidationError(),
+        SetMetadata(ZOD_RESPONSE_TOKEN, ExchangeResponse),
     );

@@ -1,7 +1,10 @@
-import { ISessionRepository } from '@core/auth/domain/repository';
-import { TokenService } from '@core/auth/infrastructure/security';
+import crypto from 'node:crypto';
+
 import { Inject, Injectable } from '@nestjs/common';
-import { createId } from '@paralleldrive/cuid2';
+import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
+import { ICacheService } from '@shared/adapters/cache/ports';
+
+import { EXCHANGE_TOKEN_NAME, EXCHANGE_TOKEN_TTL } from '../../../infrastructure/constants';
 
 import { OAuthOrchestratorUseCase } from './oauth-orchestrator.use-case';
 
@@ -11,10 +14,9 @@ import type { DeviceMetadata } from '@core/auth/infrastructure/utils';
 @Injectable()
 export class AuthenticateOAuthUseCase {
     constructor(
+        @Inject(CACHE_SERVICE)
+        private readonly cacheService: ICacheService,
         private readonly orchestrator: OAuthOrchestratorUseCase,
-        @Inject('ISessionRepository')
-        private readonly sessionRepo: ISessionRepository,
-        private readonly tokenService: TokenService,
     ) {}
 
     async execute(dto: OAuthResponse, meta: DeviceMetadata, state?: string) {
@@ -33,28 +35,26 @@ export class AuthenticateOAuthUseCase {
                 expiresAt: null,
             };
         }
+        const token = crypto.randomBytes(32).toString('hex');
 
-        const sessionId = createId();
-        const { access, expiresAt, refresh } = await this.tokenService.generateTokens(
-            user,
-            sessionId,
+        const data = {
+            userId: user.id,
+            isNewUser,
+            email: user.email,
+            provider: dto.provider,
+            ip: meta.ip,
+        };
+
+        await this.cacheService.setOne(
+            EXCHANGE_TOKEN_NAME(token),
+            JSON.stringify(data),
+            EXCHANGE_TOKEN_TTL,
         );
 
-        await this.sessionRepo.create({
-            id: sessionId,
-            ...meta,
-            expiresAt: expiresAt.toISOString(),
-            userId: user.id,
-        });
-
         const query = new URLSearchParams({
-            success: 'true',
-            message: isNewUser ? 'Регистрация успешна' : 'Вход успешен',
-            access,
-            provider: dto.provider,
-            isNewUser: String(isNewUser),
+            token,
         });
 
-        return { query, refresh, expiresAt, isSign: true };
+        return { query, isSign: true };
     }
 }

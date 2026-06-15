@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
-import type { User } from '@core/user';
 import type { JwtPayload } from '@shared/types';
 
 @Injectable()
@@ -12,7 +11,7 @@ export class TokenService {
         private readonly cfg: ConfigService,
     ) {}
 
-    async generateTokens(user: User, sessionId: string) {
+    async generateTokens(user: { id: string; email: string }, sessionId: string) {
         const iss = this.cfg.getOrThrow('JWT_ISSUER');
         const aud = this.cfg.getOrThrow('JWT_AUDIENCE');
 

@@ -50,7 +50,7 @@ export async function setupSwagger(app: NestFastifyApplication, options: Swagger
         extraModels: [GlobalErrorResponse.Output],
     });
 
-    const customCss = await getCustomCSS();
+    const customCss = await getCustomCSS().catch(() => '');
 
     SwaggerModule.setup(path, app, cleanupOpenApiDoc(document), {
         jsonDocumentUrl: `${path}/s/json`,

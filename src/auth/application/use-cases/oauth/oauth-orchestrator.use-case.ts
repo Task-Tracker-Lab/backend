@@ -25,6 +25,12 @@ export class OAuthOrchestratorUseCase {
     ) {}
 
     async execute(dto: OAuthResponse, state?: string) {
+        console.log('[OAuth] Start:', {
+            provider: dto.provider,
+            email: dto.email,
+            hasState: !!state,
+        });
+
         if (state) {
             try {
                 return this.connectProvider.execute(dto, state);

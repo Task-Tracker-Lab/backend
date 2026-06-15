@@ -3,6 +3,7 @@ import { AuthenticateOAuthUseCase } from './oauth/authenticate-oauth.use-case';
 import { ConnectOAuthProviderUseCase } from './oauth/connect-oauth-provider.use-case';
 import { ConnectProviderUseCase } from './oauth/connect-provider.use-case';
 import { DisconnectProviderUseCase } from './oauth/disconnect-provider.use-case';
+import { ExchangeUseCase } from './oauth/exchange.use-case';
 import { GetConnectedProvidersQuery } from './oauth/get-connected-providers.query';
 import { GetEnabledProvidersQuery } from './oauth/get-enabled-providers.query';
 import { OAuthOrchestratorUseCase } from './oauth/oauth-orchestrator.use-case';
@@ -37,24 +38,26 @@ export const AuthUseCases = [
     SignOutUseCase,
     SignUpUseCase,
     ResendCodeUseCase,
+    ExchangeUseCase,
 ];
 
-export { ConfirmResetPasswordUseCase } from './confirm-reset-password.use-case';
-export { VerifyResetPasswordUseCase } from './verify-reset-password.use-case';
-export { GetConnectedProvidersQuery } from './oauth/get-connected-providers.query';
-export { DisconnectProviderUseCase } from './oauth/disconnect-provider.use-case';
-export { AuthenticateOAuthUseCase } from './oauth/authenticate-oauth.use-case';
-export { ConnectProviderUseCase } from './oauth/connect-provider.use-case';
-export { RefreshTokensUseCase } from './refresh-tokens.use-case';
-export { ResetPasswordUseCase } from './reset-password.use-case';
-export { SignUpVerifyUseCase } from './sign-up-verify.use-case';
-export { GetEnabledProvidersQuery } from './oauth/get-enabled-providers.query';
+export * from './confirm-reset-password.use-case';
+export * from './verify-reset-password.use-case';
+export * from './oauth/get-connected-providers.query';
+export * from './oauth/disconnect-provider.use-case';
+export * from './oauth/authenticate-oauth.use-case';
+export * from './oauth/connect-provider.use-case';
+export * from './refresh-tokens.use-case';
+export * from './reset-password.use-case';
+export * from './sign-up-verify.use-case';
+export * from './oauth/get-enabled-providers.query';
+export * from './oauth/exchange.use-case';
 
-export { OAuthOrchestratorUseCase } from './oauth/oauth-orchestrator.use-case';
-export { ProcessOAuthLoginUseCase } from './oauth/process-oauth-login.use-case';
-export { ProcessOAuthRegistrationUseCase } from './oauth/process-oauth-registration.use-case';
-export { ConnectOAuthProviderUseCase } from './oauth/connect-oauth-provider.use-case';
-export { SignInUseCase } from './sign-in.use-case';
-export { SignOutUseCase } from './sign-out.use-case';
-export { SignUpUseCase } from './sign-up.use-case';
-export { ResendCodeUseCase } from './resend-code.use-case';
+export * from './oauth/oauth-orchestrator.use-case';
+export * from './oauth/process-oauth-login.use-case';
+export * from './oauth/process-oauth-registration.use-case';
+export * from './oauth/connect-oauth-provider.use-case';
+export * from './sign-in.use-case';
+export * from './sign-out.use-case';
+export * from './sign-up.use-case';
+export * from './resend-code.use-case';
