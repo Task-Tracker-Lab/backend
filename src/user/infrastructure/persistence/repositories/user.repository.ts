@@ -27,7 +27,7 @@ export class UserRepository implements IUserRepository {
             .leftJoin(sc.userNotifications, eq(sc.users.id, sc.userNotifications.userId));
     }
 
-    public findProfile = async (id: string) => {
+    public readonly findProfile = async (id: string) => {
         const [rows] = await this.fullUserQuery
             .leftJoin(sc.userPreferences, eq(sc.users.id, sc.userPreferences.userId))
             .where(eq(sc.users.id, id));
@@ -61,13 +61,13 @@ export class UserRepository implements IUserRepository {
         };
     };
 
-    public findByIds = async (ids: string[]) => {
+    public readonly findByIds = async (ids: readonly string[]) => {
         if (ids.length === 0) return [];
 
         return this.db.select().from(sc.users).where(inArray(sc.users.id, ids));
     };
 
-    public findById = async (id: string) => {
+    public readonly findById = async (id: string) => {
         const [row] = await this.fullUserQuery.where(eq(sc.users.id, id));
         if (!row || !row.user_security) return null;
         return {
@@ -78,7 +78,7 @@ export class UserRepository implements IUserRepository {
         };
     };
 
-    public findByEmail = async (email: string) => {
+    public readonly findByEmail = async (email: string) => {
         const [row] = await this.fullUserQuery.where(eq(sc.users.email, email.toLowerCase()));
         if (!row || !row.user_security) return null;
         return {
@@ -89,7 +89,7 @@ export class UserRepository implements IUserRepository {
         };
     };
 
-    public findSecurityByUserId = async (userId: string) => {
+    public readonly findSecurityByUserId = async (userId: string) => {
         const [result] = await this.db
             .select()
             .from(sc.userSecurity)
@@ -97,7 +97,7 @@ export class UserRepository implements IUserRepository {
         return result || null;
     };
 
-    public create = async (data: NewUser) => {
+    public readonly create = async (data: NewUser) => {
         return this.db.transaction(async (tx) => {
             const [newUser] = await tx.insert(sc.users).values(data).returning();
 
@@ -113,7 +113,7 @@ export class UserRepository implements IUserRepository {
         });
     };
 
-    public updateProfile = async (
+    public readonly updateProfile = async (
         id: string,
         user: Partial<User>,
         preferences?: Partial<UserPreferences>,
@@ -200,7 +200,10 @@ export class UserRepository implements IUserRepository {
         return (result?.count ?? 0) > 0;
     }
 
-    async findActivityByUser(userId: string, options: { limit: number; offset: number }) {
+    async findActivityByUser(
+        userId: string,
+        options: { readonly limit: number; readonly offset: number },
+    ) {
         const [totalResult, items] = await Promise.all([
             this.db
                 .select({ value: count() })

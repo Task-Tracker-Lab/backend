@@ -22,7 +22,7 @@ export class OAuthController {
 
     constructor(
         private readonly facade: AuthFacade,
-        private cfg: ConfigService,
+        private readonly cfg: ConfigService,
     ) {
         this.isProduction = this.cfg.get('NODE_ENV') === 'production';
         this.domain = this.cfg.get('DOMAIN');
@@ -39,7 +39,7 @@ export class OAuthController {
     @UseGuards(OAuthGuard)
     @SkipContract()
     async oauthCallback(
-        @Query() query: { code?: string; state?: string },
+        @Query() query: { readonly code?: string; readonly state?: string },
         @Param('provider') provider: 'google' | 'yandex' | 'github' | 'vkontakte',
         @Res({ passthrough: true }) res: FastifyReply,
         @Req() req: FastifyRequest,

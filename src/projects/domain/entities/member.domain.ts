@@ -1,5 +1,5 @@
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
-import { projectMembers } from '@shared/entities';
+import type { projectMembers } from '@shared/entities';
 
 export type Member = InferSelectModel<typeof projectMembers>;
 export type NewMember = InferInsertModel<typeof projectMembers>;

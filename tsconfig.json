@@ -6,7 +6,7 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
-        "target": "ES2021",
+        "target": "ES2022",
         "resolveJsonModule": true,
         "esModuleInterop": true,
         "sourceMap": true,
@@ -31,6 +31,7 @@
         "noImplicitOverride": true,
         "exactOptionalPropertyTypes": false,
         "forceConsistentCasingInFileNames": true,
+        "lib": ["ES2022"],
         "paths": {
             "@libs/bootstrap": ["./libs/bootstrap/src"],
             "@libs/bootstrap/*": ["./libs/bootstrap/src/*"],

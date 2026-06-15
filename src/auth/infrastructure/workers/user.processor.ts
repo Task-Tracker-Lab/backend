@@ -38,7 +38,7 @@ export class UserProcessor extends WorkerHost {
         }
     }
 
-    private createWorkspace = async (job: Job<CreateUserWorkspaceEvent>) => {
+    private readonly createWorkspace = async (job: Job<CreateUserWorkspaceEvent>) => {
         const { userId, username } = job.data;
 
         await job.log(`Start creating a workspace for ${username}`);

@@ -1,6 +1,6 @@
 import { Inject, Injectable, HttpStatus } from '@nestjs/common';
 import { ITeamsRepository } from '../../../domain/repository';
-import type { UpdateTeamDto } from '../../dtos';
+import { UpdateTeamDto } from '../../dtos';
 import { BaseException } from '@shared/error';
 
 @Injectable()

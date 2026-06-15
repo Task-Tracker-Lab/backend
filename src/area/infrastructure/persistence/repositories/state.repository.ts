@@ -111,7 +111,7 @@ export class StateRepository implements IStateRepository {
         return result ?? null;
     }
 
-    public countByArea = async (areaId: string) => {
+    public readonly countByArea = async (areaId: string) => {
         const [result] = await this.db
             .select({ count: count() })
             .from(schema.states)

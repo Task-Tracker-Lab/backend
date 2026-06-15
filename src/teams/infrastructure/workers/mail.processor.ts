@@ -35,7 +35,7 @@ export class MailProcessor extends WorkerHost {
         }
     }
 
-    private sendTeamInvitation = async (job: Job<TeamInvitationEvent>) => {
+    private readonly sendTeamInvitation = async (job: Job<TeamInvitationEvent>) => {
         const { email, teamName, inviteUrl } = job.data;
 
         await job.log(`Sending team(${teamName}) invitation link to: ${email}`);

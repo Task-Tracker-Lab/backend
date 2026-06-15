@@ -9,22 +9,20 @@ import type {
     UserWithSecurity,
 } from '../entities';
 
-type DeepPartial<T> = {
-    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-};
+type DeepPartial<T> = { readonly [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P] };
 
 export interface IUserRepository {
     create(data: NewUser): Promise<User>;
     findById(id: string): Promise<UserWithSecurity | null>;
-    findByIds(ids: string[]): Promise<User[]>;
+    findByIds(ids: readonly string[]): Promise<readonly User[]>;
     findByEmail(email: string): Promise<UserWithSecurity | null>;
     findProfile(id: string): Promise<UserProfile>;
     findActivityByUser(
         userId: string,
-        options: { limit: number; offset: number },
+        options: { readonly limit: number; readonly offset: number },
     ): Promise<{
-        items: UserActivity[];
-        total: number;
+        readonly items: readonly UserActivity[];
+        readonly total: number;
     }>;
     updateAvatar(id: string, url: string): Promise<boolean>;
     updateProfile(

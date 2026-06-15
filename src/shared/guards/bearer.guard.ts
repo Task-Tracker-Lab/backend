@@ -8,7 +8,7 @@ import type { FastifyRequest } from 'fastify';
 
 @Injectable()
 export class BearerAuthGuard extends AuthGuard('bearer') {
-    constructor(private reflector: Reflector) {
+    constructor(private readonly reflector: Reflector) {
         super();
     }
 
@@ -51,7 +51,7 @@ export class BearerAuthGuard extends AuthGuard('bearer') {
     private isPublicOrHasToken(context: ExecutionContext): boolean {
         const { query } = context
             .switchToHttp()
-            .getRequest<FastifyRequest<{ Querystring: { token: string } }>>();
+            .getRequest<FastifyRequest<{ readonly Querystring: { readonly token: string } }>>();
 
         const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
             context.getHandler(),

@@ -43,7 +43,7 @@ export class FindProjectQuery {
         return this.findPrivate(project, teamId, userId, minRole);
     }
 
-    private findPrivate = async (
+    private readonly findPrivate = async (
         project: Project,
         teamId: string,
         userId?: string,
@@ -91,7 +91,7 @@ export class FindProjectQuery {
         return { project, member, team };
     };
 
-    private findPublic = async (project: Project, token: string) => {
+    private readonly findPublic = async (project: Project, token: string) => {
         if (project.visibility !== 'public') {
             throw new BaseException(
                 { code: 'PROJECT_NOT_PUBLIC', message: 'Публичный доступ к проекту ограничен' },

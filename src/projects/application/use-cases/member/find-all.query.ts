@@ -26,7 +26,7 @@ export class FindAllProjectMembersQuery {
                 user: map.get(m.userId),
             }))
             .filter(
-                (item): item is typeof item & { user: NonNullable<typeof item.user> } =>
+                (item): item is typeof item & { readonly user: NonNullable<typeof item.user> } =>
                     item.user !== undefined,
             );
 

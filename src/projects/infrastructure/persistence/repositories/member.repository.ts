@@ -12,7 +12,7 @@ export class MemberRepository implements IMemberRepository {
         private readonly db: DatabaseService<typeof schema>,
     ) {}
 
-    public create = async (data: typeof schema.projectMembers.$inferInsert) => {
+    public readonly create = async (data: typeof schema.projectMembers.$inferInsert) => {
         const [result] = await this.db
             .insert(schema.projectMembers)
             .values(data)
@@ -25,7 +25,7 @@ export class MemberRepository implements IMemberRepository {
         return { id: result?.id };
     };
 
-    public findById = async (memberId: string) => {
+    public readonly findById = async (memberId: string) => {
         const [result] = await this.db
             .select()
             .from(schema.projectMembers)
@@ -35,7 +35,7 @@ export class MemberRepository implements IMemberRepository {
         return result ?? null;
     };
 
-    public findByProject = async (projectId: string) => {
+    public readonly findByProject = async (projectId: string) => {
         return this.db
             .select()
             .from(schema.projectMembers)
@@ -58,7 +58,7 @@ export class MemberRepository implements IMemberRepository {
         return result !== undefined;
     }
 
-    public findByProjectAndUser = async (projectId: string, userId: string) => {
+    public readonly findByProjectAndUser = async (projectId: string, userId: string) => {
         const [result] = await this.db
             .select()
             .from(schema.projectMembers)
@@ -72,7 +72,7 @@ export class MemberRepository implements IMemberRepository {
         return result || null;
     };
 
-    public getUserRole = async (projectId: string, userId: string) => {
+    public readonly getUserRole = async (projectId: string, userId: string) => {
         const [result] = await this.db
             .select({ role: schema.projectMembers.role })
             .from(schema.projectMembers)
@@ -87,7 +87,7 @@ export class MemberRepository implements IMemberRepository {
         return (result?.role as MemberRole) ?? null;
     };
 
-    public countByProject = async (projectId: string) => {
+    public readonly countByProject = async (projectId: string) => {
         const [result] = await this.db
             .select({ count: sql<number>`count(*)` })
             .from(schema.projectMembers)
@@ -96,7 +96,7 @@ export class MemberRepository implements IMemberRepository {
         return result?.count ?? 0;
     };
 
-    public updateRole = async (memberId: string, role: MemberRole) => {
+    public readonly updateRole = async (memberId: string, role: MemberRole) => {
         const [result] = await this.db
             .update(schema.projectMembers)
             .set({ role })
@@ -106,7 +106,7 @@ export class MemberRepository implements IMemberRepository {
         return result ?? null;
     };
 
-    public delete = async (memberId: string) => {
+    public readonly delete = async (memberId: string) => {
         const [result] = await this.db
             .delete(schema.projectMembers)
             .where(eq(schema.projectMembers.id, memberId))

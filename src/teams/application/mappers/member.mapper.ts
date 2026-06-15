@@ -22,7 +22,7 @@ export class TeamMemberMapper {
         };
     }
 
-    public static toList(rows: RawMemberRow[], cdn: string) {
+    public static toList(rows: readonly RawMemberRow[], cdn: string) {
         return rows.map((row) => this.toDetail(row, cdn));
     }
 

@@ -4,12 +4,12 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, type Profile } from 'passport-github';
 
 interface GitHubJsonProfile {
-    login: string;
-    id: number;
-    avatar_url: string;
-    name: string | null;
-    email: string | null;
-    bio: string | null;
+    readonly login: string;
+    readonly id: number;
+    readonly avatar_url: string;
+    readonly name: string | null;
+    readonly email: string | null;
+    readonly bio: string | null;
 }
 
 @Injectable()
@@ -38,7 +38,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github-oauth') {
         _at: string,
         _rt: string,
         profile: Profile,
-        done: (...args: unknown[]) => void,
+        done: (...args: readonly unknown[]) => void,
     ) {
         const json = profile._json as unknown as GitHubJsonProfile;
 

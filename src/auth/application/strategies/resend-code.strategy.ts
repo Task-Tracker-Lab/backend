@@ -1,11 +1,12 @@
-import { Queue } from 'bullmq';
+import type { Queue } from 'bullmq';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { ResendCodeDto } from '../dtos';
 
 export abstract class ResendCodeStrategy<TCacheData = unknown> {
-    abstract readonly context: ResendCodeDto['context'];
-    abstract readonly successMessage: string;
-    abstract readonly cacheNotFoundCode: string;
-    abstract readonly cacheNotFoundMessage: string;
+    abstract context: ResendCodeDto['context'];
+    abstract successMessage: string;
+    abstract cacheNotFoundCode: string;
+    abstract cacheNotFoundMessage: string;
 
     abstract getCacheKey(email: string): string;
 

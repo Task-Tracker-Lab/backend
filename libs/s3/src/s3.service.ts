@@ -11,9 +11,9 @@ import { MODULE_OPTIONS_TOKEN } from './s3.module-definition';
 export class S3Service {
     constructor(
         @Inject(S3_CLIENT)
-        private s3Client: S3Client,
+        private readonly s3Client: S3Client,
         @Inject(MODULE_OPTIONS_TOKEN)
-        private options: S3ModuleOptions,
+        private readonly options: S3ModuleOptions,
     ) {}
 
     private get bucket(): string {
@@ -28,7 +28,7 @@ export class S3Service {
                 }),
             );
             return true;
-        } catch (error) {
+        } catch {
             return false;
         }
     }

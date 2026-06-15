@@ -46,59 +46,59 @@ export class AuthFacade {
         private readonly resendCodeUseCase: ResendCodeUseCase,
     ) {}
 
-    async signIn(dto: SignInDto, device: DeviceMetadata) {
+    public async signIn(dto: SignInDto, device: DeviceMetadata) {
         return this.signInUseCase.execute(dto, device);
     }
 
-    async signUp(dto: SignUpDto) {
+    public async signUp(dto: SignUpDto) {
         return this.signUpUseCase.execute(dto);
     }
 
-    async resendCode(dto: ResendCodeDto) {
+    public async resendCode(dto: ResendCodeDto) {
         return this.resendCodeUseCase.execute(dto);
     }
 
-    async verifySignUp(dto: VerifyDto, device: DeviceMetadata) {
+    public async verifySignUp(dto: VerifyDto, device: DeviceMetadata) {
         return this.signUpVerifyUseCase.execute(dto, device);
     }
 
-    async signOut(token?: string) {
+    public async signOut(token?: string) {
         return this.signOutUseCase.execute(token);
     }
 
-    async refreshTokens(token: string | undefined, device: DeviceMetadata) {
+    public async refreshTokens(token: string | undefined, device: DeviceMetadata) {
         return this.refreshTokensUseCase.execute(token, device);
     }
 
-    async sendResetCode(dto: ResetPasswordDto) {
+    public async sendResetCode(dto: ResetPasswordDto) {
         return this.resetPasswordUseCase.execute(dto);
     }
 
-    async verifyResetCode(dto: VerifyResetCodeDto) {
+    public async verifyResetCode(dto: VerifyResetCodeDto) {
         return this.verifyResetPasswordUseCase.execute(dto);
     }
 
-    async confirmNewPassword(dto: PasswordResetConfirmDto) {
+    public async confirmNewPassword(dto: PasswordResetConfirmDto) {
         return this.confirmResetPasswordUseCase.execute(dto);
     }
 
-    async authenticateOAuth(dto: OAuthResponse, device: DeviceMetadata, state?: string) {
+    public async authenticateOAuth(dto: OAuthResponse, device: DeviceMetadata, state?: string) {
         return this.authenticateOAuthUseCase.execute(dto, device, state);
     }
 
-    async connectProvider(provider: string, userId: string) {
+    public async connectProvider(provider: string, userId: string) {
         return this.connectProviderUseCase.execute(provider, userId);
     }
 
-    async disconnectProvider(provider: string, userId: string) {
+    public async disconnectProvider(provider: string, userId: string) {
         return this.disconnectProviderUseCase.execute(provider, userId);
     }
 
-    async getConnectedProviders(userId: string) {
+    public async getConnectedProviders(userId: string) {
         return this.getConnectedProvidersQuery.execute(userId);
     }
 
-    async getEnabledProviders() {
+    public async getEnabledProviders() {
         return this.getEnabledProvidersQuery.execute();
     }
 }

@@ -132,7 +132,7 @@ export class SendInvitationUseCase {
     }
 
     private async sendEmailNotification(code: string, teamName: string, email: string) {
-        const origins = this.cfg.get<string[]>('CORS_ALLOWED_ORIGINS') || [];
+        const origins = this.cfg.get<readonly string[]>('CORS_ALLOWED_ORIGINS') || [];
         const url = `${origins[0]}/invites/accept?code=${code}`;
         const event = new TeamInvitationEvent(email, teamName, url);
 

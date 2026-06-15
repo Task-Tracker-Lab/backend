@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as UC from './use-cases';
-import type {
+import {
     CreateTeamDto,
     InviteMemberDto,
     UpdateInvitationDto,

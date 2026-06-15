@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { S3Service } from '@libs/s3';
-import type { UploadMediaDto } from './dtos';
+import { UploadMediaDto } from './dtos';
 import { BaseException } from '@shared/error';
 import { FlowProducer } from 'bullmq';
 import { InjectFlowProducer } from '@nestjs/bullmq';
@@ -17,7 +17,7 @@ export class MediaService {
         private readonly s3: S3Service,
     ) {}
 
-    public upload = async (dto: UploadMediaDto, userId: string) => {
+    public readonly upload = async (dto: UploadMediaDto, userId: string) => {
         const { context, file } = dto;
 
         const strategy = this.getStrategy(context);

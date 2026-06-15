@@ -9,11 +9,11 @@ import { AxiosError } from 'axios';
 
 @Injectable()
 export class ImagorService {
-    private logger = new Logger(ImagorService.name);
+    private readonly logger = new Logger(ImagorService.name);
 
     constructor(
         @Inject(MODULE_OPTIONS_TOKEN)
-        private options: ImagorModuleOptions,
+        private readonly options: ImagorModuleOptions,
         private readonly http: HttpService,
     ) {}
 
@@ -28,21 +28,17 @@ export class ImagorService {
         const signature = this.getFullSignedPath(transformPath);
         const url = `${host}/${signature}`;
 
-        try {
-            this.logger.debug(url);
-            const response = await firstValueFrom(
-                this.http.get(url, { responseType: 'arraybuffer' }).pipe(
-                    catchError((error: AxiosError) => {
-                        console.error('Imagor Get Error:', error.response?.data || error.message);
-                        return throwError(() => error);
-                    }),
-                ),
-            );
+        this.logger.debug(url);
+        const response = await firstValueFrom(
+            this.http.get(url, { responseType: 'arraybuffer' }).pipe(
+                catchError((error: AxiosError) => {
+                    console.error('Imagor Get Error:', error.response?.data || error.message);
+                    return throwError(() => error);
+                }),
+            ),
+        );
 
-            return Buffer.from(response.data);
-        } catch (error) {
-            throw error;
-        }
+        return Buffer.from(response.data);
     }
 
     private buildTransformPath(path: string, presetOrFilters?: string | Filters): string {

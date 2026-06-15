@@ -9,7 +9,7 @@ export class FindUserQuery {
         private readonly repository: IUserRepository,
     ) {}
 
-    async execute(params: { email?: string; id?: string }) {
+    async execute(params: { readonly email?: string; readonly id?: string }) {
         if (params.email) return this.repository.findByEmail(params.email);
         if (params.id) return this.repository.findById(params.id);
 

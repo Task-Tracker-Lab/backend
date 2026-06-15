@@ -28,16 +28,14 @@ export class OAuthGuard implements CanActivate {
 
         const GuardClass = this.guardClasses[provider];
 
-        const passportOptions: Record<string, boolean | string> = { session: false };
-
-        if (query) {
-            passportOptions['state'] = query;
-        }
-
-        if (provider === 'google') {
-            passportOptions['accessType'] = 'offline';
-            passportOptions['prompt'] = 'consent';
-        }
+        const passportOptions: Record<string, boolean | string> = {
+            session: false,
+            ...(query && { state: query }),
+            ...(provider === 'google' && {
+                accessType: 'offline',
+                prompt: 'consent',
+            }),
+        };
 
         const targetGuard = new GuardClass(passportOptions);
 

@@ -8,9 +8,9 @@ import { IMailPort } from './port';
 
 @Injectable()
 export class MailAdapter implements IMailPort {
-    private transporter: nodemailer.Transporter;
+    private readonly transporter: nodemailer.Transporter;
 
-    constructor(private cfg: ConfigService) {
+    constructor(private readonly cfg: ConfigService) {
         const port = this.cfg.get('MAIL_PORT');
         const mode = this.cfg.get('NODE_ENV');
 

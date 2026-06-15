@@ -14,7 +14,9 @@ export class MediaProcessor extends WorkerHost {
         super();
     }
 
-    async process(job: Job<{ original: string; context: string; userId: string }>) {
+    async process(
+        job: Job<{ readonly original: string; readonly context: string; readonly userId: string }>,
+    ) {
         if (job.name !== MEDIA_JOBS.RESIZE_IMAGES) return;
 
         const { original: originalFilePath, context } = job.data;

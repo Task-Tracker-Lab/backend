@@ -4,33 +4,33 @@ import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import type { ThrottlerModuleOptions } from '@nestjs/throttler';
 
 export interface SwaggerMetadata {
-    title?: string;
-    description?: string;
-    version?: string;
-    path?: string;
+    readonly title?: string;
+    readonly description?: string;
+    readonly version?: string;
+    readonly path?: string;
 }
 
 export interface SwaggerInfrastructure {
-    server?: {
-        port?: string | number;
-        domain?: string;
-        stage?: string;
+    readonly server?: {
+        readonly port?: string | number;
+        readonly domain?: string;
+        readonly stage?: string;
     };
-    services?: { name: string; port: number }[];
+    readonly services?: readonly { readonly name: string; readonly port: number }[];
 }
 
 export interface SwaggerOptions extends SwaggerMetadata, SwaggerInfrastructure {}
 
 export interface BootstrapOptions {
-    apiPrefix?: string;
-    version?: string;
-    appModule: Type<unknown>;
-    defaultPort?: number;
-    portEnvKey?: keyof Config;
-    serviceName: string;
-    setupApp?: (app: NestFastifyApplication) => Promise<void> | void;
-    swaggerOptions?: SwaggerMetadata;
-    throttlerOptions?: ThrottlerModuleOptions;
-    useCookieParser?: boolean;
-    useCors?: boolean;
+    readonly apiPrefix?: string;
+    readonly version?: string;
+    readonly appModule: Type<unknown>;
+    readonly defaultPort?: number;
+    readonly portEnvKey?: keyof Config;
+    readonly serviceName: string;
+    readonly setupApp?: (app: NestFastifyApplication) => Promise<void> | void;
+    readonly swaggerOptions?: SwaggerMetadata;
+    readonly throttlerOptions?: ThrottlerModuleOptions;
+    readonly useCookieParser?: boolean;
+    readonly useCors?: boolean;
 }

@@ -22,7 +22,7 @@ export class AuthController {
 
     constructor(
         private readonly facade: AuthFacade,
-        private cfg: ConfigService,
+        private readonly cfg: ConfigService,
     ) {
         this.isProduction = this.cfg.get('NODE_ENV') === 'production';
         this.domain = this.cfg.get('DOMAIN');

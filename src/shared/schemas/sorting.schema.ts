@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
 
-export const createSortingSchema = <T extends readonly [string, ...string[]]>(
+export const createSortingSchema = <T extends readonly [string, ...(readonly string[])]>(
     fields: T,
     defaultField?: T[number],
     defaultOrder: 'asc' | 'desc' = 'asc',

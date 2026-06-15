@@ -12,7 +12,7 @@ export class ProjectRepository implements IProjectRepository {
         private readonly db: DatabaseService<typeof schema>,
     ) {}
 
-    public create = async (userId: string, data: NewProject) => {
+    public readonly create = async (userId: string, data: NewProject) => {
         const result = await this.db.transaction(async (tx) => {
             const project = await tx
                 .insert(schema.projects)
@@ -38,7 +38,11 @@ export class ProjectRepository implements IProjectRepository {
         return result;
     };
 
-    public update = async (teamId: string, projectId: string, data: Partial<NewProject>) => {
+    public readonly update = async (
+        teamId: string,
+        projectId: string,
+        data: Partial<NewProject>,
+    ) => {
         const result = await this.db
             .update(schema.projects)
             .set({ ...data, updatedAt: new Date().toISOString() })
@@ -54,7 +58,7 @@ export class ProjectRepository implements IProjectRepository {
         return result.length > 0;
     };
 
-    public delete = async (teamId: string, projectId: string) => {
+    public readonly delete = async (teamId: string, projectId: string) => {
         const result = await this.db
             .update(schema.projects)
             .set({
@@ -74,7 +78,7 @@ export class ProjectRepository implements IProjectRepository {
         return result.length > 0;
     };
 
-    public findOne = async (id: string, teamId?: string) => {
+    public readonly findOne = async (id: string, teamId?: string) => {
         const [project] = await this.db
             .select()
             .from(schema.projects)
@@ -89,7 +93,7 @@ export class ProjectRepository implements IProjectRepository {
         return project || null;
     };
 
-    public findBySlug = async (slug: string, teamId?: string) => {
+    public readonly findBySlug = async (slug: string, teamId?: string) => {
         const [project] = await this.db
             .select()
             .from(schema.projects)
@@ -104,14 +108,14 @@ export class ProjectRepository implements IProjectRepository {
         return project || null;
     };
 
-    public findByTeam = async (teamId: string) => {
+    public readonly findByTeam = async (teamId: string) => {
         return this.db
             .select()
             .from(schema.projects)
             .where(and(eq(schema.projects.teamId, teamId), isNull(schema.projects.deletedAt)));
     };
 
-    public createShare = async (data: NewProjectShare) => {
+    public readonly createShare = async (data: NewProjectShare) => {
         const [result] = await this.db
             .insert(schema.projectShares)
             .values(data)
@@ -127,7 +131,7 @@ export class ProjectRepository implements IProjectRepository {
         return !!result;
     };
 
-    public hasValidShareToken = async (id: string, token: string) => {
+    public readonly hasValidShareToken = async (id: string, token: string) => {
         const [result] = await this.db
             .select()
             .from(schema.projectShares)
@@ -146,7 +150,7 @@ export class ProjectRepository implements IProjectRepository {
         return !!result;
     };
 
-    public revokeAllShares = async (projectId: string) => {
+    public readonly revokeAllShares = async (projectId: string) => {
         const result = await this.db
             .delete(schema.projectShares)
             .where(eq(schema.projectShares.projectId, projectId))
@@ -155,7 +159,7 @@ export class ProjectRepository implements IProjectRepository {
         return result.length > 0;
     };
 
-    public countByTeam = async (teamId: string) => {
+    public readonly countByTeam = async (teamId: string) => {
         const [result] = await this.db
             .select({ count: count() })
             .from(schema.projects)

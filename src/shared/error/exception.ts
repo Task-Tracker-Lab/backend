@@ -1,14 +1,15 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import type { HttpStatus } from '@nestjs/common';
+import { HttpException } from '@nestjs/common';
 
 interface IDetailsOptions {
-    target?: string;
-    [key: string]: any;
+    readonly target?: string;
+    readonly [key: string]: any;
 }
 
 export interface IErrorOptions {
-    code: string;
-    message: string;
-    details?: IDetailsOptions[];
+    readonly code: string;
+    readonly message: string;
+    readonly details?: readonly IDetailsOptions[];
 }
 
 export class BaseException extends HttpException {

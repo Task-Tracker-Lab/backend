@@ -26,7 +26,10 @@ export class RedisCacheAdapter implements ICacheService {
         await this.redis.set(key, value, 'EX', ttlSeconds);
     }
 
-    async setMany(items: { key: string; value: string }[], ttlSeconds: number = this.defaultTtl) {
+    async setMany(
+        items: readonly { readonly key: string; readonly value: string }[],
+        ttlSeconds: number = this.defaultTtl,
+    ) {
         if (!items.length) return;
 
         const pipeline = this.redis.pipeline();
@@ -110,7 +113,10 @@ class RedisTransaction implements ICacheTransaction {
         return this;
     }
 
-    setMany(items: { key: string; value: string }[], ttlSeconds: number = this.defaultTtl): this {
+    setMany(
+        items: readonly { readonly key: string; readonly value: string }[],
+        ttlSeconds: number = this.defaultTtl,
+    ): this {
         for (const item of items) {
             this.multi.set(item.key, item.value, 'EX', ttlSeconds);
         }

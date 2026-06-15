@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import type { UpdateProjectDto } from '../../dtos';
+import { UpdateProjectDto } from '../../dtos';
 import { BaseException } from '@shared/error';
 import { IProjectRepository } from '@core/projects/domain/repository';
 import { ProjectAccessPolicy } from '@core/projects/domain/policy';
@@ -41,18 +41,18 @@ export class UpdateProjectUseCase {
             }
         }
 
-        const data: Record<string, unknown> = {};
-
-        if (dto.slug) data['slug'] = slugify(dto.slug, { lower: true, strict: true });
-        if (dto.name) data['name'] = dto.name.trim();
-        if (dto.description !== undefined) data['description'] = dto.description?.trim() || null;
-        if (dto.descriptionHtml !== undefined) {
-            data['descriptionHtml'] = dto.descriptionHtml?.trim() || null;
-        }
-        if (dto.icon !== undefined) data['icon'] = dto.icon || null;
-        if (dto.color !== undefined) data['color'] = dto.color || null;
-        if (dto.sequence !== undefined) data['sequence'] = dto.sequence;
-        if (dto.visibility) data['visibility'] = dto.visibility;
+        const data = {
+            ...(dto.slug && { slug: slugify(dto.slug, { lower: true, strict: true }) }),
+            ...(dto.name && { name: dto.name.trim() }),
+            ...(dto.description !== undefined && { description: dto.description?.trim() || null }),
+            ...(dto.descriptionHtml !== undefined && {
+                descriptionHtml: dto.descriptionHtml?.trim() || null,
+            }),
+            ...(dto.icon !== undefined && { icon: dto.icon || null }),
+            ...(dto.color !== undefined && { color: dto.color || null }),
+            ...(dto.sequence !== undefined && { sequence: dto.sequence }),
+            ...(dto.visibility && { visibility: dto.visibility }),
+        };
 
         if (Object.keys(data).length === 0 && !dto.settings) {
             return {
@@ -68,17 +68,6 @@ export class UpdateProjectUseCase {
                 {
                     code: ProjectErrorCodes.UPDATE_FAILED,
                     message: ProjectErrorMessages[ProjectErrorCodes.UPDATE_FAILED],
-                },
-                HttpStatus.INTERNAL_SERVER_ERROR,
-            );
-        }
-
-        if (!result) {
-            throw new BaseException(
-                {
-                    code: 'UPDATE_FAILED',
-                    message:
-                        'Изменения не были применены. Возможно, данные идентичны текущим или проект недоступен',
                 },
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );

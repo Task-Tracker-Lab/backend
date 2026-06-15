@@ -1,5 +1,5 @@
 import { ConfigurableModuleBuilder } from '@nestjs/common';
-import { HealthModuleOptions } from './interfaces';
+import type { HealthModuleOptions } from './interfaces';
 
 export const { ASYNC_OPTIONS_TYPE, ConfigurableModuleClass, MODULE_OPTIONS_TOKEN, OPTIONS_TYPE } =
     new ConfigurableModuleBuilder<HealthModuleOptions>()

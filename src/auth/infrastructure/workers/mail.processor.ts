@@ -46,7 +46,7 @@ export class MailProcessor extends WorkerHost {
         }
     }
 
-    private sendRegisterCode = async (job: Job<RegisterCodeEvent>) => {
+    private readonly sendRegisterCode = async (job: Job<RegisterCodeEvent>) => {
         const { email, name, otp } = job.data;
 
         await job.log(`Sending registration code to: ${email}`);
@@ -58,7 +58,7 @@ export class MailProcessor extends WorkerHost {
         await job.updateProgress(100);
     };
 
-    private sendResetPassCode = async (job: Job<ResetPasswordEvent>) => {
+    private readonly sendResetPassCode = async (job: Job<ResetPasswordEvent>) => {
         const { email, otp } = job.data;
 
         await job.log(`Sending password reset to: ${email}`);

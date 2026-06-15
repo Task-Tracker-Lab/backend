@@ -11,7 +11,7 @@ export class IdentitiyRepository implements IIdentityRepository {
         private readonly db: DatabaseService<typeof schema>,
     ) {}
 
-    public create = async (data: typeof schema.userIdentities.$inferInsert) => {
+    public readonly create = async (data: typeof schema.userIdentities.$inferInsert) => {
         const [result] = await this.db.insert(schema.userIdentities).values(data).returning();
 
         if (!result) {
@@ -21,7 +21,7 @@ export class IdentitiyRepository implements IIdentityRepository {
         return result;
     };
 
-    public delete = async (id: string) => {
+    public readonly delete = async (id: string) => {
         const result = await this.db
             .delete(schema.userIdentities)
             .where(eq(schema.userIdentities.id, id));
@@ -29,14 +29,14 @@ export class IdentitiyRepository implements IIdentityRepository {
         return result.count.valueOf() > 0;
     };
 
-    public findAllByUserId = async (userId: string) => {
+    public readonly findAllByUserId = async (userId: string) => {
         return this.db
             .select()
             .from(schema.userIdentities)
             .where(eq(schema.userIdentities.userId, userId));
     };
 
-    public findByProvider = async (
+    public readonly findByProvider = async (
         provider: 'google' | 'yandex' | 'github',
         providerUserId: string,
     ) => {

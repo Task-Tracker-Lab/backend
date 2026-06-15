@@ -3,7 +3,7 @@ export type HealthIndicatorKey = HealthIndicatorsServices | (string & NonNullabl
 export type HealthIndicatorFn = () => boolean | Promise<boolean>;
 
 export interface HealthModuleOptions {
-    serviceName: string;
-    version?: string;
-    indicators?: Partial<Record<HealthIndicatorKey, HealthIndicatorFn>>;
+    readonly serviceName: string;
+    readonly version?: string;
+    readonly indicators?: Partial<Record<HealthIndicatorKey, HealthIndicatorFn>>;
 }

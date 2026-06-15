@@ -18,64 +18,64 @@ export interface Filters {
      * Ширина выходного изображения в пикселях.
      * Используйте 'orig', чтобы сохранить исходную ширину.
      */
-    width?: number | 'orig';
+    readonly width?: number | 'orig';
 
     /**
      * Высота выходного изображения в пикселях.
      * Используйте 'orig', чтобы сохранить исходную высоту.
      */
-    height?: number | 'orig';
+    readonly height?: number | 'orig';
 
     /**
      * Включает умную обрезку (Smart Cropping).
      * Imagor попытается найти наиболее важные области (лица, контрастные объекты) и сфокусироваться на них.
      */
-    smart?: boolean;
+    readonly smart?: boolean;
 
     /**
      * Режим вписывания.
      * Если не указан, по умолчанию используется обрезка (Crop) для заполнения всей области.
      */
-    fit?: Fit;
+    readonly fit?: Fit;
 
     /**
      * Устанавливает качество выходного изображения.
      * @param {number} quality Число от 0 до 100.
      */
-    quality?: number;
+    readonly quality?: number;
 
     /**
      * Принудительно устанавливает формат выходного изображения.
      * WebP и AVIF рекомендуются для лучшего сжатия.
      */
-    format?: Format;
+    readonly format?: Format;
 
     /**
      * Если true, автоматически конвертирует изображения с прозрачностью в JPEG,
      * заменяя прозрачные области фоном (белым по умолчанию).
      */
-    autojpg?: boolean;
+    readonly autojpg?: boolean;
 
     /** Удаляет EXIF метаданные из выходного изображения. Полезно для приватности и уменьшения размера. */
-    strip_exif?: boolean;
+    readonly strip_exif?: boolean;
 
     /** Удаляет ICC профили цвета. */
-    strip_icc?: boolean;
+    readonly strip_icc?: boolean;
 
     /**
      * Регулирует яркость изображения.
      * @param {number} brightness Число от -100 до 100. Положительные — ярче, отрицательные — темнее.
      */
-    brightness?: number;
+    readonly brightness?: number;
 
     /**
      * Регулирует контрастность изображения.
      * @param {number} contrast Число от -100 до 100.
      */
-    contrast?: number;
+    readonly contrast?: number;
 
     /** Преобразует изображение в черно-белое (grayscale). */
-    grayscale?: boolean;
+    readonly grayscale?: boolean;
 
     /**
      * Настройка цветовых каналов RGB.
@@ -83,19 +83,19 @@ export interface Filters {
      * @property {number} g Зеленый (-100 до 100)
      * @property {number} b Синий (-100 до 100)
      */
-    rgb?: { r: number; g: number; b: number };
+    readonly rgb?: { readonly r: number; readonly g: number; readonly b: number };
 
     /**
      * Изменяет общую насыщенность цветов.
      * @param {number} proportion Число от 0 до 100.
      */
-    proportion?: number;
+    readonly proportion?: number;
 
     /**
      * Применяет размытие Гаусса.
      * Можно передать число (радиус) или объект для более точной настройки сигмы.
      */
-    blur?: number | { radius: number; sigma?: number };
+    readonly blur?: number | { readonly radius: number; readonly sigma?: number };
 
     /**
      * Повышает резкость изображения.
@@ -103,71 +103,71 @@ export interface Filters {
      * @property {number} radius Радиус фильтра.
      * @property {number} threshold Порог срабатывания.
      */
-    sharpen?: {
-        amount: number;
-        radius: number;
-        threshold: number;
+    readonly sharpen?: {
+        readonly amount: number;
+        readonly radius: number;
+        readonly threshold: number;
     };
 
     /**
      * Добавляет шум на изображение.
      * @param {number} noise Уровень шума от 0 до 100.
      */
-    noise?: number;
+    readonly noise?: number;
 
     /** Поворачивает изображение на заданный угол по часовой стрелке. */
-    rotate?: 90 | 180 | 270;
+    readonly rotate?: 90 | 180 | 270;
 
     /**
      * Определяет цвет заполнения пустых областей при использовании режима 'fit-in'.
      * @example 'ff0000' (hex), 'white' (name) или 'auto' (главный цвет изображения).
      */
-    fill?: string;
+    readonly fill?: string;
 
     /** Устанавливает цвет фона для прозрачных изображений (например, PNG). */
-    background_color?: string;
+    readonly background_color?: string;
 
     /**
      * Наложение водяного знака поверх основного изображения.
      */
-    watermark?: {
+    readonly watermark?: {
         /** Путь к файлу водяного знака в хранилище. */
-        image: string;
+        readonly image: string;
         /** Позиция по горизонтали или смещение в пикселях. */
-        x?: number | 'center' | 'left' | 'right';
+        readonly x?: number | 'center' | 'left' | 'right';
         /** Позиция по вертикали или смещение в пикселях. */
-        y?: number | 'center' | 'top' | 'bottom';
+        readonly y?: number | 'center' | 'top' | 'bottom';
         /** Прозрачность водяного знака (0 - прозрачный, 100 - непрозрачный). */
-        alpha?: number;
+        readonly alpha?: number;
         /** Относительная ширина знака в процентах (0.0 - 1.0) от основного изображения. */
-        w_ratio?: number;
+        readonly w_ratio?: number;
         /** Относительная высота знака в процентах (0.0 - 1.0). */
-        h_ratio?: number;
+        readonly h_ratio?: number;
     };
 
     /**
      * Указывает точку фокуса для кропа.
      * Полезно, если вы знаете координаты лица или важного объекта.
      */
-    focal?: { x: number; y: number };
+    readonly focal?: { readonly x: number; readonly y: number };
 
     /**
      * Скругление углов изображения.
      * @property {number} radius Радиус скругления в пикселях.
      * @property {string} color Цвет заливки углов (например, 'transparent' или 'ffffff').
      */
-    round_corner?: {
-        radius: number;
-        color?: string;
+    readonly round_corner?: {
+        readonly radius: number;
+        readonly color?: string;
     };
 
     /**
      * Ограничивает размер файла (в байтах). Imagor будет снижать качество, пока не впишется в лимит.
      */
-    max_bytes?: number;
+    readonly max_bytes?: number;
 
     /**
      * Запрещает увеличивать изображение, если его исходные размеры меньше запрошенных (width/height).
      */
-    no_upscale?: boolean;
+    readonly no_upscale?: boolean;
 }

@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import type { CreateShareTokenDto } from '../../dtos';
+import { CreateShareTokenDto } from '../../dtos';
 import { createHash, randomBytes } from 'crypto';
 import { BaseException } from '@shared/error';
 import { ProjectAccessPolicy } from '@core/projects/domain/policy';

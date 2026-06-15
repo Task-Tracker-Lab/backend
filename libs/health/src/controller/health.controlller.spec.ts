@@ -4,7 +4,7 @@ import { HttpStatus, Logger } from '@nestjs/common';
 
 describe('HealthController', () => {
     let controller: HealthController;
-    let healthServiceMock: { getHealthData: ReturnType<typeof vi.fn> };
+    let healthServiceMock: { readonly getHealthData: ReturnType<typeof vi.fn> };
 
     const SERVICE_NAME = 'MyService';
 

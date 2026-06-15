@@ -23,7 +23,7 @@ const validateConfig = (config: Record<string, unknown>) => {
 
             console.groupEnd();
 
-            throw new Error('Invalid environment configuration');
+            throw new Error('Invalid environment configuration', { cause: error });
         }
         throw error;
     }

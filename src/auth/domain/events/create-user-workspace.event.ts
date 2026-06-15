@@ -1,6 +1,6 @@
 export class CreateUserWorkspaceEvent {
     constructor(
-        public userId: string,
-        public username: string,
+        public readonly userId: string,
+        public readonly username: string,
     ) {}
 }

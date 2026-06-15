@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import type { CreateProjectDto } from '../../dtos';
+import { CreateProjectDto } from '../../dtos';
 import { IProjectRepository } from '@core/projects/domain/repository';
 import { PROJECT_STATUSES } from '@core/projects/domain/entities';
 import { ProjectAccessPolicy } from '@core/projects/domain/policy';

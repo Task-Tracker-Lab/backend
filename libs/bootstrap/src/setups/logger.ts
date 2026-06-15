@@ -129,95 +129,95 @@ export type TLog = {
      * Used by Grafana to color-code rows and for alerting.
      * @type {'info' | 'error' | 'warn'}
      */
-    level: 'info' | 'error' | 'warn';
+    readonly level: 'info' | 'error' | 'warn';
     /**
      * Human-readable summary of the event.
      * @example 'Request completed POST /v1/auth/sign-in | 200 | 145ms'
      * @type {string}
      */
-    message: string;
+    readonly message: string;
     /**
      * Event occurrence time in ISO 8601 format.
      * @example '2026-05-09T01:17:29.000Z'
      * @type {string}
      */
-    timestamp: string;
+    readonly timestamp: string;
     /**
      * Unique identifier for the HTTP request (e.g., UUID, NanoID).
      * Used to correlate all logs produced within a single request lifecycle.
      * @type {string}
      */
-    request_id: string;
+    readonly request_id: string;
     /**
      * The system component that triggered the log entry.
      * @type {'interceptor' | 'filter_exception' | 'guard' | 'service'}
      */
-    triggered_by: 'interceptor' | 'filter_exception' | 'guard' | 'service';
+    readonly triggered_by: 'interceptor' | 'filter_exception' | 'guard' | 'service';
     /**
      * The logical type of the event within the request/response flow.
      * @type {'request' | 'response' | 'error' | 'system'}
      */
-    type: 'request' | 'response' | 'error' | 'system';
+    readonly type: 'request' | 'response' | 'error' | 'system';
     /**
      * The HTTP method used for the request.
      * @type {'POST' | 'GET' | 'DELETE' | 'PATCH' | 'PUT' | 'OPTIONS' | 'HEAD'}
      */
-    method: 'POST' | 'GET' | 'DELETE' | 'PATCH' | 'PUT' | 'OPTIONS' | 'HEAD';
+    readonly method: 'POST' | 'GET' | 'DELETE' | 'PATCH' | 'PUT' | 'OPTIONS' | 'HEAD';
     /**
      * The full URL of the request, including query parameters.
      * @example '/v1/auth/sign-in?source=mobile'
      * @type {string}
      */
-    url: string;
+    readonly url: string;
     /**
      * The sanitized API path, including versioning but excluding query parameters.
      * Ideal for aggregating statistics per endpoint.
      * @example '/v1/auth/sign-in'
      * @type {string}
      */
-    path: string;
+    readonly path: string;
     /**
      * The HTTP status code returned to the client.
      * @example 200
      * @type {number}
      */
-    status_code: number;
+    readonly status_code: number;
     /**
      * Request processing time in milliseconds.
      * Note: Typically undefined for entries with type 'request'.
      * @type {number}
      */
-    delay_num?: number;
+    readonly delay_num?: number;
     /**
      * The client's IP address.
      * @type {string}
      */
-    ip: string;
+    readonly ip: string;
     /**
      * The client's application or browser identification string.
      * @type {string}
      */
-    user_agent: string;
+    readonly user_agent: string;
     /**
      * The name of the NestJS controller handling the request.
      * @example 'AuthController'
      * @type {string}
      */
-    controller: string;
+    readonly controller: string;
     /**
      * The name of the specific controller method (handler).
      * @example 'signIn'
      * @type {string}
      */
-    handler: string;
+    readonly handler: string;
     /**
      * The error stack trace. Only populated when level is 'error'.
      * @type {string}
      */
-    stack?: string;
+    readonly stack?: string;
     /**
      * Additional contextual data for debugging (e.g., Zod validation issues, DB error details).
      * @type {any}
      */
-    error_details?: any;
+    readonly error_details?: any;
 };

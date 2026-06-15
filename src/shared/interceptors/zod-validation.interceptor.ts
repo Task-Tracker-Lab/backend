@@ -15,11 +15,11 @@ export const ZOD_RESPONSE_TOKEN = 'ZOD_RESPONSE_TOKEN';
 
 @Injectable()
 export class ZodValidationInterceptor implements NestInterceptor<unknown, unknown> {
-    constructor(private reflector: Reflector) {}
+    constructor(private readonly reflector: Reflector) {}
 
     intercept(context: ExecutionContext, next: CallHandler<unknown>): Observable<unknown> {
         const handler = context.getHandler();
-        const metadata = this.reflector.get<{ schema: z.ZodTypeAny } | undefined>(
+        const metadata = this.reflector.get<{ readonly schema: z.ZodTypeAny } | undefined>(
             ZOD_RESPONSE_TOKEN,
             handler,
         );

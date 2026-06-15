@@ -11,7 +11,7 @@ export class RegisterUserUseCase {
         private readonly repository: IUserRepository,
     ) {}
 
-    async execute(dto: NewUser & { password: string | null }) {
+    async execute(dto: NewUser & { readonly password: string | null }) {
         const existingUser = await this.repository.findByEmail(dto.email);
 
         if (existingUser?.user) {

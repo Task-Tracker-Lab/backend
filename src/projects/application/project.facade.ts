@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { ProjectStatus } from '../domain/entities';
 import { CheckSlugAvailabilityQuery } from './use-cases/project/check-slug.use-case';
-import type {
+import {
     AddProjectMemberDto,
     CreateProjectDto,
     CreateShareTokenDto,

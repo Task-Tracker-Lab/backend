@@ -1,5 +1,5 @@
 import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';
-import {
+import type {
     users,
     userSecurity,
     userNotifications,
@@ -23,18 +23,18 @@ export type UserActivity = InferSelectModel<typeof userActivity>;
 export type NewUserActivity = InferInsertModel<typeof userActivity>;
 
 export type UserProfile = {
-    user: User;
-    security: {
-        lastPasswordChange: string | null;
-        is2faEnabled: boolean;
+    readonly user: User;
+    readonly security: {
+        readonly lastPasswordChange: string | null;
+        readonly is2faEnabled: boolean;
     };
-    preferences: UserPreferences | null;
-    notifications: NotificationSettings;
+    readonly preferences: UserPreferences | null;
+    readonly notifications: NotificationSettings;
 };
 
 export type UserWithSecurity = {
-    user: User;
-    security: {
-        passwordHash: string | null;
+    readonly user: User;
+    readonly security: {
+        readonly passwordHash: string | null;
     };
 };

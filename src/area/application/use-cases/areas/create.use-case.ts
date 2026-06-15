@@ -1,6 +1,6 @@
 import { IAreaRepository } from '@core/area/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import type { CreateAreaDto } from '../../dtos';
+import { CreateAreaDto } from '../../dtos';
 import { ProjectAccessPolicy } from '@core/projects/domain/policy';
 import slugify from 'slugify';
 import { BaseException } from '@shared/error';

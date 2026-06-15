@@ -64,7 +64,7 @@ export class ProjectAccessPolicy {
     public async ensureProjectAccess(
         slug: string,
         userId: string,
-        minRoles: MemberRole[] = ['viewer'],
+        minRoles: readonly MemberRole[] = ['viewer'],
     ) {
         const project = await this.projectRepo.findBySlug(slug);
         if (!project) {

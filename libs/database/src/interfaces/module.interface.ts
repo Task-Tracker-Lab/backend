@@ -8,14 +8,14 @@ export interface DatabaseModuleOptions {
      * @default 'public'
      * @example 'auth_service'
      */
-    schemaName?: string;
+    readonly schemaName?: string;
 
     /**
      * Объект схемы Drizzle, содержащий определения таблиц и связей.
      * * Рекомендуется импортировать целиком: `import * as schema from './schema'`.
      * @example schema
      */
-    schema: Record<string, unknown>;
+    readonly schema: Record<string, unknown>;
 
     /**
      * Настройки драйвера `postgres.js`.
@@ -24,27 +24,27 @@ export interface DatabaseModuleOptions {
      * @see https://github.com/porsager/postgres#options
      * @example { max: 20, idle_timeout: 30, connect_timeout: 5 }
      */
-    pool?: Options<any>;
+    readonly pool?: Options<any>;
 
     /**
      * Включение или выключение логирования SQL-запросов в консоль через NestJS Logger.
      * @default false
      */
-    logging?: boolean;
+    readonly logging?: boolean;
 
     /**
      * Флаг для автоматического запуска миграций при старте приложения.
      * * Полезно для локальной разработки и стейджинга.
      * @default true
      */
-    runMigrations?: boolean;
+    readonly runMigrations?: boolean;
 
     /**
      * Абсолютный путь к директории с файлами миграций (SQL или JS/TS).
      * * Если не указано, используется путь `./migrations` от корня проекта.
      * @default path.resolve(process.cwd(), 'migrations')
      */
-    migrationsPath?: string;
+    readonly migrationsPath?: string;
 }
 
 /**

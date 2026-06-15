@@ -2,11 +2,11 @@ import type { FastifyRequest } from 'fastify';
 import { UAParser } from 'ua-parser-js';
 
 export interface DeviceMetadata {
-    ip: string;
-    userAgent: string;
-    browser: string;
-    os: string;
-    deviceType: 'mobile' | 'desktop' | 'tablet';
+    readonly ip: string;
+    readonly userAgent: string;
+    readonly browser: string;
+    readonly os: string;
+    readonly deviceType: 'mobile' | 'desktop' | 'tablet';
 }
 
 export function getDeviceMeta(req: FastifyRequest): DeviceMetadata {
