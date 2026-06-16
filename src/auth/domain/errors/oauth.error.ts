@@ -15,8 +15,6 @@ export const OAuthErrorCodes = {
     DATA_CORRUPTION: 'OAUTH.DATA_CORRUPTION',
     SESSION_CREATION_FAILED: 'OAUTH.SESSION_CREATION_FAILED',
     SESSION_CREATION_INTERNAL_ERROR: 'OAUTH.SESSION_CREATION_INTERNAL_ERROR',
-    PROVIDER_CONNECT_FAILED: 'OAUTH.PROVIDER_CONNECT_FAILED',
-    PROVIDER_DISCONNECT_FAILED: 'OAUTH.PROVIDER_DISCONNECT_FAILED',
 } as const;
 
 export type OAuthErrorCode = (typeof OAuthErrorCodes)[keyof typeof OAuthErrorCodes];
@@ -40,6 +38,4 @@ export const OAuthErrorMessages: Record<OAuthErrorCode, string> = {
     [OAuthErrorCodes.DATA_CORRUPTION]: 'Ошибка целостности данных',
     [OAuthErrorCodes.SESSION_CREATION_FAILED]: 'Не удалось создать сессию',
     [OAuthErrorCodes.SESSION_CREATION_INTERNAL_ERROR]: 'Внутренняя ошибка при создании сессии',
-    [OAuthErrorCodes.PROVIDER_CONNECT_FAILED]: 'Не удалось привязать провайдера',
-    [OAuthErrorCodes.PROVIDER_DISCONNECT_FAILED]: 'Не удалось отвязать провайдера',
 };

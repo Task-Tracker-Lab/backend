@@ -64,6 +64,9 @@ export const ExchangeSchema = z.object({
         .min(32, 'Token must be at least 32 characters')
         .max(128, 'Token must not exceed 128 characters')
         .regex(/^[a-f0-9]+$/, 'Token must be hexadecimal string'),
+    provider: z
+        .string()
+        .describe('Название OAuth-провайдера (например, "google", "github", "facebook")'),
 });
 
 export class ExchangeDto extends createZodDto(ExchangeSchema) {}

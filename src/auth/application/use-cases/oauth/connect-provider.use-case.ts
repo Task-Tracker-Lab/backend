@@ -23,7 +23,7 @@ export class ConnectProviderUseCase {
     private readonly STATE_KEY = (state: string) => `oauth:state:${state}`;
 
     async execute(provider: string, userId: string) {
-        await this.findUserQ.execute({ id: userId });
+        await this.findUserQ.execute({ id: userId }, { throwIfNotFound: true });
         await this.validateProviderNotConnected(userId, provider);
         await this.validateNoActiveSession(userId, provider);
 

@@ -19,6 +19,15 @@ import {
     ProvidersResponse,
 } from '../../dtos';
 
+export const ApiProviderParam = () =>
+    ApiParam({
+        name: 'provider',
+        description: 'Название OAuth провайдера',
+        enum: OAuthProvider,
+        required: true,
+        example: OAuthProvider.GOOGLE,
+    });
+
 export const OAuthLoginSwagger = () =>
     applyDecorators(
         ApiOperation({
@@ -26,11 +35,7 @@ export const OAuthLoginSwagger = () =>
             description:
                 'Перенаправляет пользователя на страницу аутентификации выбранного провайдера (google, github и т.д.).',
         }),
-        ApiParam({
-            name: 'provider',
-            description: 'Название OAuth провайдера',
-            enum: OAuthProvider,
-        }),
+        ApiProviderParam(),
         ApiResponse({
             status: 302,
             description: 'Успешное перенаправление на сторону провайдера.',
@@ -42,14 +47,24 @@ export const OAuthCallbackSwagger = () =>
     applyDecorators(
         ApiOperation({
             summary: 'Callback для завершения OAuth авторизации',
-            description:
-                'Обрабатывает ответ от провайдера, аутентифицирует пользователя, устанавливает refresh-токен в httpOnly cookie и возвращает результат.',
+            description: [
+                'Обрабатывает ответ от провайдера. Поддерживает два сценария:',
+                '',
+                '**1. Вход/Регистрация **',
+                '- Проверяет существование пользователя по email',
+                '- Если существует → выполняет вход',
+                '- Если не существует → создает нового пользователя',
+                '- Генерирует **одноразовый exchange-токен** (не access!)',
+                '- Перенаправляет на фронтенд с exchange-токеном: `?exchange_token=xxx&provider=google`',
+                '- Фронтенд обменивает exchange-токен на access/refresh через `/oauth/exchange`',
+                '',
+                '**2. Привязка провайдера (state содержит `connect_`)**',
+                '- Привязывает OAuth провайдера к существующему аккаунту',
+                '- Не генерирует токены',
+                '- Перенаправляет на фронтенд: `same-url?success=true&provider=google&message=connected`',
+            ].join('\n'),
         }),
-        ApiParam({
-            name: 'provider',
-            description: 'Название OAuth провайдера',
-            enum: OAuthProvider,
-        }),
+        ApiProviderParam(),
         ApiResponse({
             status: 302,
             description: 'Успешный вход. Перенаправление на фронтенд с параметрами авторизации.',
@@ -99,7 +114,7 @@ export const ConnectOAuthProviderSwagger = () =>
         ApiResponse({
             status: 200,
             description: 'Провайдер успешно привязан к аккаунту.',
-            type: [ConnectProviderResponse.Output],
+            type: ConnectProviderResponse.Output,
         }),
         ApiBadRequest(
             'Провайдер уже привязан к этому аккаунту или указан неподдерживаемый провайдер',

@@ -24,6 +24,7 @@ export class ExchangeUseCase {
 
     async execute(dto: ExchangeDto, meta: DeviceMetadata) {
         const key = EXCHANGE_TOKEN_NAME(dto.token);
+
         const rawData = await this.cacheService.getOne(key);
 
         if (!rawData) {
@@ -36,15 +37,15 @@ export class ExchangeUseCase {
             );
         }
 
-        const data = JSON.parse(rawData) as IOAuthExchangeData;
+        const data: IOAuthExchangeData = JSON.parse(rawData);
         await this.cacheService.removeOne(key);
 
-        if (!data.userId || !data.email) {
+        if (!data.userId || !data.email || data.provider !== dto.provider) {
             await this.cacheService.removeOne(key);
             throw new BaseException(
                 {
-                    message: 'Неверный формат данных авторизации',
-                    code: 'EXCHANGE_DATA_CORRUPTED',
+                    code: OAuthErrorCodes.DATA_CORRUPTION,
+                    message: OAuthErrorMessages[OAuthErrorCodes.DATA_CORRUPTION],
                 },
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
@@ -67,8 +68,8 @@ export class ExchangeUseCase {
             if (!result?.id) {
                 throw new BaseException(
                     {
-                        message: 'Не удалось создать сессию',
-                        code: 'SESSION_CREATION_FAILED',
+                        code: OAuthErrorCodes.SESSION_CREATION_FAILED,
+                        message: OAuthErrorMessages[OAuthErrorCodes.SESSION_CREATION_FAILED],
                     },
                     HttpStatus.INTERNAL_SERVER_ERROR,
                 );
@@ -90,8 +91,8 @@ export class ExchangeUseCase {
 
             throw new BaseException(
                 {
-                    message: 'Внутренняя ошибка сервера при создании сессии',
-                    code: 'SESSION_CREATION_INTERNAL_ERROR',
+                    code: OAuthErrorCodes.SESSION_CREATION_INTERNAL_ERROR,
+                    message: OAuthErrorMessages[OAuthErrorCodes.SESSION_CREATION_INTERNAL_ERROR],
                 },
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
