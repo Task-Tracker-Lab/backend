@@ -18,7 +18,7 @@ export class MailProcessor extends WorkerHost {
 
     async process(job: Job<RegisterCodeEvent>): Promise<void>;
     async process(job: Job<ResetPasswordEvent>): Promise<void>;
-    async process(job: Job<any>): Promise<void> {
+    async process(job: Job): Promise<void> {
         await job.log(`[START] Job ID: ${job.id} | Type: ${job.name}`);
 
         try {

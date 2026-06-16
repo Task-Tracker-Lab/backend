@@ -4,6 +4,7 @@ import { createId } from '@paralleldrive/cuid2';
 import { BaseException } from '@shared/error';
 import { removeUndefined } from '@shared/utils';
 
+import { UserErrorCodes, UserErrorMessages } from '../../domain/errors';
 import { UpdateNotificationsDto } from '../dtos';
 
 @Injectable()
@@ -18,28 +19,22 @@ export class UpdateNotificationsUseCase {
 
         if (!user) {
             throw new BaseException(
-                { code: 'USER_NOT_FOUND', message: 'Пользователь не найден' },
+                {
+                    code: UserErrorCodes.NOT_FOUND,
+                    message: UserErrorMessages[UserErrorCodes.NOT_FOUND],
+                },
                 HttpStatus.NOT_FOUND,
             );
         }
 
         try {
-            const isUpdated = await this.userRepo.updateNotifications(
+            const result = await this.userRepo.updateNotifications(
                 id,
                 removeUndefined({
                     email: dto.email,
                     push: dto.push,
                 }),
             );
-            if (!isUpdated) {
-                throw new BaseException(
-                    {
-                        code: 'NOTIFICATIONS_UPDATE_FAILED',
-                        message: 'Не удалось обновить настройки уведомлений',
-                    },
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                );
-            }
 
             await this.userRepo.logActivity({
                 id: createId(),
@@ -48,7 +43,7 @@ export class UpdateNotificationsUseCase {
             });
 
             return {
-                success: true,
+                success: result,
                 message: 'Настройки уведомлений обновлены',
             };
         } catch (error) {
@@ -58,13 +53,8 @@ export class UpdateNotificationsUseCase {
 
             throw new BaseException(
                 {
-                    code: 'USER_SETTINGS_ERROR',
-                    message: 'Ошибка при сохранении настроек пользователя',
-                    details: [
-                        {
-                            reason: error instanceof Error ? error.message : 'Database error',
-                        },
-                    ],
+                    code: UserErrorCodes.UPDATE_FAILED,
+                    message: UserErrorMessages[UserErrorCodes.UPDATE_FAILED],
                 },
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );

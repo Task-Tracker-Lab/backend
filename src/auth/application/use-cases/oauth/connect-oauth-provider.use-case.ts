@@ -5,6 +5,7 @@ import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { BaseException } from '@shared/error';
 
+import { OAuthErrorCodes, OAuthErrorMessages } from '../../../domain/errors';
 import { OAuthResponse } from '../../dtos';
 
 @Injectable()
@@ -22,7 +23,7 @@ export class ConnectOAuthProviderUseCase {
 
         this.validateProvider(stateData, dto);
 
-        const user = await this.getUser(stateData.userId);
+        const { user } = await this.findUserQ.execute({ id: stateData.userId });
 
         await this.validateProviderNotConnected(user.id, dto.provider, dto.id);
 
@@ -47,8 +48,8 @@ export class ConnectOAuthProviderUseCase {
         if (!rawData) {
             throw new BaseException(
                 {
-                    code: 'INVALID_OR_EXPIRED_STATE',
-                    message: 'Сессия подключения недействительна или истекла',
+                    code: OAuthErrorCodes.INVALID_OR_EXPIRED_STATE,
+                    message: OAuthErrorMessages[OAuthErrorCodes.INVALID_OR_EXPIRED_STATE],
                 },
                 HttpStatus.BAD_REQUEST,
             );
@@ -60,8 +61,8 @@ export class ConnectOAuthProviderUseCase {
         if (stateData.action !== 'connect') {
             throw new BaseException(
                 {
-                    code: 'INVALID_ACTION',
-                    message: 'Этот state не предназначен для подключения провайдера',
+                    code: OAuthErrorCodes.INVALID_ACTION,
+                    message: OAuthErrorMessages[OAuthErrorCodes.INVALID_ACTION],
                 },
                 HttpStatus.BAD_REQUEST,
             );
@@ -70,28 +71,12 @@ export class ConnectOAuthProviderUseCase {
         if (stateData.provider !== dto.provider) {
             throw new BaseException(
                 {
-                    code: 'PROVIDER_MISMATCH',
-                    message: `Провайдер в запросе (${dto.provider}) не совпадает с ожидаемым (${stateData.provider})`,
+                    code: OAuthErrorCodes.PROVIDER_MISMATCH,
+                    message: OAuthErrorMessages[OAuthErrorCodes.PROVIDER_MISMATCH],
                 },
                 HttpStatus.BAD_REQUEST,
             );
         }
-    }
-
-    private async getUser(userId: string) {
-        const result = await this.findUserQ.execute({ id: userId });
-
-        if (!result?.user) {
-            throw new BaseException(
-                {
-                    code: 'USER_NOT_FOUND',
-                    message: 'Пользователь для подключения провайдера не найден',
-                },
-                HttpStatus.NOT_FOUND,
-            );
-        }
-
-        return result.user;
     }
 
     private async validateProviderNotConnected(
@@ -107,8 +92,8 @@ export class ConnectOAuthProviderUseCase {
         if (existingIdentity && existingIdentity.userId !== userId) {
             throw new BaseException(
                 {
-                    code: 'PROVIDER_ALREADY_USED',
-                    message: `Этот ${provider} аккаунт уже привязан к другому пользователю`,
+                    code: OAuthErrorCodes.PROVIDER_ALREADY_USED,
+                    message: OAuthErrorMessages[OAuthErrorCodes.PROVIDER_ALREADY_USED],
                 },
                 HttpStatus.CONFLICT,
             );
@@ -120,8 +105,8 @@ export class ConnectOAuthProviderUseCase {
         if (alreadyConnected) {
             throw new BaseException(
                 {
-                    code: 'PROVIDER_ALREADY_CONNECTED',
-                    message: `Провайдер ${provider} уже привязан к вашему аккаунту`,
+                    code: OAuthErrorCodes.PROVIDER_ALREADY_CONNECTED,
+                    message: OAuthErrorMessages[OAuthErrorCodes.PROVIDER_ALREADY_CONNECTED],
                 },
                 HttpStatus.CONFLICT,
             );

@@ -1,4 +1,4 @@
-import { ProjectsModule } from '@core/projects';
+import { ProjectModule } from '@core/project';
 import { TeamsModule } from '@core/teams';
 import { UserModule } from '@core/user';
 import { BullModule } from '@nestjs/bullmq';
@@ -8,7 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { MailAdapter } from '@shared/adapters/mail';
 
 import { AuthFacade } from './application/auth.facade';
-import { CONTROLLERS } from './application/controller';
+import { CONTROLLERS } from './application/controllers';
 import { AuthUseCases } from './application/use-cases';
 import { AuthQueues } from './domain/enums';
 import { REPOSITORIES } from './infrastructure/persistence/repositories';
@@ -30,6 +30,7 @@ const WORKERS = [MailProcessor, UserProcessor];
                      * формат строки (напр. '15m', '30d') через regex в ConfigSchema, но внутренний тип
                      * 'StringValue' из библиотеки 'ms' слишком строг для обычного string.
                      */
+                    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
                     expiresIn: cfg.get<any>('JWT_ACCESS_EXPIRES_IN'),
                     algorithm: 'HS256',
                 },
@@ -43,7 +44,7 @@ const WORKERS = [MailProcessor, UserProcessor];
         BullModule.registerQueue({ name: AuthQueues.AUTH_MAIL }, { name: AuthQueues.AUTH_USER }),
         forwardRef(() => UserModule),
         TeamsModule,
-        ProjectsModule,
+        ProjectModule,
     ],
     controllers: CONTROLLERS,
     providers: [

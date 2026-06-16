@@ -19,7 +19,7 @@ export class ZodValidationInterceptor implements NestInterceptor<unknown, unknow
 
     intercept(context: ExecutionContext, next: CallHandler<unknown>): Observable<unknown> {
         const handler = context.getHandler();
-        const metadata = this.reflector.get<{ readonly schema: z.ZodTypeAny } | undefined>(
+        const metadata = this.reflector.get<{ schema: z.ZodTypeAny } | undefined>(
             ZOD_RESPONSE_TOKEN,
             handler,
         );

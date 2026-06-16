@@ -3,6 +3,8 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
 import { BaseException } from '@shared/error';
 
+import { UserErrorCodes, UserErrorMessages } from '../../domain/errors';
+
 import type { NewUser } from '@core/user/domain/entities';
 
 @Injectable()
@@ -12,14 +14,14 @@ export class RegisterUserUseCase {
         private readonly repository: IUserRepository,
     ) {}
 
-    async execute(dto: NewUser & { readonly password: string | null }) {
+    async execute(dto: NewUser & { password: string | null }) {
         const existingUser = await this.repository.findByEmail(dto.email);
 
         if (existingUser?.user) {
             throw new BaseException(
                 {
-                    code: 'USER_ALREADY_EXISTS',
-                    message: `Пользователь с email ${dto.email} уже зарегистрирован`,
+                    code: UserErrorCodes.ALREADY_EXISTS,
+                    message: UserErrorMessages[UserErrorCodes.ALREADY_EXISTS],
                     details: [{ target: 'email', value: dto.email }],
                 },
                 HttpStatus.CONFLICT,
@@ -48,9 +50,8 @@ export class RegisterUserUseCase {
 
             throw new BaseException(
                 {
-                    code: 'USER_REGISTRATION_FAILED',
-                    message: 'Не удалось завершить регистрацию',
-                    details: [{ reason: error instanceof Error ? error.message : 'DB error' }],
+                    code: UserErrorCodes.CREATE_FAILED,
+                    message: UserErrorMessages[UserErrorCodes.CREATE_FAILED],
                 },
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );

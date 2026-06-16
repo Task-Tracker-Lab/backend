@@ -7,6 +7,7 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
 import { Queue } from 'bullmq';
 
+import { OAuthErrorCodes, OAuthErrorMessages } from '../../../domain/errors';
 import { OAuthResponse } from '../../dtos';
 
 @Injectable()
@@ -26,9 +27,8 @@ export class ProcessOAuthRegistrationUseCase {
         if (existingUser) {
             throw new BaseException(
                 {
-                    code: 'EMAIL_ALREADY_EXISTS',
-                    message:
-                        'Пользователь с таким email уже существует. Пожалуйста, войдите через пароль.',
+                    code: OAuthErrorCodes.EMAIL_ALREADY_EXISTS,
+                    message: OAuthErrorMessages[OAuthErrorCodes.EMAIL_ALREADY_EXISTS],
                 },
                 HttpStatus.CONFLICT,
             );

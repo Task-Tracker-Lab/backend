@@ -157,7 +157,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         );
     };
 
-    private handleUnknownError(exception: any, host: ArgumentsHost) {
+    private handleUnknownError(exception: unknown, host: ArgumentsHost) {
         const { request, response } = this.getCtxBase(host);
         const status = HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -168,7 +168,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
                 code: 'INTERNAL_SERVER_ERROR',
                 message: 'Произошла непредвиденная ошибка на сервере',
                 details: [],
-                stack: exception?.stack,
             }),
         );
     }
@@ -177,11 +176,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         request: FastifyRequest,
         status: number,
         data: {
-            readonly code: string;
-            readonly message: string;
-            readonly details: readonly any[];
-            readonly stack?: string;
-            readonly service?: string;
+            code: string;
+            message: string;
+            details: Record<string, any>[] | undefined | null;
+            stack?: string;
+            service?: string;
         },
     ) {
         const requestId = request.id ?? request.headers['x-request-id'];
@@ -221,12 +220,21 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     private log(
-        exception: any,
+        exception: unknown,
         host: ArgumentsHost,
         status: number,
         extraData: Record<string, unknown> = {},
     ) {
         const { request } = this.getCtxBase(host);
+
+        const hasMessage = (err: unknown): err is { message: string } =>
+            typeof err === 'object' &&
+            err !== null &&
+            'message' in err &&
+            typeof (err as { message: unknown }).message === 'string';
+
+        const stack = exception instanceof Error ? exception.stack : undefined;
+        const errMessage = hasMessage(exception) ? exception.message : 'Unknown Error';
 
         const logData = {
             request_id: request.id || request.headers['x-request-id'] || 'unknown',
@@ -240,11 +248,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
             user_agent: request.headers['user-agent'] || 'unknown',
             controller: 'Unknown',
             handler: 'Unknown',
-            stack: exception instanceof Error ? exception.stack : undefined,
+            stack,
             error_details: extraData,
         };
 
-        const message = `Exception Filter: ${logData.method} ${logData.path} | ${status} | ${exception?.message || 'Unknown Error'}`;
+        const message = `Exception Filter: ${logData.method} ${logData.path} | ${status} | ${errMessage}`;
 
         if (status >= 500) {
             this.logger.error(message, logData);

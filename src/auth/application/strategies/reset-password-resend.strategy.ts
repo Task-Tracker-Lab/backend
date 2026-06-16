@@ -6,6 +6,8 @@ import {
 } from '@core/auth/infrastructure/constants';
 import { generate, generateSecret } from 'otplib';
 
+import { AuthErrorCodes, AuthErrorMessages } from '../../domain/errors';
+
 import { ResendCodeStrategy } from './resend-code.strategy';
 
 import type { ResetPasswordCacheData } from '@core/auth/application/interfaces';
@@ -14,9 +16,8 @@ import type { Queue } from 'bullmq';
 export class ResetPasswordResendStrategy extends ResendCodeStrategy<ResetPasswordCacheData> {
     readonly context = 'reset-password' as const;
     readonly successMessage = 'Повторный код для восстановления пароля отправлен на вашу почту';
-    readonly cacheNotFoundCode = 'RESET_SESSION_EXPIRED';
-    readonly cacheNotFoundMessage =
-        'Время подтверждения истекло или запрос не найден. Запросите код снова.';
+    readonly cacheNotFoundCode = AuthErrorCodes.RESET_SESSION_EXPIRED;
+    readonly cacheNotFoundMessage = AuthErrorMessages[AuthErrorCodes.RESET_SESSION_EXPIRED];
 
     getCacheKey(email: string): string {
         return RESET_PASSWORD_CACHE_KEY(email);

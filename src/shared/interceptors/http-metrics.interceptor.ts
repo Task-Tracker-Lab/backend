@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectMetric } from '@willsoto/nestjs-prometheus';
 import { Histogram } from 'prom-client';
-import { Observable, throwError } from 'rxjs';
+import { throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 
 import type { FastifyReply, FastifyRequest } from 'fastify';
@@ -18,7 +18,7 @@ export class HttpMetricsInterceptor implements NestInterceptor {
         private readonly histogram: Histogram<string>,
     ) {}
 
-    intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    intercept(context: ExecutionContext, next: CallHandler) {
         const ctx = context.switchToHttp();
         const request = ctx.getRequest<FastifyRequest>();
         const response = ctx.getResponse<FastifyReply>();

@@ -16,6 +16,7 @@ export const createSortingSchema = <T extends readonly [string, ...(readonly str
              * так как массив fields используется для создания enum.
              * as any безопасно подавляет ошибку, не расширяя тип за пределы этой строки.
              */
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             .default(defaultField ?? (fields[0] as any))
             .describe(`Поле для сортировки. Доступно: ${fields.join(', ')}`),
 

@@ -1,7 +1,7 @@
 import { AuthQueues } from '@core/auth/domain/enums';
 import { AuthUserJobs } from '@core/auth/domain/enums/auth-jobs.enum';
 import { CreateUserWorkspaceEvent } from '@core/auth/domain/events';
-import { CreateProjectUseCase } from '@core/projects/application/use-cases';
+import { CreateProjectUseCase } from '@core/project/application/use-cases';
 import { CreateTeamUseCase } from '@core/teams/application/use-cases';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';

@@ -62,93 +62,102 @@ export class ImagorPathBuilder {
         return parts.join('/');
     }
 
-    // TODO will fix that shit
-    // eslint-disable-next-line sonarjs/cognitive-complexity
     private serializeAllFilters(f: Filters): string {
-        const s: string[] = [];
+        const segments: string[] = [];
 
+        this.addBasicFilters(f, segments);
+        this.addAdjustmentFilters(f, segments);
+        this.addEffectFilters(f, segments);
+        this.addTransformationFilters(f, segments);
+        this.addWatermarkFilter(f, segments);
+
+        return segments.length ? `filters:${segments.join(':')}` : '';
+    }
+
+    private addBasicFilters(f: Filters, segments: string[]): void {
         if (f.quality) {
-            s.push(`quality(${f.quality})`);
+            segments.push(`quality(${f.quality})`);
         }
         if (f.format) {
-            s.push(`format(${f.format})`);
+            segments.push(`format(${f.format})`);
         }
         if (f.autojpg) {
-            s.push('autojpg()');
+            segments.push('autojpg()');
         }
         if (f.strip_exif) {
-            s.push('strip_exif()');
+            segments.push('strip_exif()');
         }
         if (f.strip_icc) {
-            s.push('strip_icc()');
-        }
-
-        if (f.brightness !== undefined) {
-            s.push(`brightness(${f.brightness})`);
-        }
-        if (f.contrast !== undefined) {
-            s.push(`contrast(${f.contrast})`);
-        }
-        if (f.grayscale) {
-            s.push('grayscale()');
-        }
-        if (f.proportion !== undefined) {
-            s.push(`proportion(${f.proportion})`);
-        }
-        if (f.rgb) {
-            s.push(`rgb(${f.rgb.r},${f.rgb.g},${f.rgb.b})`);
-        }
-
-        if (f.blur) {
-            const b = f.blur;
-            s.push(typeof b === 'number' ? `blur(${b})` : `blur(${b.radius},${b.sigma || 0})`);
-        }
-        if (f.sharpen) {
-            s.push(`sharpen(${f.sharpen.amount},${f.sharpen.radius},${f.sharpen.threshold})`);
-        }
-        if (f.noise) {
-            s.push(`noise(${f.noise})`);
-        }
-        if (f.rotate) {
-            s.push(`rotate(${f.rotate})`);
-        }
-
-        if (f.fill) {
-            s.push(`fill(${f.fill})`);
-        }
-        if (f.background_color) {
-            s.push(`background_color(${f.background_color})`);
-        }
-
-        if (f.watermark) {
-            const w = f.watermark;
-            const params = [
-                w.image,
-                w.x ?? 0,
-                w.y ?? 0,
-                w.alpha ?? 0,
-                w.w_ratio ?? 0,
-                w.h_ratio ?? 0,
-            ];
-            s.push(`watermark(${params.join(',')})`);
-        }
-
-        if (f.focal) {
-            s.push(`focal(${f.focal.x}x${f.focal.y})`);
-        }
-        if (f.round_corner) {
-            s.push(
-                `round_corner(${f.round_corner.radius}${f.round_corner.color ? `,${f.round_corner.color}` : ''})`,
-            );
-        }
-
-        if (f.max_bytes) {
-            s.push(`max_bytes(${f.max_bytes})`);
+            segments.push('strip_icc()');
         }
         if (f.no_upscale) {
-            s.push('no_upscale()');
+            segments.push('no_upscale()');
+        }
+        if (f.max_bytes) {
+            segments.push(`max_bytes(${f.max_bytes})`);
+        }
+    }
+
+    private addAdjustmentFilters(f: Filters, segments: string[]): void {
+        if (f.brightness !== undefined) {
+            segments.push(`brightness(${f.brightness})`);
+        }
+        if (f.contrast !== undefined) {
+            segments.push(`contrast(${f.contrast})`);
+        }
+        if (f.grayscale) {
+            segments.push('grayscale()');
+        }
+        if (f.proportion !== undefined) {
+            segments.push(`proportion(${f.proportion})`);
+        }
+        if (f.rgb) {
+            segments.push(`rgb(${f.rgb.r},${f.rgb.g},${f.rgb.b})`);
+        }
+    }
+
+    private addEffectFilters(f: Filters, segments: string[]): void {
+        if (f.blur) {
+            segments.push(
+                typeof f.blur === 'number'
+                    ? `blur(${f.blur})`
+                    : `blur(${f.blur.radius},${f.blur.sigma ?? 0})`,
+            );
+        }
+        if (f.sharpen) {
+            const { amount, radius, threshold } = f.sharpen;
+            segments.push(`sharpen(${amount},${radius},${threshold})`);
+        }
+        if (f.noise !== undefined) {
+            segments.push(`noise(${f.noise})`);
+        }
+    }
+
+    private addTransformationFilters(f: Filters, segments: string[]): void {
+        if (f.rotate !== undefined) {
+            segments.push(`rotate(${f.rotate})`);
+        }
+        if (f.fill) {
+            segments.push(`fill(${f.fill})`);
+        }
+        if (f.background_color) {
+            segments.push(`background_color(${f.background_color})`);
+        }
+        if (f.focal) {
+            segments.push(`focal(${f.focal.x}x${f.focal.y})`);
+        }
+        if (f.round_corner) {
+            const { radius, color } = f.round_corner;
+            segments.push(`round_corner(${radius}${color ? `,${color}` : ''})`);
+        }
+    }
+
+    private addWatermarkFilter(f: Filters, segments: string[]): void {
+        if (!f.watermark) {
+            return;
         }
 
-        return s.length ? `filters:${s.join(':')}` : '';
+        const { image, x = 0, y = 0, alpha = 0, w_ratio = 0, h_ratio = 0 } = f.watermark;
+        segments.push(`watermark(${image},${x},${y},${alpha},${w_ratio},${h_ratio})`);
     }
 }

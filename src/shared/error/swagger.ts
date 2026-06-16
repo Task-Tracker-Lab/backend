@@ -3,15 +3,13 @@ import { ApiResponse, getSchemaPath } from '@nestjs/swagger';
 
 import { GlobalErrorResponse } from './schema';
 
+type TDetails = { field: string; message: string; code: string }[];
+
 export const ApiErrorResponse = (
     status: number,
     bizCode: string,
     description: string,
-    details?: readonly {
-        readonly field: string;
-        readonly message: string;
-        readonly code: string;
-    }[],
+    details: TDetails = [],
 ) =>
     ApiResponse({
         status,
@@ -54,7 +52,7 @@ export const ApiNotFound = (description: string = 'Ресурс не найде�
 
 export const ApiValidationError = (
     description: string = 'Ошибка валидации входных данных',
-    fields: readonly any[] = [],
+    fields: TDetails = [],
 ) => applyDecorators(ApiErrorResponse(400, 'VALIDATION_FAILED', description, fields));
 
 export const ApiConflict = (description: string = 'Ресурс уже существует') =>
@@ -63,7 +61,7 @@ export const ApiConflict = (description: string = 'Ресурс уже суще�
 export const ApiTooManyRequests = (description: string = 'Слишком много попыток') =>
     applyDecorators(ApiErrorResponse(429, 'TOO_MANY_REQUESTS', description));
 
-export const DATABASE_ERRORS: Record<string, { readonly code: number; readonly msg: string }> = {
+export const DATABASE_ERRORS: Record<string, { code: number; msg: string }> = {
     '23505': { code: 409, msg: 'Запись с таким значением уже существует (дубликат).' },
     '23503': { code: 409, msg: 'Ошибка внешнего ключа: связанная запись не найдена.' },
     '22P02': { code: 400, msg: 'Неверный формат данных (например, некорректный UUID).' },

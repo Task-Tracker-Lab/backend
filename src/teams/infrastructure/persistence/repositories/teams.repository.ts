@@ -2,7 +2,7 @@ import { ITeamsRepository } from '@core/teams/domain/repository';
 import * as scUsers from '@core/user/infrastructure/persistence/models';
 import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
 import { Inject } from '@nestjs/common';
-import { and, desc, eq, ilike, isNull } from 'drizzle-orm';
+import { and, desc, eq, isNull } from 'drizzle-orm';
 
 import * as schema from '../models';
 
@@ -14,7 +14,7 @@ export class TeamsRepository implements ITeamsRepository {
         private readonly db: DatabaseService<typeof schema>,
     ) {}
 
-    public readonly addMember = async (dto: NewTeamMember) => {
+    public addMember = async (dto: NewTeamMember) => {
         const result = await this.db
             .insert(schema.teamMembers)
             .values(dto)
@@ -25,7 +25,7 @@ export class TeamsRepository implements ITeamsRepository {
         return (result?.count ?? 0) > 0;
     };
 
-    public readonly create = async (ownerId: string, dto: NewTeam) =>
+    public create = async (ownerId: string, dto: NewTeam) =>
         this.db.transaction(async (tx) => {
             const [team] = await tx
                 .insert(schema.teams)
@@ -50,7 +50,7 @@ export class TeamsRepository implements ITeamsRepository {
             };
         });
 
-    public readonly update = async (id: string, dto: Partial<Team>) =>
+    public update = async (id: string, dto: Partial<Team>) =>
         this.db.transaction(async (tx) => {
             const [team] = await tx
                 .update(schema.teams)
@@ -68,7 +68,7 @@ export class TeamsRepository implements ITeamsRepository {
             };
         });
 
-    public readonly remove = async (teamId: string, userId: string) => {
+    public remove = async (teamId: string, userId: string) => {
         const result = await this.db
             .update(schema.teams)
             .set({
@@ -79,7 +79,7 @@ export class TeamsRepository implements ITeamsRepository {
         return (result?.count ?? 0) > 0;
     };
 
-    public readonly findMember = async (teamId: string, userId: string) => {
+    public findMember = async (teamId: string, userId: string) => {
         const [member] = await this.membersQuery.where(
             and(eq(schema.teamMembers.teamId, teamId), eq(schema.teamMembers.userId, userId)),
         );
@@ -87,26 +87,17 @@ export class TeamsRepository implements ITeamsRepository {
         return member || null;
     };
 
-    public readonly findMembers = async (teamId: string) =>
+    public findMembers = async (teamId: string) =>
         this.membersQuery
             .where(eq(schema.teamMembers.teamId, teamId))
             .orderBy(desc(schema.teamMembers.joinedAt));
 
-    public readonly findByUser = async (
-        userId: string,
-        pagination: { readonly search?: string; readonly limit?: number; readonly offset?: number },
-    ) => {
-        const { search, limit = 10, offset = 0 } = pagination;
-
+    public findByUser = async (userId: string) => {
         const filters = [
             eq(schema.teamMembers.userId, userId),
             eq(schema.teamMembers.status, 'active'),
             isNull(schema.teams.deletedAt),
         ];
-
-        if (search) {
-            filters.push(ilike(schema.teams.name, `%${search}%`));
-        }
 
         const query = this.db
             .select({
@@ -120,14 +111,12 @@ export class TeamsRepository implements ITeamsRepository {
             .from(schema.teamMembers)
             .innerJoin(schema.teams, eq(schema.teams.id, schema.teamMembers.teamId))
             .where(and(...filters))
-            .orderBy(desc(schema.teamMembers.joinedAt))
-            .limit(limit)
-            .offset(offset);
+            .orderBy(desc(schema.teamMembers.joinedAt));
 
         return query;
     };
 
-    public readonly findById = async (teamId: string) => {
+    public findById = async (teamId: string) => {
         const [team] = await this.db.select().from(schema.teams).where(eq(schema.teams.id, teamId));
         if (!team) {
             return null;
@@ -135,7 +124,7 @@ export class TeamsRepository implements ITeamsRepository {
         return team;
     };
 
-    public readonly removeMember = async (teamId: string, userId: string) => {
+    public removeMember = async (teamId: string, userId: string) => {
         const result = await this.db
             .delete(schema.teamMembers)
             .where(
@@ -145,11 +134,7 @@ export class TeamsRepository implements ITeamsRepository {
         return (result?.count ?? 0) > 0;
     };
 
-    public readonly updateMember = async (
-        teamId: string,
-        userId: string,
-        dto: Partial<TeamMember>,
-    ) => {
+    public updateMember = async (teamId: string, userId: string, dto: Partial<TeamMember>) => {
         const { role, status } = dto;
 
         const data = {

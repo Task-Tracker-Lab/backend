@@ -6,6 +6,8 @@ import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { BaseException } from '@shared/error';
 
+import { OAuthErrorCodes, OAuthErrorMessages } from '../../../domain/errors';
+
 @Injectable()
 export class ConnectProviderUseCase {
     constructor(
@@ -21,7 +23,7 @@ export class ConnectProviderUseCase {
     private readonly STATE_KEY = (state: string) => `oauth:state:${state}`;
 
     async execute(provider: string, userId: string) {
-        await this.validateUser(userId);
+        await this.findUserQ.execute({ id: userId });
         await this.validateProviderNotConnected(userId, provider);
         await this.validateNoActiveSession(userId, provider);
 
@@ -56,19 +58,6 @@ export class ConnectProviderUseCase {
         return { success: true, url: `/v1/auth/oauth/${provider}?state=${stateCode}` };
     }
 
-    private async validateUser(userId: string) {
-        const entity = await this.findUserQ.execute({ id: userId });
-        if (!entity?.user) {
-            throw new BaseException(
-                {
-                    code: 'USER_NOT_FOUND',
-                    message: 'Пользователь не найден',
-                },
-                HttpStatus.NOT_FOUND,
-            );
-        }
-    }
-
     private async validateProviderNotConnected(userId: string, provider: string) {
         const identities = await this.identityRepo.findAllByUserId(userId);
         const isConnected = identities.some((identity) => identity.provider === provider);
@@ -76,8 +65,8 @@ export class ConnectProviderUseCase {
         if (isConnected) {
             throw new BaseException(
                 {
-                    code: 'PROVIDER_ALREADY_CONNECTED',
-                    message: `Провайдер "${this.getProviderName(provider)}" уже подключен к аккаунту`,
+                    code: OAuthErrorCodes.PROVIDER_ALREADY_CONNECTED,
+                    message: OAuthErrorMessages[OAuthErrorCodes.PROVIDER_ALREADY_CONNECTED],
                 },
                 HttpStatus.CONFLICT,
             );
@@ -105,7 +94,7 @@ export class ConnectProviderUseCase {
 
             throw new BaseException(
                 {
-                    code: 'ACTIVE_OAUTH_SESSION_EXISTS',
+                    code: OAuthErrorCodes.ACTIVE_OAUTH_SESSION_EXISTS,
                     message,
                     details: [
                         {
@@ -126,9 +115,8 @@ export class ConnectProviderUseCase {
         const names: Record<string, string> = {
             google: 'Google',
             github: 'GitHub',
-            facebook: 'Facebook',
             yandex: 'Яндекс',
-            vk: 'VK',
+            vkontakte: 'VK',
         };
         return names[provider] || provider;
     }
