@@ -40,7 +40,10 @@ export class SignUpUseCase {
         }
 
         try {
-            await this.findUserQ.execute({ email: dto.email }, { throwIfExists: true });
+            await this.findUserQ.execute(
+                { email: dto.email },
+                { throwIfExists: true, throwIfNotFound: false },
+            );
 
             const hashPass = await argon.hash(dto.password);
 

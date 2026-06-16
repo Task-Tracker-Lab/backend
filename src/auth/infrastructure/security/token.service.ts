@@ -12,15 +12,19 @@ export class TokenService {
     ) {}
 
     async generateTokens(user: { id: string; email: string }, sessionId: string) {
-        const iss = this.cfg.getOrThrow('JWT_ISSUER');
-        const aud = this.cfg.getOrThrow('JWT_AUDIENCE');
+        const issuer = this.cfg.getOrThrow('JWT_ISSUER');
+        const audience = this.cfg.getOrThrow('JWT_AUDIENCE');
+
+        const now = Math.floor(Date.now() / 1000);
 
         const payload = {
-            jti: sessionId,
-            sub: user.id,
             email: user.email,
-            iss,
-            aud,
+        };
+
+        const sharedPayload = {
+            issuer,
+            audience,
+            notBefore: 0,
         };
 
         /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -30,10 +34,16 @@ export class TokenService {
 
         const [access, refresh] = await Promise.all([
             this.jwtService.signAsync(payload, {
+                ...sharedPayload,
                 secret: this.cfg.get('JWT_ACCESS_SECRET'),
+                subject: user.id,
                 expiresIn: accessExp,
+                jwtid: `${sessionId}_access_${now}`,
             }),
             this.jwtService.signAsync(payload, {
+                ...sharedPayload,
+                jwtid: sessionId,
+                subject: user.id,
                 secret: this.cfg.get('JWT_REFRESH_SECRET'),
                 expiresIn: refreshExp,
             }),
@@ -48,10 +58,17 @@ export class TokenService {
         try {
             const accessSecret = this.cfg.get('JWT_ACCESS_SECRET');
             const refreshSecret = this.cfg.get('JWT_REFRESH_SECRET');
+            const audience = this.cfg.get('JWT_AUDIENCE');
+            const issuer = this.cfg.get('JWT_ISSUER');
 
             const secret = type === 'access' ? accessSecret : refreshSecret;
 
-            return this.jwtService.verifyAsync<JwtPayload>(token, { secret });
+            return this.jwtService.verifyAsync<JwtPayload>(token, {
+                secret,
+                issuer,
+                audience,
+                clockTolerance: 30,
+            });
         } catch {
             return null;
         }

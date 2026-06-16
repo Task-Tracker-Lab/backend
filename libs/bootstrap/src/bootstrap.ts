@@ -100,6 +100,10 @@ export async function bootstrapApp(options: BootstrapOptions) {
         },
     });
 
+    const isProduction = configService.get('NODE_ENV') === 'production';
+    const domain = configService.get('DOMAIN');
+    const stage = configService.get('STAGE_DOMAIN');
+
     if (apiPrefix) {
         app.setGlobalPrefix(apiPrefix);
     }
@@ -118,9 +122,6 @@ export async function bootstrapApp(options: BootstrapOptions) {
     if (swaggerOptions) {
         const { path = 'docs', ...metadata } = swaggerOptions;
 
-        const domain = configService.get('DOMAIN');
-        const stage = configService.get('STAGE_DOMAIN');
-
         const fullOptions = {
             ...metadata,
             path,
@@ -135,14 +136,27 @@ export async function bootstrapApp(options: BootstrapOptions) {
     }
     if (useCookieParser) {
         const secret = configService.getOrThrow('COOKIE_SECRET');
-        await app.register(fastifyCookie, { secret });
+        const domainCookie = domain ? `.${domain}` : undefined;
+        await app.register(fastifyCookie, {
+            secret,
+            parseOptions: {
+                httpOnly: true,
+                sameSite: 'lax',
+                signed: true,
+                secure: isProduction,
+                path: '/',
+                domain: domainCookie,
+            },
+        });
         await app.register(fastifyCsrf, {
             cookieOpts: {
-                signed: true,
                 httpOnly: true,
-                sameSite: 'strict',
-                secure: configService.getOrThrow('NODE_ENV') === 'production',
+                sameSite: 'lax',
+                secure: isProduction,
+                path: '/',
+                domain: domainCookie,
             },
+            sessionPlugin: '@fastify/cookie',
         });
     }
     if (setupApp) {

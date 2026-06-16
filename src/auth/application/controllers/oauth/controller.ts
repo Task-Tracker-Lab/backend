@@ -33,14 +33,12 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 
 @ApiBaseController('oauth', 'OAuth')
 export class OAuthController {
-    private readonly isProduction: boolean = false;
     private readonly domain?: string | null = null;
 
     constructor(
         private readonly facade: AuthFacade,
         private readonly cfg: ConfigService,
     ) {
-        this.isProduction = this.cfg.get('NODE_ENV') === 'production';
         this.domain = this.cfg.get('DOMAIN');
     }
 
@@ -56,7 +54,7 @@ export class OAuthController {
     @SkipContract()
     async oauthCallback(
         @Query() query: { code?: string; state?: string },
-        @Param('provider') provider: 'google' | 'yandex' | 'github' | 'vkontakte',
+        @Param('provider') provider: 'google' | 'yandex' | 'github',
         @Res({ passthrough: true }) res: FastifyReply,
         @Req() req: FastifyRequest,
     ) {
@@ -79,10 +77,10 @@ export class OAuthController {
 
             const result = await this.facade.authenticateOAuth(dto, meta, state);
 
-            if (result.isSign) {
-                res.redirect(`${baseUrl}/oauth?${result.query.toString()}`, 302);
-            } else {
+            if (result.isConnect) {
                 res.redirect(`${baseUrl}/user/profile?${result.query.toString()}`, 302);
+            } else {
+                res.redirect(`${baseUrl}/oauth?${result.query.toString()}`, 302);
             }
         } catch (err) {
             let message = 'Произошла ошибка при авторизации';
@@ -154,12 +152,7 @@ export class OAuthController {
 
     private setRefreshCookie(res: FastifyReply, refreshToken: string, expires: Date) {
         res.setCookie('refresh', refreshToken, {
-            httpOnly: true,
-            secure: this.isProduction,
-            path: '/',
             expires,
-            sameSite: 'lax',
-            domain: this.domain ? `.${this.domain}` : undefined,
         });
     }
 }

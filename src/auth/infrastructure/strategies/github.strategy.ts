@@ -30,7 +30,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github-oauth') {
             clientID: cfg.getOrThrow<string>('GITHUB_CLIENT_ID'),
             clientSecret: cfg.getOrThrow<string>('GITHUB_CLIENT_SECRET'),
             callbackURL,
-            scope: ['user:email', 'read:user'],
+            scope: ['user', 'user:email'],
             passReqToCallback: true,
         });
     }

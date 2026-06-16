@@ -19,6 +19,9 @@ export class CookieStrategy extends PassportStrategy(Strategy, 'cookie') {
             ]),
             secretOrKey: configService.getOrThrow('JWT_REFRESH_SECRET'),
             passReqToCallback: true,
+            ignoreExpiration: false,
+            issuer: configService.getOrThrow('JWT_ISSUER'),
+            audience: configService.getOrThrow('JWT_AUDIENCE'),
         });
     }
 
@@ -29,6 +32,22 @@ export class CookieStrategy extends PassportStrategy(Strategy, 'cookie') {
                     code: 'INVALID_REFRESH_TOKEN',
                     message: 'Refresh токен невалиден или протух',
                     details: [{ target: 'auth', reason: 'Payload is missing or jti is invalid' }],
+                },
+                HttpStatus.UNAUTHORIZED,
+            );
+        }
+
+        if (payload.jti?.includes('_access_')) {
+            throw new BaseException(
+                {
+                    code: 'WRONG_TOKEN_TYPE',
+                    message: 'Ожидался refresh токен, но получен access',
+                    details: [
+                        {
+                            target: 'auth',
+                            reason: 'Token type mismatch',
+                        },
+                    ],
                 },
                 HttpStatus.UNAUTHORIZED,
             );

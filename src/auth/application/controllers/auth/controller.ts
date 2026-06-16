@@ -1,6 +1,5 @@
 import { getDeviceMeta } from '@core/auth/infrastructure/utils';
 import { Body, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { ApiBaseController } from '@shared/decorators';
 import { BearerAuthGuard, CookieAuthGuard } from '@shared/guards';
 
@@ -20,16 +19,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 
 @ApiBaseController('auth', 'Auth')
 export class AuthController {
-    private readonly isProduction: boolean = false;
-    private readonly domain?: string | null = null;
-
-    constructor(
-        private readonly facade: AuthFacade,
-        private readonly cfg: ConfigService,
-    ) {
-        this.isProduction = this.cfg.get('NODE_ENV') === 'production';
-        this.domain = this.cfg.get('DOMAIN');
-    }
+    constructor(private readonly facade: AuthFacade) {}
 
     @Post('sign-up')
     @PostRegisterSwagger()
@@ -82,14 +72,8 @@ export class AuthController {
     @PostLogoutSwagger()
     async logout(@Res({ passthrough: true }) res: FastifyReply, @Req() req: FastifyRequest) {
         const session = req.cookies?.['refresh'];
-
         const response = await this.facade.signOut(session);
-
-        res.clearCookie('refresh', {
-            path: '/',
-            domain: this.domain ? `.${this.domain}` : undefined,
-        });
-
+        res.clearCookie('refresh');
         return response;
     }
 
@@ -107,14 +91,10 @@ export class AuthController {
         return { token: tokens.access, ...response };
     }
 
-    private setRefreshCookie(res: FastifyReply, refreshToken: string, expires: Date) {
-        res.setCookie('refresh', refreshToken, {
-            httpOnly: true,
-            secure: this.isProduction,
-            path: '/',
+    private setRefreshCookie(res: FastifyReply, token: string, expires: Date) {
+        res.setCookie('refresh', token, {
+            signed: false,
             expires,
-            sameSite: 'lax',
-            domain: this.domain ? `.${this.domain}` : undefined,
         });
     }
 }

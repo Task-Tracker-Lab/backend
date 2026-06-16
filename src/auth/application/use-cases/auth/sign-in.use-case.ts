@@ -55,6 +55,7 @@ export class SignInUseCase {
                 HttpStatus.UNAUTHORIZED,
             );
         }
+
         try {
             const sessionId = createId();
             const { access, refresh, expiresAt } = await this.tokenService.generateTokens(
