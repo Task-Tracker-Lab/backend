@@ -78,13 +78,15 @@ export class YandexStrategy extends PassportStrategy(Strategy, 'yandex-oauth') {
     ) {
         const json = profile._json;
 
+        const phone = json.default_phone?.number || null;
+
         const user = {
             id: json.id,
             email: json.default_email,
             first_name: json.first_name,
             last_name: json.last_name,
             sex: json.sex || null,
-            phone: json.default_phone.number,
+            phone,
             avatar_url: profile.photos?.[0]?.value || null,
             bio: null,
         };
