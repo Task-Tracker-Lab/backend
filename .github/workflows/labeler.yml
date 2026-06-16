@@ -3,7 +3,17 @@ name: 'Pull Request Labeler'
 on:
     # Важно: target позволяет работать в PR из форков
     pull_request_target:
-        types: [opened, synchronize]
+        types: [opened, synchronize, reopened, ready_for_review]
+    workflow_dispatch:
+        inputs:
+            pr_number:
+                description: 'PR Number'
+                required: true
+                type: number
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.number }}
+    cancel-in-progress: true
 
 jobs:
     label:
@@ -12,6 +22,12 @@ jobs:
             pull-requests: write
         runs-on: ubuntu-latest
         steps:
+            - name: Checkout head branch
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.pull_request.head.sha }}
+                  fetch-depth: 0
+
             - name: Ensure Labels Exist
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
