@@ -23,7 +23,9 @@ export class TokenService {
             aud,
         };
 
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         const accessExp = this.cfg.get<any>('JWT_ACCESS_EXPIRES_IN');
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         const refreshExp = this.cfg.get<any>('JWT_REFRESH_EXPIRES_IN');
 
         const [access, refresh] = await Promise.all([

@@ -28,7 +28,6 @@ export class CreateTeamUseCase {
                 {
                     code: 'TEAM_CREATE_FAILED',
                     message: 'Не удалось создать команду',
-                    details: [{ reason: error instanceof Error ? error.message : 'Unknown error' }],
                 },
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );

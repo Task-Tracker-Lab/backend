@@ -1,11 +1,13 @@
 import { AreaErrorCodes, AreaErrorMessages } from '@core/area/domain/errors';
 import { IAreaRepository } from '@core/area/domain/repository';
-import { ProjectAccessPolicy } from '@core/projects/domain/policy';
+import { ProjectAccessPolicy } from '@core/project/domain/policy';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
 import slugify from 'slugify';
 
 import { UpdateAreaDto } from '../../dtos';
+
+import type { NewArea } from '../../../domain/entities';
 
 @Injectable()
 export class UpdateAreaUseCase {
@@ -34,10 +36,8 @@ export class UpdateAreaUseCase {
                 );
             }
 
-            // TODO: TMP|fix that at next patch resolve
-            const updateData: any = {
+            const updateData: Partial<NewArea> = {
                 updatedAt: new Date().toISOString(),
-                updatedBy: userId,
                 ...(dto.title && dto.title !== area.title && { title: dto.title.trim() }),
                 ...(dto.description &&
                     dto.description !== area.description && {

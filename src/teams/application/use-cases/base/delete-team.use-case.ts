@@ -51,7 +51,6 @@ export class DeleteTeamUseCase {
                 {
                     code: 'TEAM_DELETE_FAILED',
                     message: 'Не удалось удалить команду',
-                    details: [{ reason: error instanceof Error ? error.message : 'Unknown error' }],
                 },
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );

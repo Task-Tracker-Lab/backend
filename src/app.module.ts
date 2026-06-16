@@ -1,3 +1,4 @@
+import { MediaModule } from '@core/media';
 import { ConfigModule } from '@libs/config';
 import { DatabaseModule, DatabaseHealthService } from '@libs/database';
 import { HealthModule } from '@libs/health';
@@ -14,12 +15,11 @@ import { ICacheService } from '@shared/adapters/cache/ports';
 import { MailModule } from '@shared/adapters/mail';
 import { GlobalExceptionFilter } from '@shared/error';
 import { ZodValidationInterceptor } from '@shared/interceptors';
-import { MediaModule } from '@shared/media';
 import { ZodValidationPipe } from 'nestjs-zod';
 
 import { AreaModule } from './area';
 import { AuthModule } from './auth/auth.module';
-import { ProjectsModule } from './projects';
+import { ProjectModule } from './project';
 import * as schema from './shared/entities';
 import { TeamsModule } from './teams';
 import { UserModule } from './user';
@@ -34,7 +34,6 @@ import { UserModule } from './user';
                 schema,
                 schemaName: cfg.getOrThrow('DB_SCHEMA'),
                 logging: true,
-                // runMigrations: false,
             }),
         }),
         BullModule.forRootAsync({
@@ -54,7 +53,7 @@ import { UserModule } from './user';
         AuthModule,
         UserModule,
         TeamsModule,
-        ProjectsModule,
+        ProjectModule,
         AreaModule,
         MetricsModule,
         HealthModule.registerAsync({

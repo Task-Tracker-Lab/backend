@@ -3,6 +3,7 @@ import { FindUserQuery } from '@core/user';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
 
+import { OAuthErrorCodes, OAuthErrorMessages } from '../../../domain/errors';
 import { OAuthResponse } from '../../dtos';
 
 @Injectable()
@@ -19,24 +20,14 @@ export class ProcessOAuthLoginUseCase {
         if (!identity) {
             throw new BaseException(
                 {
-                    code: 'OAUTH_LOGIN_NOT_FOUND',
-                    message: 'Пользователь с таким OAuth аккаунтом не найден',
+                    code: OAuthErrorCodes.OAUTH_LOGIN_NOT_FOUND,
+                    message: OAuthErrorMessages[OAuthErrorCodes.OAUTH_LOGIN_NOT_FOUND],
                 },
                 HttpStatus.NOT_FOUND,
             );
         }
 
         const result = await this.findUserQ.execute({ id: identity.userId });
-
-        if (!result?.user) {
-            throw new BaseException(
-                {
-                    code: 'USER_NOT_FOUND',
-                    message: 'Пользователь не найден',
-                },
-                HttpStatus.NOT_FOUND,
-            );
-        }
 
         return {
             user: result.user,

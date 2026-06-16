@@ -4,6 +4,7 @@ import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { BaseException } from '@shared/error';
 
+import { OAuthErrorCodes, OAuthErrorMessages } from '../../../domain/errors';
 import { ISessionRepository } from '../../../domain/repository';
 import { EXCHANGE_TOKEN_NAME } from '../../../infrastructure/constants';
 import { TokenService } from '../../../infrastructure/security';
@@ -28,8 +29,8 @@ export class ExchangeUseCase {
         if (!rawData) {
             throw new BaseException(
                 {
-                    message: 'Exchange token is invalid or expired',
-                    code: 'EXCHANGE_TOKEN_INVALID',
+                    code: OAuthErrorCodes.EXCHANGE_TOKEN_INVALID,
+                    message: OAuthErrorMessages[OAuthErrorCodes.EXCHANGE_TOKEN_INVALID],
                 },
                 HttpStatus.BAD_REQUEST,
             );

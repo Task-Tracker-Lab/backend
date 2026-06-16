@@ -2,13 +2,14 @@ import { HttpException, type HttpStatus } from '@nestjs/common';
 
 interface IDetailsOptions {
     readonly target?: string;
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     readonly [key: string]: any;
 }
 
 export interface IErrorOptions {
-    readonly code: string;
-    readonly message: string;
-    readonly details?: readonly IDetailsOptions[];
+    code: string;
+    message: string;
+    details?: IDetailsOptions[];
 }
 
 export class BaseException extends HttpException {

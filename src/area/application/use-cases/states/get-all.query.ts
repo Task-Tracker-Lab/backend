@@ -1,6 +1,7 @@
 import { IStateRepository } from '@core/area/domain/repository';
 import { Inject, Injectable } from '@nestjs/common';
 
+import { QueryParamsDto } from '../../dtos';
 import { GetAreaQuery } from '../areas';
 
 @Injectable()
@@ -11,7 +12,7 @@ export class GetStatesQuery {
         private readonly getAreaQ: GetAreaQuery,
     ) {}
 
-    async execute(slug: string, userId: string, query: unknown) {
+    async execute(slug: string, userId: string, query: QueryParamsDto) {
         const area = await this.getAreaQ.execute({ key: slug }, userId);
         const states = await this.stateRepo.find(area.id, query);
 

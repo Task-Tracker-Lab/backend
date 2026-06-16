@@ -2,7 +2,7 @@ import { Body, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBaseController, GetUserId, Public } from '@shared/decorators';
 
 import { AreaFacade } from '../../area.facade';
-import { CreateStateDto, ReordersStatesDto, UpdateStateDto } from '../../dtos';
+import { CreateStateDto, QueryParamsDto, ReordersStatesDto, UpdateStateDto } from '../../dtos';
 
 import {
     CreateStateSwagger,
@@ -24,31 +24,8 @@ export class StateController {
     async getAll(
         @Param('slug') slug: string,
         @GetUserId() userId: string,
-        // TODO: ADD SCHEMA, AT DTO, AND VALIDATE WITH CONTRACT
-        @Query('hidden') hidden?: boolean,
-        @Query('counts') counts?: boolean,
-        @Query('my') my?: boolean,
-        @Query('category') category?: string,
-        @Query('overdue') overdue?: boolean,
-        @Query('orderBy') orderBy?: 'order' | 'title' | 'tasksCount' | 'createdAt',
-        @Query('order') order?: 'asc' | 'desc',
-        @Query('page') page?: number,
-        @Query('offset') offset?: number,
-        @Query('limit') limit?: number,
+        @Query() query: QueryParamsDto,
     ) {
-        const query = {
-            hidden,
-            counts,
-            my,
-            category,
-            overdue,
-            order,
-            limit,
-            offset,
-            page,
-            orderBy,
-        };
-
         return this.facade.getStates(slug, query, userId);
     }
 

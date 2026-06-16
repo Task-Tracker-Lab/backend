@@ -1,5 +1,5 @@
 import { IAreaRepository } from '@core/area/domain/repository';
-import { ProjectAccessPolicy } from '@core/projects/domain/policy';
+import { ProjectAccessPolicy } from '@core/project/domain/policy';
 import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()

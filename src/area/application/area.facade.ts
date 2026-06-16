@@ -6,6 +6,7 @@ import {
     ReordersStatesDto,
     CreateAreaDto,
     UpdateAreaDto,
+    QueryParamsDto,
 } from './dtos';
 import {
     CreateAreaUseCase,
@@ -78,7 +79,7 @@ export class AreaFacade {
         return this.getStateDetailQ.execute(slug, stateId, userId);
     }
 
-    public async getStates(slug: string, query: unknown, userId: string) {
+    public async getStates(slug: string, query: QueryParamsDto, userId: string) {
         return this.getStatesQ.execute(slug, userId, query);
     }
 

@@ -1,5 +1,5 @@
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import type { Options } from 'postgres';
+import type { Options, PostgresType } from 'postgres';
 
 export interface DatabaseModuleOptions {
     /**
@@ -24,7 +24,9 @@ export interface DatabaseModuleOptions {
      * @see https://github.com/porsager/postgres#options
      * @example { max: 20, idle_timeout: 30, connect_timeout: 5 }
      */
-    readonly pool?: Options<any>;
+    readonly pool?: Options<{
+        [key: string]: PostgresType<any>;
+    }>;
 
     /**
      * Включение или выключение логирования SQL-запросов в консоль через NestJS Logger.
@@ -47,6 +49,8 @@ export interface DatabaseModuleOptions {
     readonly migrationsPath?: string;
 }
 
+export type DatabaseSchema = Record<string, unknown>;
+
 /**
  * Тип для внедрения Drizzle ORM в репозитории.
  * Использует драйвер postgres-js под капотом.
@@ -59,4 +63,5 @@ export interface DatabaseModuleOptions {
  *
  * @template TSchema - Тип вашей схемы данных (например, `typeof schema`).
  */
-export type DatabaseService<TSchema extends Record<string, unknown>> = PostgresJsDatabase<TSchema>;
+export type DatabaseService<TSchema extends DatabaseSchema = DatabaseSchema> =
+    PostgresJsDatabase<TSchema>;

@@ -11,8 +11,8 @@ export class GetMyTeamsUseCase {
         private readonly cfg: ConfigService,
     ) {}
 
-    async execute(userId: string, pagination: Record<string, string>) {
-        const teams = await this.teamsRepo.findByUser(userId, pagination);
+    async execute(userId: string) {
+        const teams = await this.teamsRepo.findByUser(userId);
         const cdn = this.getCdnBaseUrl();
 
         return teams.map((t) => TeamMemberMapper.toUserTeam(t, cdn));

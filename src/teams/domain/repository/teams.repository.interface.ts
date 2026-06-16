@@ -29,13 +29,9 @@ export interface ITeamsRepository {
     remove(id: string, userId: string): Promise<boolean>;
 
     findMember(teamId: string, userId: string): Promise<RawMemberRow | null>;
-    findMembers(teamId: string): Promise<readonly RawMemberRow[]>;
+    findMembers(teamId: string): Promise<RawMemberRow[]>;
     findById(teamId: string): Promise<Team | null>;
-    findByUser(
-        userId: string,
-        // TODO: ADD ZOD QUERY
-        pagination: { readonly search?: string; readonly limit?: number; readonly offset?: number },
-    ): Promise<readonly RawMemberTeams[]>;
+    findByUser(userId: string): Promise<RawMemberTeams[]>;
 
     updateTeamAvatar(teamId: string, url: string): Promise<boolean>;
     updateTeamBanner(teamId: string, url: string): Promise<boolean>;
@@ -44,7 +40,7 @@ export interface ITeamsRepository {
     updateMember(
         teamId: string,
         userId: string,
-        dto: { readonly role?: string; readonly status?: string },
+        dto: { role?: string; status?: string },
     ): Promise<boolean>;
     removeMember(teamId: string, userId: string): Promise<boolean>;
 }

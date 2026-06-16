@@ -1,3 +1,4 @@
+import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod/v4';
 
 export const PaginationBaseSchema = z.object({
@@ -63,3 +64,5 @@ export const createPaginationSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
         items: z.array(itemSchema),
         meta: paginationResponseSchema,
     });
+
+export class PaginationQuery extends createZodDto(PaginationSchema) {}

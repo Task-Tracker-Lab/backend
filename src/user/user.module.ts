@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { UserController, UserSettingsController } from './application/controller';
+import { UserController, UserSettingsController } from './application/controllers';
 import { USER_EXTERNAL_USE_CASES, UserQueries, UserUseCases } from './application/use-cases';
 import { UserFacade } from './application/user.facade';
 import { LISTENERS } from './infrastructure/listeners';

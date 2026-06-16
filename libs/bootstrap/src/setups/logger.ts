@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WinstonModule, utilities } from 'nest-winston';
-import { Observable, throwError } from 'rxjs';
+import { throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { format, transports } from 'winston';
 
@@ -39,7 +39,7 @@ export class LoggingInterceptor implements NestInterceptor {
     private readonly logger = new Logger('HTTP');
     private readonly sensitiveFields = ['password', 'token', 'access', 'refresh', 'code', 'secret'];
 
-    intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    intercept(context: ExecutionContext, next: CallHandler) {
         const request = context.switchToHttp().getRequest<FastifyRequest>();
         const startTime = Date.now();
 

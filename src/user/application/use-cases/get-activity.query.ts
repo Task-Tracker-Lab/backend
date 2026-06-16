@@ -1,5 +1,6 @@
 import { IUserRepository } from '@core/user/domain/repository';
 import { Inject, Injectable } from '@nestjs/common';
+import { PaginationQuery } from '@shared/schemas';
 
 @Injectable()
 export class GetActivityQuery {
@@ -8,7 +9,9 @@ export class GetActivityQuery {
         private readonly userRepo: IUserRepository,
     ) {}
 
-    async execute(id: string, page: number, limit: number) {
+    async execute(id: string, query: PaginationQuery) {
+        const { limit, page } = query;
+
         const safeLimit = Math.min(limit, 50);
         const offset = (page - 1) * safeLimit;
 
