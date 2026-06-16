@@ -57,3 +57,43 @@ export const ConnectProviderSchema = z.object({
 });
 
 export class ConnectProviderResponse extends createZodDto(ConnectProviderSchema) {}
+
+export const ExchangeSchema = z.object({
+    token: z
+        .string()
+        .min(32, 'Token must be at least 32 characters')
+        .max(128, 'Token must not exceed 128 characters')
+        .regex(/^[a-f0-9]+$/, 'Token must be hexadecimal string'),
+});
+
+export class ExchangeDto extends createZodDto(ExchangeSchema) {}
+
+export interface IOAuthExchangeData {
+    userId: string;
+    isNewUser: boolean;
+    email: string;
+    provider: 'google' | 'yandex' | 'github' | 'vkontakte';
+    ip: string;
+}
+
+export const ExchangeResponseSchema = z.object({
+    success: z.boolean().describe('Успешность операции'),
+    message: z
+        .string()
+        .min(1, 'message не может быть пустым')
+        .max(255, 'message не длиннее 255 символов')
+        .describe('Сообщение для тоста'),
+    access: z
+        .string()
+        .min(10, 'access токен слишком короткий')
+        .max(500, 'access токен слишком длинный')
+        .describe('JWT access токен'),
+    isNewUser: z.boolean().describe('Новый пользователь?'),
+    provider: z
+        .enum(['google', 'yandex', 'github', 'vkontakte'], {
+            message: 'provider должен быть: google, yandex, github или vkontakte',
+        })
+        .describe('OAuth провайдер'),
+});
+
+export class ExchangeResponse extends createZodDto(ExchangeResponseSchema) {}

@@ -6,6 +6,8 @@ import { BaseException } from '@shared/error';
 import { Strategy } from 'passport-oauth2';
 import { firstValueFrom } from 'rxjs';
 
+import { ensureEmail } from '../utils';
+
 export interface IUserInfo {
     readonly id: string;
     readonly login: string;
@@ -50,7 +52,7 @@ export class YandexStrategy extends PassportStrategy(Strategy, 'yandex-oauth') {
         const isProduction = cfg.get('NODE_ENV') === 'production';
         const domain = cfg.get('DOMAIN');
         const port = cfg.get('PORT');
-        const apiPath = 'v1/auth/oauth/yandex/callback';
+        const apiPath = 'v1/oauth/yandex/callback';
 
         const callbackURL = domain
             ? `${isProduction ? 'https' : 'http'}://api.${domain}/${apiPath}`
@@ -110,7 +112,7 @@ export class YandexStrategy extends PassportStrategy(Strategy, 'yandex-oauth') {
                 id: String(data.id),
                 displayName: data.display_name || data.real_name || data.login,
                 username: data.login,
-                emails: [{ value: data.default_email }],
+                email: ensureEmail(data.default_email, 'yandex', data.id.toString(), data.login),
                 name: {
                     familyName: data.last_name || '',
                     givenName: data.first_name || '',

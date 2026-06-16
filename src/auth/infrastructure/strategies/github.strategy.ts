@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, type Profile } from 'passport-github';
 
+import { ensureEmail } from '../utils';
+
 interface GitHubJsonProfile {
     readonly login: string;
     readonly id: number;
@@ -18,7 +20,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github-oauth') {
         const isProduction = cfg.get('NODE_ENV') === 'production';
         const domain = cfg.get('DOMAIN');
         const port = cfg.get('PORT');
-        const apiPath = 'v1/auth/oauth/github/callback';
+        const apiPath = 'v1/oauth/github/callback';
 
         const callbackURL = domain
             ? `${isProduction ? 'https' : 'http'}://api.${domain}/${apiPath}`
@@ -44,7 +46,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github-oauth') {
 
         const user = {
             id: json.id.toString(),
-            email: json.email || `${json.login}@github.placeholder.internal`,
+            email: ensureEmail(json.email, 'github', json.id.toString(), json.login),
             first_name: json.name || json.login,
             last_name: null,
             sex: null,

@@ -1,20 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { BaseException, type IErrorOptions } from '@shared/error';
+import { isBaseExceptionWithCode } from '@shared/error';
 
 import { OAuthResponse } from '../../dtos';
 
 import { ConnectOAuthProviderUseCase } from './connect-oauth-provider.use-case';
 import { ProcessOAuthLoginUseCase } from './process-oauth-login.use-case';
 import { ProcessOAuthRegistrationUseCase } from './process-oauth-registration.use-case';
-
-// TODO: ADD TO GLOBAL
-function isBaseException(error: unknown): error is BaseException {
-    return error instanceof BaseException;
-}
-
-function isBaseExceptionWithCode(error: unknown, code: string): error is BaseException {
-    return isBaseException(error) && (error.getResponse() as IErrorOptions).code === code;
-}
 
 @Injectable()
 export class OAuthOrchestratorUseCase {

@@ -6,6 +6,8 @@ import { BaseException } from '@shared/error';
 import { Strategy } from 'passport-oauth2';
 import { firstValueFrom } from 'rxjs';
 
+import { ensureEmail } from '../utils';
+
 export interface IVKUserInfo {
     readonly id: number;
     readonly first_name: string;
@@ -93,7 +95,7 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
         const isProduction = cfg.get('NODE_ENV') === 'production';
         const domain = cfg.get('DOMAIN');
         const port = cfg.get('PORT');
-        const apiPath = 'v1/auth/oauth/yandex/callback';
+        const apiPath = 'v1/oauth/yandex/callback';
 
         const callbackURL = domain
             ? `${isProduction ? 'https' : 'http'}://api.${domain}/${apiPath}`
@@ -120,7 +122,12 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
     ) {
         const user = {
             id: profile.id,
-            email: `${profile.displayName}@vk.placholder.internal`,
+            email: ensureEmail(
+                profile.emails?.[0]?.value,
+                'vkontakte',
+                profile.id,
+                profile.displayName,
+            ),
             first_name: profile.name.givenName,
             last_name: profile.name.familyName,
             sex: profile.gender === 'male' ? 'male' : profile.gender === 'female' ? 'female' : null,
@@ -233,6 +240,10 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
         const finalPhotos =
             photos.length === 0 && json.photo_max ? [...photos, { value: json.photo_max }] : photos;
 
+        const email = json.contacts?.mobile_phone
+            ? `${json.contacts.mobile_phone}@vk.phone.internal`
+            : undefined;
+
         const profile: IVKProfile = {
             provider: 'vkontakte',
             id: String(json.id),
@@ -242,7 +253,7 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte-oau
                 givenName: json.first_name || '',
             },
             gender,
-            emails: [],
+            emails: email ? [{ value: email }] : [],
             photos: finalPhotos,
             _raw: JSON.stringify(json),
             _json: json,
