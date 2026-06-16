@@ -53,6 +53,7 @@ export class AuthenticateOAuthUseCase {
 
         const query = new URLSearchParams({
             token,
+            success: 'true',
         });
 
         return { query, isSign: true };

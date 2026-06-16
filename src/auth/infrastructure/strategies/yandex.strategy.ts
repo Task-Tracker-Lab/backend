@@ -52,7 +52,7 @@ export class YandexStrategy extends PassportStrategy(Strategy, 'yandex-oauth') {
         const isProduction = cfg.get('NODE_ENV') === 'production';
         const domain = cfg.get('DOMAIN');
         const port = cfg.get('PORT');
-        const apiPath = 'v1/auth/oauth/yandex/callback';
+        const apiPath = 'v1/oauth/yandex/callback';
 
         const callbackURL = domain
             ? `${isProduction ? 'https' : 'http'}://api.${domain}/${apiPath}`

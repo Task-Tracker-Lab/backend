@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiBaseController, GetUserId, SkipContract } from '@shared/decorators';
+import { isBaseException } from '@shared/error';
 import { BearerAuthGuard, OAuthGuard } from '@shared/guards';
 
 import { AuthFacade } from '../../auth.facade';
@@ -62,26 +63,43 @@ export class OAuthController {
         const meta = getDeviceMeta(req);
         const body = req.user as unknown as TOAuthResponse;
         const state = query?.state;
-
-        const dto = {
-            provider,
-            id: body.id,
-            first_name: body.first_name,
-            last_name: body.last_name,
-            email: body.email,
-            avatar_url: body.avatar_url,
-            sex: body.sex,
-            bio: body.bio,
-        };
-
-        const result = await this.facade.authenticateOAuth(dto, meta, state);
-
         const baseUrl = `https://dev.${this.domain}`;
 
-        if (result.isSign) {
-            res.redirect(`${baseUrl}/oauth?${result.query.toString()}`, 302);
-        } else {
-            res.redirect(`${baseUrl}/user/profile?${result.query.toString()}`, 302);
+        try {
+            const dto = {
+                provider,
+                id: body.id,
+                first_name: body.first_name,
+                last_name: body.last_name,
+                email: body.email,
+                avatar_url: body.avatar_url,
+                sex: body.sex,
+                bio: body.bio,
+            };
+
+            const result = await this.facade.authenticateOAuth(dto, meta, state);
+
+            if (result.isSign) {
+                res.redirect(`${baseUrl}/oauth?${result.query.toString()}`, 302);
+            } else {
+                res.redirect(`${baseUrl}/user/profile?${result.query.toString()}`, 302);
+            }
+        } catch (err) {
+            const isBaseError = isBaseException(err);
+
+            const code = isBaseError
+                ? typeof err.getResponse().valueOf() !== 'object' && String(err)
+                : String(err);
+
+            const message = isBaseError ? err.message : String(err);
+
+            const errorQuery = new URLSearchParams({
+                success: 'false',
+                message: message || 'Произошла ошибка при авторизации',
+                code: code || 'OAUTH_ERROR',
+            });
+
+            res.redirect(`${baseUrl}/oauth?${errorQuery.toString()}`, 302);
         }
     }
 

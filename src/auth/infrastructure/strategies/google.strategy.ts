@@ -11,7 +11,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google-oauth') {
         const isProduction = cfg.get('NODE_ENV') === 'production';
         const domain = cfg.get('DOMAIN');
         const port = cfg.get('PORT');
-        const apiPath = 'v1/auth/oauth/google/callback';
+        const apiPath = 'v1/oauth/google/callback';
 
         const callbackURL = domain
             ? `${isProduction ? 'https' : 'http'}://api.${domain}/${apiPath}`

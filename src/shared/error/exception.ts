@@ -16,3 +16,11 @@ export class BaseException extends HttpException {
         super(options, status);
     }
 }
+
+export function isBaseException(error: unknown): error is BaseException {
+    return error instanceof BaseException;
+}
+
+export function isBaseExceptionWithCode(error: unknown, code: string): error is BaseException {
+    return isBaseException(error) && (error.getResponse() as IErrorOptions).code === code;
+}
