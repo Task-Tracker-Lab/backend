@@ -54,7 +54,6 @@ export class UpdateTeamUseCase {
                 {
                     code: 'TEAM_UPDATE_FAILED',
                     message: 'Ошибка при обновлении данных команды',
-                    details: [{ reason: error instanceof Error ? error.message : 'Unknown error' }],
                 },
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );

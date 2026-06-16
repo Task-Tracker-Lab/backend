@@ -58,12 +58,6 @@ export class SignOutUseCase {
                 {
                     code: AuthErrorCodes.SIGNOUT_FAILED,
                     message: AuthErrorMessages[AuthErrorCodes.SIGNOUT_FAILED],
-                    details: [
-                        {
-                            target: 'server',
-                            message: error instanceof Error ? error.message : 'Unknown error',
-                        },
-                    ],
                 },
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );

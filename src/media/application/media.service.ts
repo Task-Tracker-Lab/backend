@@ -111,7 +111,6 @@ export class MediaService {
             {
                 code: 'MEDIA_SAVE_FAILED',
                 message: 'Ошибка при сохранении медиа-данных',
-                details: [{ reason: error instanceof Error ? error.message : 'Unknown error' }],
             },
             HttpStatus.BAD_REQUEST,
         );
