@@ -20,14 +20,12 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 
 @ApiBaseController('auth', 'Auth')
 export class AuthController {
-    private readonly isProduction: boolean = false;
     private readonly domain?: string | null = null;
 
     constructor(
         private readonly facade: AuthFacade,
         private readonly cfg: ConfigService,
     ) {
-        this.isProduction = this.cfg.get('NODE_ENV') === 'production';
         this.domain = this.cfg.get('DOMAIN');
     }
 
@@ -109,12 +107,7 @@ export class AuthController {
 
     private setRefreshCookie(res: FastifyReply, refreshToken: string, expires: Date) {
         res.setCookie('refresh', refreshToken, {
-            httpOnly: true,
-            secure: this.isProduction,
-            path: '/',
             expires,
-            sameSite: 'lax',
-            domain: this.domain ? `.${this.domain}` : undefined,
         });
     }
 }

@@ -30,7 +30,7 @@ export class ConnectOAuthProviderUseCase {
         await this.identityRepo.create({
             userId: user.id,
             avatarUrl: dto.avatar_url,
-            provider: dto.provider as any,
+            provider: dto.provider,
             providerUserId: dto.id,
             email: dto.email,
         });
@@ -40,7 +40,11 @@ export class ConnectOAuthProviderUseCase {
             `oauth:state:${state}`,
         ]);
 
-        return { user, isConnect: true, isNewUser: false };
+        const query = new URLSearchParams({
+            success: 'true',
+        });
+
+        return { isConnect: true, query };
     }
 
     private async getStateData(state: string) {

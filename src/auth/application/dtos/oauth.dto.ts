@@ -8,8 +8,8 @@ const OAuthResponseSchema = z.object({
     last_name: z.string().nullish(),
     avatar_url: z.string().nullish(),
     bio: z.string().nullish(),
-    sex: z.enum(['male', 'female']).or(z.string()),
-    provider: z.enum(['google', 'yandex', 'github', 'vkontakte']),
+    sex: z.enum(['male', 'female']),
+    provider: z.enum(['google', 'yandex', 'github']),
 });
 
 export class OAuthResponse extends createZodDto(OAuthResponseSchema) {}
@@ -64,17 +64,18 @@ export const ExchangeSchema = z.object({
         .min(32, 'Token must be at least 32 characters')
         .max(128, 'Token must not exceed 128 characters')
         .regex(/^[a-f0-9]+$/, 'Token must be hexadecimal string'),
+    provider: z
+        .string()
+        .describe('Название OAuth-провайдера (например, "google", "github", "facebook")'),
 });
 
 export class ExchangeDto extends createZodDto(ExchangeSchema) {}
 
-export interface IOAuthExchangeData {
-    userId: string;
+export type IOAuthExchangeData = z.infer<typeof OAuthResponseSchema> & {
+    ip: string | null;
     isNewUser: boolean;
-    email: string;
-    provider: 'google' | 'yandex' | 'github' | 'vkontakte';
-    ip: string;
-}
+    userId: string | null;
+};
 
 export const ExchangeResponseSchema = z.object({
     success: z.boolean().describe('Успешность операции'),
@@ -88,7 +89,6 @@ export const ExchangeResponseSchema = z.object({
         .min(10, 'access токен слишком короткий')
         .max(500, 'access токен слишком длинный')
         .describe('JWT access токен'),
-    isNewUser: z.boolean().describe('Новый пользователь?'),
     provider: z
         .enum(['google', 'yandex', 'github', 'vkontakte'], {
             message: 'provider должен быть: google, yandex, github или vkontakte',
