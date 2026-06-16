@@ -14,7 +14,7 @@ export class MigrationService implements OnModuleInit {
 
     constructor(
         @Inject(DATABASE_SERVICE)
-        private readonly db: DatabaseService<any>,
+        private readonly db: DatabaseService,
         @Inject(MODULE_OPTIONS_TOKEN)
         private readonly options: typeof OPTIONS_TYPE,
     ) {}

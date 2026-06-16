@@ -73,8 +73,7 @@ export class TeamsFacade {
         dto: UpdateInvitationDto,
     ) => this.updateInvitationUc.execute(teamId, code, userId, dto);
 
-    public getMyTeams = (userId: string, pagination: any) =>
-        this.getMyTeamsUc.execute(userId, pagination);
+    public getMyTeams = (userId: string) => this.getMyTeamsUc.execute(userId);
 
     public getMyInvites = (email: string) => this.getMyInvitesUc.execute(email);
 }

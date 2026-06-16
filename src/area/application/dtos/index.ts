@@ -1,2 +1,2 @@
-export * from './states.dto';
+export * from './state.dto';
 export * from './area.dto';

@@ -1,5 +1,4 @@
-import { ActionResponseSchema } from '@shared/dtos';
-import { AvatarResponseSchema } from '@shared/schemas';
+import { ActionResponseSchema, AvatarResponseSchema } from '@shared/schemas';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod/v4';
 

@@ -4,11 +4,12 @@ import { ConfigService } from '@nestjs/config';
 import { BaseException } from '@shared/error';
 import { ImageHelper } from '@shared/utils';
 
+import { UserErrorCodes, UserErrorMessages } from '../../domain/errors';
+
 @Injectable()
 export class FindProfileQuery {
     constructor(
-        @Inject('IUserRepository')
-        private readonly userRepo: IUserRepository,
+        @Inject('IUserRepository') private readonly userRepo: IUserRepository,
         private readonly cfg: ConfigService,
     ) {}
 
@@ -17,7 +18,10 @@ export class FindProfileQuery {
 
         if (!entity?.user) {
             throw new BaseException(
-                { code: 'USER_NOT_FOUND', message: 'Пользователь не найден' },
+                {
+                    code: UserErrorCodes.NOT_FOUND,
+                    message: UserErrorMessages[UserErrorCodes.NOT_FOUND],
+                },
                 HttpStatus.NOT_FOUND,
             );
         }

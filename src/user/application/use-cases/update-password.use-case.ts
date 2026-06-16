@@ -2,6 +2,8 @@ import { IUserRepository } from '@core/user/domain/repository';
 import { Injectable, Inject, HttpStatus } from '@nestjs/common';
 import { BaseException } from '@shared/error';
 
+import { UserErrorCodes, UserErrorMessages } from '../../domain/errors';
+
 @Injectable()
 export class UpdatePasswordUseCase {
     constructor(
@@ -15,33 +17,24 @@ export class UpdatePasswordUseCase {
         if (!result?.user) {
             throw new BaseException(
                 {
-                    code: 'USER_NOT_FOUND',
-                    message: 'Пользователь для обновления пароля не найден',
+                    code: UserErrorCodes.NOT_FOUND,
+                    message: UserErrorMessages[UserErrorCodes.NOT_FOUND],
                 },
                 HttpStatus.NOT_FOUND,
             );
         }
 
         try {
-            const isUpdated = await this.repository.updatePasswordHash(result.user.id, password);
-
-            if (!isUpdated) {
-                throw new BaseException(
-                    {
-                        code: 'PASSWORD_UPDATE_FAILED',
-                        message: 'Запись не была изменена',
-                    },
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                );
+            return this.repository.updatePasswordHash(result.user.id, password);
+        } catch (error) {
+            if (error instanceof BaseException) {
+                throw error;
             }
 
-            return isUpdated;
-        } catch (error) {
             throw new BaseException(
                 {
-                    code: 'DATABASE_ERROR',
-                    message: 'Ошибка при работе с БД',
-                    details: [{ reason: error instanceof Error ? error.message : 'Unknown' }],
+                    code: UserErrorCodes.UPDATE_FAILED,
+                    message: UserErrorMessages[UserErrorCodes.UPDATE_FAILED],
                 },
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );

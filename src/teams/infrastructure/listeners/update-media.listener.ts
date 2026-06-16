@@ -1,8 +1,8 @@
+import { MEDIA_JOBS, MEDIA_QUEUES, UpdateMediaTeam } from '@core/media';
 import { TeamMemberPolicy } from '@core/teams/domain/policy';
 import { ITeamsRepository } from '@core/teams/domain/repository';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject } from '@nestjs/common';
-import { MEDIA_JOBS, MEDIA_QUEUES, type UpdateMediaTeam } from '@shared/media';
 import { type Job, UnrecoverableError } from 'bullmq';
 
 import type { TeamRole } from '@shared/entities';

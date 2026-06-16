@@ -3,6 +3,8 @@ import { FindUserQuery } from '@core/user';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
 
+import { OAuthErrorCodes, OAuthErrorMessages } from '../../../domain/errors';
+
 @Injectable()
 export class DisconnectProviderUseCase {
     constructor(
@@ -14,24 +16,14 @@ export class DisconnectProviderUseCase {
     async execute(provider: string, userId: string) {
         const entity = await this.findUserQ.execute({ id: userId });
 
-        if (!entity?.user) {
-            throw new BaseException(
-                {
-                    code: 'USER_NOT_FOUND',
-                    message: 'Пользователь не найден',
-                },
-                HttpStatus.NOT_FOUND,
-            );
-        }
-
         const providers = await this.identityRepo.findAllByUserId(entity.user.id);
         const targetProvider = providers.find((p) => p.provider === provider);
 
         if (!targetProvider) {
             throw new BaseException(
                 {
-                    code: 'PROVIDER_NOT_LINKED',
-                    message: `Провайдер ${provider} не привязан к пользователю`,
+                    code: OAuthErrorCodes.PROVIDER_NOT_LINKED,
+                    message: OAuthErrorMessages[OAuthErrorCodes.PROVIDER_NOT_LINKED],
                 },
                 HttpStatus.BAD_REQUEST,
             );
@@ -44,9 +36,8 @@ export class DisconnectProviderUseCase {
         if (!hasOtherProviders && !hasPassword) {
             throw new BaseException(
                 {
-                    message:
-                        'Нельзя удалить последний способ входа. Пожалуйста, установите пароль или добавьте другой провайдер.',
-                    code: 'LAST_AUTH_METHOD_CANNOT_BE_REMOVED',
+                    code: OAuthErrorCodes.LAST_AUTH_METHOD_CANNOT_BE_REMOVED,
+                    message: OAuthErrorMessages[OAuthErrorCodes.LAST_AUTH_METHOD_CANNOT_BE_REMOVED],
                 },
                 HttpStatus.BAD_REQUEST,
             );

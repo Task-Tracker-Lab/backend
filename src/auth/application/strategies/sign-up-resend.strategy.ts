@@ -3,6 +3,8 @@ import { RegisterCodeEvent } from '@core/auth/domain/events';
 import { EMAIL_CODE_TTL_SECONDS, SIGNUP_CACHE_KEY } from '@core/auth/infrastructure/constants';
 import { generate, generateSecret } from 'otplib';
 
+import { AuthErrorCodes, AuthErrorMessages } from '../../domain/errors';
+
 import { ResendCodeStrategy } from './resend-code.strategy';
 
 import type { SignUpCacheData } from '@core/auth/application/interfaces';
@@ -11,8 +13,8 @@ import type { Queue } from 'bullmq';
 export class SignUpResendStrategy extends ResendCodeStrategy<SignUpCacheData> {
     readonly context = 'sign-up' as const;
     readonly successMessage = 'Повторный код подтверждения отправлен на вашу почту';
-    readonly cacheNotFoundCode = 'REGISTRATION_EXPIRED';
-    readonly cacheNotFoundMessage = 'Срок регистрации истек или email не найден. Попробуйте снова.';
+    readonly cacheNotFoundCode = AuthErrorCodes.REGISTRATION_EXPIRED;
+    readonly cacheNotFoundMessage = AuthErrorMessages[AuthErrorCodes.REGISTRATION_EXPIRED];
 
     getCacheKey(email: string): string {
         return SIGNUP_CACHE_KEY(email);

@@ -1,4 +1,4 @@
-import { ActionResponseSchema } from '@shared/dtos';
+import { ActionResponseSchema } from '@shared/schemas';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod/v4';
 

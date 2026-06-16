@@ -1,4 +1,9 @@
-import { ConfirmResetPasswordUseCase } from './confirm-reset-password.use-case';
+import { RefreshTokensUseCase } from './auth/refresh-tokens.use-case';
+import { ResendCodeUseCase } from './auth/resend-code.use-case';
+import { SignInUseCase } from './auth/sign-in.use-case';
+import { SignOutUseCase } from './auth/sign-out.use-case';
+import { SignUpVerifyUseCase } from './auth/sign-up-verify.use-case';
+import { SignUpUseCase } from './auth/sign-up.use-case';
 import { AuthenticateOAuthUseCase } from './oauth/authenticate-oauth.use-case';
 import { ConnectOAuthProviderUseCase } from './oauth/connect-oauth-provider.use-case';
 import { ConnectProviderUseCase } from './oauth/connect-provider.use-case';
@@ -9,14 +14,9 @@ import { GetEnabledProvidersQuery } from './oauth/get-enabled-providers.query';
 import { OAuthOrchestratorUseCase } from './oauth/oauth-orchestrator.use-case';
 import { ProcessOAuthLoginUseCase } from './oauth/process-oauth-login.use-case';
 import { ProcessOAuthRegistrationUseCase } from './oauth/process-oauth-registration.use-case';
-import { RefreshTokensUseCase } from './refresh-tokens.use-case';
-import { ResendCodeUseCase } from './resend-code.use-case';
-import { ResetPasswordUseCase } from './reset-password.use-case';
-import { SignInUseCase } from './sign-in.use-case';
-import { SignOutUseCase } from './sign-out.use-case';
-import { SignUpVerifyUseCase } from './sign-up-verify.use-case';
-import { SignUpUseCase } from './sign-up.use-case';
-import { VerifyResetPasswordUseCase } from './verify-reset-password.use-case';
+import { ConfirmResetPasswordUseCase } from './password/confirm-reset-password.use-case';
+import { ResetPasswordUseCase } from './password/reset-password.use-case';
+import { VerifyResetPasswordUseCase } from './password/verify-reset-password.use-case';
 
 export const AuthUseCases = [
     ConfirmResetPasswordUseCase,
@@ -41,15 +41,15 @@ export const AuthUseCases = [
     ExchangeUseCase,
 ];
 
-export * from './confirm-reset-password.use-case';
-export * from './verify-reset-password.use-case';
+export * from './password/confirm-reset-password.use-case';
+export * from './password/verify-reset-password.use-case';
 export * from './oauth/get-connected-providers.query';
 export * from './oauth/disconnect-provider.use-case';
 export * from './oauth/authenticate-oauth.use-case';
 export * from './oauth/connect-provider.use-case';
-export * from './refresh-tokens.use-case';
-export * from './reset-password.use-case';
-export * from './sign-up-verify.use-case';
+export * from './auth/refresh-tokens.use-case';
+export * from './password/reset-password.use-case';
+export * from './auth/sign-up-verify.use-case';
 export * from './oauth/get-enabled-providers.query';
 export * from './oauth/exchange.use-case';
 
@@ -57,7 +57,7 @@ export * from './oauth/oauth-orchestrator.use-case';
 export * from './oauth/process-oauth-login.use-case';
 export * from './oauth/process-oauth-registration.use-case';
 export * from './oauth/connect-oauth-provider.use-case';
-export * from './sign-in.use-case';
-export * from './sign-out.use-case';
-export * from './sign-up.use-case';
-export * from './resend-code.use-case';
+export * from './auth/sign-in.use-case';
+export * from './auth/sign-out.use-case';
+export * from './auth/sign-up.use-case';
+export * from './auth/resend-code.use-case';

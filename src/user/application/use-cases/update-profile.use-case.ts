@@ -4,6 +4,7 @@ import { createId } from '@paralleldrive/cuid2';
 import { BaseException } from '@shared/error';
 import { removeUndefined } from '@shared/utils';
 
+import { UserErrorCodes, UserErrorMessages } from '../../domain/errors';
 import { UpdateProfileDto } from '../dtos';
 
 @Injectable()
@@ -18,7 +19,10 @@ export class UpdateProfileUseCase {
 
         if (!entity?.user) {
             throw new BaseException(
-                { code: 'USER_NOT_FOUND', message: 'Пользователь не найден' },
+                {
+                    code: UserErrorCodes.NOT_FOUND,
+                    message: UserErrorMessages[UserErrorCodes.NOT_FOUND],
+                },
                 HttpStatus.NOT_FOUND,
             );
         }
@@ -33,34 +37,41 @@ export class UpdateProfileUseCase {
             theme,
         };
 
-        const isUpdated = await this.userRepo.updateProfile(
-            entity.user.id,
-            removeUndefined(profile),
-            preferences,
-        );
+        try {
+            const result = await this.userRepo.updateProfile(
+                entity.user.id,
+                removeUndefined(profile),
+                preferences,
+            );
 
-        if (!isUpdated) {
+            await this.userRepo.logActivity({
+                id: createId(),
+                userId: id,
+                eventType: 'PROFILE_UPDATED',
+            });
+
+            return { success: result, message: 'Профиль успешно обновлен' };
+        } catch (error) {
+            if (error instanceof BaseException) {
+                throw error;
+            }
+
             throw new BaseException(
-                { code: 'PROFILE_UPDATE_FAILED', message: 'Не удалось обновить данные' },
+                {
+                    code: UserErrorCodes.UPDATE_FAILED,
+                    message: UserErrorMessages[UserErrorCodes.UPDATE_FAILED],
+                },
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
         }
-
-        await this.userRepo.logActivity({
-            id: createId(),
-            userId: id,
-            eventType: 'PROFILE_UPDATED',
-        });
-
-        return { success: true, message: 'Профиль успешно обновлен' };
     }
 
     private validatePronouns(dto: UpdateProfileDto) {
         if (dto.pronouns === 'other' && (!dto.pronounsCustom || dto.pronounsCustom.trim() === '')) {
             throw new BaseException(
                 {
-                    code: 'PRONOUNS_CUSTOM_REQUIRED',
-                    message: 'Пожалуйста, укажите пользовательские местоимения',
+                    code: UserErrorCodes.PRONOUNS_CUSTOM_REQUIRED,
+                    message: UserErrorMessages[UserErrorCodes.PRONOUNS_CUSTOM_REQUIRED],
                 },
                 HttpStatus.BAD_REQUEST,
             );
@@ -69,8 +80,8 @@ export class UpdateProfileUseCase {
         if (dto.pronounsCustom && dto.pronounsCustom.length > 50) {
             throw new BaseException(
                 {
-                    code: 'PRONOUNS_CUSTOM_TOO_LONG',
-                    message: 'Пользовательские местоимения не могут превышать 50 символов',
+                    code: UserErrorCodes.PRONOUNS_CUSTOM_TOO_LONG,
+                    message: UserErrorMessages[UserErrorCodes.PRONOUNS_CUSTOM_TOO_LONG],
                 },
                 HttpStatus.BAD_REQUEST,
             );

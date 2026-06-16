@@ -1,7 +1,7 @@
+import { MEDIA_JOBS, MEDIA_QUEUES, type UpdateMediaUser } from '@core/media';
 import { IUserRepository } from '@core/user/domain/repository';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject } from '@nestjs/common';
-import { MEDIA_JOBS, MEDIA_QUEUES, type UpdateMediaUser } from '@shared/media';
 import { UnrecoverableError, type Job } from 'bullmq';
 
 @Processor(MEDIA_QUEUES.SAVE_ENTITY)

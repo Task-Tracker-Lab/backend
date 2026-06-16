@@ -1,7 +1,7 @@
 import { AreaErrorCodes, AreaErrorMessages } from '@core/area/domain/errors';
 import { IAreaRepository } from '@core/area/domain/repository';
 import { MAX_AREAS_PER_PROJECT } from '@core/area/infrastructure/constants';
-import { ProjectAccessPolicy } from '@core/projects/domain/policy';
+import { ProjectAccessPolicy } from '@core/project/domain/policy';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
 import slugify from 'slugify';

@@ -1,4 +1,4 @@
-import { Get, Query } from '@nestjs/common';
+import { Get } from '@nestjs/common';
 import { ApiBaseController, GetUser, GetUserId } from '@shared/decorators';
 
 import { TeamsFacade } from '../../team.facade';
@@ -13,9 +13,8 @@ export class MeController {
 
     @Get('teams')
     @FindTeamsSwagger()
-    // TODO: ADD TO QUERY DTO
-    async findMyTeams(@GetUserId() userId: string, @Query() query: any) {
-        return this.facade.getMyTeams(userId, query);
+    async findMyTeams(@GetUserId() userId: string) {
+        return this.facade.getMyTeams(userId);
     }
 
     @Get('invites')
