@@ -23,7 +23,7 @@ import { AuthModule } from './auth/auth.module';
 import { IssueModule } from './issue';
 import { ProjectModule } from './project';
 import * as schema from './shared/entities';
-import { TeamsModule } from './teams';
+import { TeamModule } from './team';
 import { UserModule } from './user';
 
 @Module({
@@ -54,7 +54,7 @@ import { UserModule } from './user';
         MailModule,
         AuthModule,
         UserModule,
-        TeamsModule,
+        TeamModule,
         ProjectModule,
         AreaModule,
         IssueModule,

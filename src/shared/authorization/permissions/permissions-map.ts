@@ -3,7 +3,7 @@ import { MEMBER_PERMISSIONS } from '@shared/authorization/permissions/member.per
 import { OWNER_PERMISSIONS } from '@shared/authorization/permissions/owner.permissions';
 import { VIEWER_PERMISSIONS } from '@shared/authorization/permissions/viewer.permissions';
 
-import type { TeamRole } from '@core/teams/infrastructure/persistence/models';
+import type { TeamRole } from '../../../team/infrastructure/persistence/models';
 import type { PermissionRule } from '@shared/authorization/types/permission-rule.interface';
 
 export const ROLE_PERMISSIONS_MAP: Record<TeamRole, PermissionRule[]> = {

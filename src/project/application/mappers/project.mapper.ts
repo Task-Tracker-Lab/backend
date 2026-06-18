@@ -1,5 +1,5 @@
+import type { RawMemberRow } from '../../../team/domain/repository';
 import type { Project } from '@core/project/domain/entities';
-import type { RawMemberRow } from '@core/teams/domain/repository';
 
 export class ProjectMapper {
     public static toDetailResponse(project: Project, member?: RawMemberRow | null, token?: string) {

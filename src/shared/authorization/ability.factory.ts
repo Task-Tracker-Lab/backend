@@ -1,8 +1,9 @@
 import { createMongoAbility, RawRuleOf } from '@casl/ability';
-import { RawMemberRow } from '@core/teams/domain/repository';
 import { Injectable } from '@nestjs/common';
 import { Subject } from '@shared/authorization/types/subject.enum';
 import { ROLE_PRIORITY } from '@shared/constants';
+
+import { RawMemberRow } from '../../team/domain/repository';
 
 import { ROLE_PERMISSIONS_MAP } from './permissions';
 import { AppAbility } from './types/app-ability.type';
