@@ -1,8 +1,7 @@
+import { UpdateMemberDto } from '@core/team/application/dtos';
+import { TeamFacade } from '@core/team/application/team.facade';
 import { Body, Delete, Get, Param, Patch } from '@nestjs/common';
 import { ApiBaseController, GetUserId } from '@shared/decorators';
-
-import { UpdateMemberDto } from '../../dtos';
-import { TeamFacade } from '../../team.facade';
 
 import { GetMembersSwagger, RemoveMemberSwagger, UpdateMemberSwagger } from './swagger';
 

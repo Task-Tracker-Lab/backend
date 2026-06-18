@@ -1,8 +1,7 @@
+import { CreateTeamDto, UpdateTeamDto } from '@core/team/application/dtos';
+import { TeamFacade } from '@core/team/application/team.facade';
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { ApiBaseController, GetUserId } from '@shared/decorators';
-
-import { CreateTeamDto, UpdateTeamDto } from '../../dtos';
-import { TeamFacade } from '../../team.facade';
 
 import {
     CreateTeamSwagger,

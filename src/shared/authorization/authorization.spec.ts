@@ -6,8 +6,8 @@ import { describe, expect } from 'vitest';
 
 import { AbilityFactory } from './ability.factory';
 
-import type { RawMemberRow } from '../../team/domain/repository';
-import type { TeamRole } from '../../team/infrastructure/persistence/models';
+import type { RawMemberRow } from '@core/team/domain/repository';
+import type { TeamRole } from '@core/team/infrastructure/persistence/models';
 
 describe('AuthorizationService - Permissions Matrix', () => {
     const findTeamMemberMock = {

@@ -1,7 +1,6 @@
+import { TeamFacade } from '@core/team/application/team.facade';
 import { Get } from '@nestjs/common';
 import { ApiBaseController, GetUser, GetUserId } from '@shared/decorators';
-
-import { TeamFacade } from '../../team.facade';
 
 import { FindInvitesSwagger, FindTeamsSwagger } from './swagger';
 

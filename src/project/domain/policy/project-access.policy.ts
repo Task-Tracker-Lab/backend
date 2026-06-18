@@ -1,9 +1,8 @@
+import { FindTeamMemberQuery, FindTeamQuery } from '@core/team';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { ROLE_PRIORITY, PROJECT_ROLE_PRIORITY } from '@shared/constants';
+import { ROLE_PRIORITY, PROJECT_ROLE_PRIORITY, isTeamRole } from '@shared/constants';
 import { BaseException } from '@shared/error';
 
-import { isTeamRole } from '../../../shared/constants/roles.constant';
-import { FindTeamMemberQuery, FindTeamQuery } from '../../../team';
 import { ProjectErrorCodes, ProjectErrorMessages } from '../errors';
 import { MemberErrorCodes, MemberErrorMessages } from '../errors/member.errors';
 import { IMemberRepository, IProjectRepository } from '../repository';

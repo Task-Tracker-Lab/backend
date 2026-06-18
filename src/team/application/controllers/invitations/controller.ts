@@ -1,8 +1,8 @@
+import { TeamFacade } from '@core/team/application/team.facade';
 import { Body, Get, Param, Delete, Patch, Post } from '@nestjs/common';
 import { ApiBaseController, GetUser, GetUserId } from '@shared/decorators';
 
 import { InviteMemberDto, UpdateInvitationDto } from '../../dtos';
-import { TeamFacade } from '../../team.facade';
 
 import {
     AcceptInviteSwagger,

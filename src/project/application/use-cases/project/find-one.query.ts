@@ -2,11 +2,10 @@ import { createHash } from 'node:crypto';
 
 import { ProjectErrorCodes, ProjectErrorMessages } from '@core/project/domain/errors';
 import { IProjectRepository } from '@core/project/domain/repository';
+import { FindTeamMemberQuery, FindTeamQuery } from '@core/team';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { isTeamRole, ROLE_PRIORITY } from '@shared/constants';
 import { BaseException } from '@shared/error';
-
-import { FindTeamMemberQuery, FindTeamQuery } from '../../../../team';
 
 import type { Project } from '@core/project/domain/entities';
 

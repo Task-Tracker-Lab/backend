@@ -1,7 +1,6 @@
+import { TeamModule } from '@core/team';
 import { UserModule } from '@core/user';
 import { forwardRef, Module } from '@nestjs/common';
-
-import { TeamModule } from '../team';
 
 import { CONTROLLERS } from './application/controllers';
 import { ProjectFacade } from './application/project.facade';

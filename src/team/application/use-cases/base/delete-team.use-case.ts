@@ -1,10 +1,9 @@
+import { ITeamRepository, RawMemberRow } from '@core/team/domain/repository';
 import { Inject, Injectable, HttpStatus } from '@nestjs/common';
 import { AbilityFactory } from '@shared/authorization/ability.factory';
 import { Action } from '@shared/authorization/types/action.enum';
 import { Subject } from '@shared/authorization/types/subject.enum';
 import { BaseException } from '@shared/error';
-
-import { ITeamRepository, RawMemberRow } from '../../../domain/repository';
 
 @Injectable()
 export class DeleteTeamUseCase {

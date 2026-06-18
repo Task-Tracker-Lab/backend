@@ -1,4 +1,4 @@
-import type { TeamRole } from '../../team/infrastructure/persistence/models';
+import type { TeamRole } from '@core/team/infrastructure/persistence/models';
 
 export const TEAM_ROLES = ['owner', 'admin', 'member', 'viewer'] as const;
 
