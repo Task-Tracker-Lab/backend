@@ -115,6 +115,6 @@ export class TeamMemberPolicy {
      * const canUpdate = policy.canUpdateMedia('admin'); // true
      */
     public canUpdateMedia(issuerRole: TeamRole): boolean {
-        return this.getPriority(issuerRole) >= (ROLE_PRIORITY['moderator'] ?? 2);
+        return this.getPriority(issuerRole) >= (ROLE_PRIORITY['admin'] ?? 2);
     }
 }

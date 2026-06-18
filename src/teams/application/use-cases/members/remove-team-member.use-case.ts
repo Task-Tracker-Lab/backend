@@ -1,6 +1,10 @@
-import { TeamMemberPolicy } from '@core/teams/domain/policy';
-import { ITeamsRepository } from '@core/teams/domain/repository';
+import { subject } from '@casl/ability';
+import { ITeamsRepository, RawMemberRow } from '@core/teams/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { AbilityFactory } from '@shared/authorization/ability.factory';
+import { Action } from '@shared/authorization/types/action.enum';
+import { Subject } from '@shared/authorization/types/subject.enum';
+import { ROLE_PRIORITY } from '@shared/constants';
 import { BaseException } from '@shared/error';
 
 import type { TeamRole } from '@shared/entities';
@@ -10,22 +14,25 @@ export class RemoveTeamMemberUseCase {
     constructor(
         @Inject('ITeamsRepository')
         private readonly teamsRepo: ITeamsRepository,
-        private readonly policy: TeamMemberPolicy,
+        private readonly abilityFactory: AbilityFactory,
     ) {}
 
     async execute(teamId: string, currentUserId: string, targetUserId: string) {
-        const team = await this.teamsRepo.findById(teamId);
-        if (!team) {
+        //TODO: move to policy
+        this.isSelfRemoval(currentUserId, targetUserId);
+
+        const member = await this.teamsRepo.findMember(teamId, currentUserId);
+        if (!member) {
             throw new BaseException(
-                { code: 'TEAM_NOT_FOUND', message: `Команда ${teamId} не найдена` },
-                HttpStatus.NOT_FOUND,
+                {
+                    code: 'TEAM_NOT_FOUND_OR_FORBIDDEN',
+                    message: `У вас нет прав или команда не найдена`,
+                },
+                HttpStatus.FORBIDDEN,
             );
         }
 
-        const [currentUser, targetUser] = await Promise.all([
-            this.teamsRepo.findMember(team.id, currentUserId),
-            this.teamsRepo.findMember(team.id, targetUserId),
-        ]);
+        const targetUser = await this.teamsRepo.findMember(teamId, targetUserId);
 
         if (!targetUser) {
             throw new BaseException(
@@ -34,49 +41,59 @@ export class RemoveTeamMemberUseCase {
             );
         }
 
-        if (!currentUser) {
-            throw new BaseException(
-                { code: 'NOT_A_TEAM_MEMBER', message: 'Вы не состоите в этой команде' },
-                HttpStatus.FORBIDDEN,
-            );
-        }
-
-        const isSelfRemoval = currentUserId === targetUserId;
-
-        const canRemove = this.policy.canRemove(
-            currentUser.role as TeamRole,
-            targetUser.role as TeamRole,
-            isSelfRemoval,
-        );
-
-        if (!canRemove) {
-            const errorCode = isSelfRemoval ? 'OWNER_CANNOT_LEAVE' : 'KICK_FORBIDDEN';
-            const errorMessage = isSelfRemoval
-                ? 'Владелец не может покинуть команду без передачи прав'
-                : 'У вас недостаточно прав, чтобы исключить этого участника';
-
-            throw new BaseException(
-                { code: errorCode, message: errorMessage },
-                HttpStatus.FORBIDDEN,
-            );
-        }
+        this.validateAccess(member, targetUser.role);
 
         try {
-            const result = await this.teamsRepo.removeMember(team.id, targetUserId);
+            const success = await this.teamsRepo.removeMember(teamId, targetUserId);
+            if (!success) {
+                this.errorDuringRemoving();
+            }
+
             return {
-                success: result,
-                message: isSelfRemoval
-                    ? `Вы успешно покинули команду ${team.name}`
-                    : `Участник успешно исключен из команды ${team.name}`,
+                success: true,
+                message: `Участник успешно исключен из команды`,
             };
         } catch (error) {
             if (error instanceof BaseException) {
                 throw error;
             }
 
+            return this.errorDuringRemoving();
+        }
+    }
+
+    private errorDuringRemoving() {
+        throw new BaseException(
+            { code: 'MEMBER_REMOVAL_FAILED', message: 'Ошибка при удалении участника' },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+    }
+
+    private isSelfRemoval(currentUserId: string, targetUserId: string) {
+        const isSelf = currentUserId === targetUserId;
+
+        if (isSelf) {
             throw new BaseException(
-                { code: 'MEMBER_REMOVAL_FAILED', message: 'Ошибка при удалении участника' },
-                HttpStatus.INTERNAL_SERVER_ERROR,
+                { code: 'INSUFFICIENT_PERMISSIONS', message: 'Вы не можете удалить самого себя' },
+                HttpStatus.BAD_REQUEST,
+            );
+        }
+    }
+
+    private validateAccess(member: RawMemberRow, targetUserRole: TeamRole) {
+        const ability = this.abilityFactory.createForTeamMember(member);
+        const isAllow = ability.can(
+            Action.DELETE,
+            subject(Subject.TEAM_MEMBER, { priority: ROLE_PRIORITY[targetUserRole] }),
+        );
+
+        if (!isAllow) {
+            throw new BaseException(
+                {
+                    code: 'INSUFFICIENT_PERMISSIONS',
+                    message: 'У вас нет прав для удаления этого участника команды',
+                },
+                HttpStatus.FORBIDDEN,
             );
         }
     }

@@ -1,5 +1,8 @@
-import { ITeamsRepository } from '@core/teams/domain/repository';
+import { ITeamsRepository, RawMemberRow } from '@core/teams/domain/repository';
 import { Inject, Injectable, HttpStatus } from '@nestjs/common';
+import { AbilityFactory } from '@shared/authorization/ability.factory';
+import { Action } from '@shared/authorization/types/action.enum';
+import { Subject } from '@shared/authorization/types/subject.enum';
 import { BaseException } from '@shared/error';
 
 @Injectable()
@@ -7,36 +10,25 @@ export class DeleteTeamUseCase {
     constructor(
         @Inject('ITeamsRepository')
         private readonly teamsRepo: ITeamsRepository,
+        private readonly abilityFactory: AbilityFactory,
     ) {}
 
     async execute(teamId: string, userId: string) {
-        const team = await this.teamsRepo.findById(teamId);
+        const member = await this.teamsRepo.findMember(teamId, userId);
 
-        if (!team) {
+        if (!member) {
             throw new BaseException(
                 {
-                    code: 'TEAM_NOT_FOUND',
-                    message: `Команда ${teamId} не найдена`,
-                },
-                HttpStatus.NOT_FOUND,
-            );
-        }
-
-        const member = await this.teamsRepo.findMember(team.id, userId);
-        const isOwner = team.ownerId === userId || member?.role === 'owner';
-
-        if (!isOwner) {
-            throw new BaseException(
-                {
-                    code: 'ONLY_OWNER_CAN_DELETE',
-                    message: 'Только владелец может удалить команду',
+                    code: 'TEAM_NOT_FOUND_OR_FORBIDDEN',
+                    message: 'Команда не найдена или у вас нет к ней доступа',
                 },
                 HttpStatus.FORBIDDEN,
             );
         }
+        this.validateAccess(member);
 
         try {
-            const result = await this.teamsRepo.remove(team.id, userId);
+            const result = await this.teamsRepo.remove(teamId, userId);
 
             return {
                 success: result,
@@ -53,6 +45,21 @@ export class DeleteTeamUseCase {
                     message: 'Не удалось удалить команду',
                 },
                 HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+    }
+
+    private validateAccess(member: RawMemberRow) {
+        const ability = this.abilityFactory.createForTeamMember(member);
+        const isAllow = ability.can(Action.DELETE, Subject.TEAM);
+
+        if (!isAllow) {
+            throw new BaseException(
+                {
+                    code: 'INSUFFICIENT_PERMISSIONS',
+                    message: 'У вас недостаточно прав',
+                },
+                HttpStatus.FORBIDDEN,
             );
         }
     }

@@ -26,7 +26,7 @@ export class TeamsFacade {
         private readonly sendInviteUc: UC.SendInvitationUseCase,
         private readonly acceptInviteUc: UC.AcceptInvitationUseCase,
         private readonly updateInvitationUc: UC.UpdateInvitationUseCase,
-        private readonly declineInvitationUc: UC.DeclineInvitationUseCase,
+        private readonly deleteInvitationUc: UC.DeleteInvitationUseCase,
 
         private readonly getMyTeamsUc: UC.GetMyTeamsUseCase,
         private readonly getMyInvitesUc: UC.GetMyInvitesUseCase,
@@ -63,8 +63,8 @@ export class TeamsFacade {
     public acceptInvite = (code: string, userId: string, email: string) =>
         this.acceptInviteUc.execute(code, userId, email);
 
-    public declineInvitation = (teamId: string, code: string, userId: string, userEmail: string) =>
-        this.declineInvitationUc.execute(teamId, code, userId, userEmail);
+    public declineInvitation = (teamId: string, code: string, userId: string) =>
+        this.deleteInvitationUc.execute(teamId, code, userId);
 
     public updateInvitation = (
         teamId: string,

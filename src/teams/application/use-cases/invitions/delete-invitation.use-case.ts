@@ -1,13 +1,16 @@
-import { ITeamsRepository } from '@core/teams/domain/repository';
+import { ITeamsRepository, RawMemberRow } from '@core/teams/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
+import { AbilityFactory } from '@shared/authorization/ability.factory';
+import { Action } from '@shared/authorization/types/action.enum';
+import { Subject } from '@shared/authorization/types/subject.enum';
 import { BaseException } from '@shared/error';
 
 import type { TeamInvite } from '../../dtos/invitation.dto';
 
 @Injectable()
-export class DeclineInvitationUseCase {
+export class DeleteInvitationUseCase {
     private readonly INVITES_KEY = (code: string) => `inv:code:${code}`;
     private readonly TEAM_INVITES_KEY = (teamId: string) => `team:invites:${teamId}`;
     private readonly USER_INVITES_KEY = (email: string) => `user:invites:${email.toLowerCase()}`;
@@ -15,17 +18,27 @@ export class DeclineInvitationUseCase {
     constructor(
         @Inject('ITeamsRepository') private readonly teamsRepo: ITeamsRepository,
         @Inject(CACHE_SERVICE) private readonly cacheService: ICacheService,
+        private readonly abilityFactory: AbilityFactory,
     ) {}
 
-    async execute(teamId: string, code: string, userId: string, userEmail: string) {
-        const team = await this.getTeamOrThrow(teamId);
+    async execute(teamId: string, code: string, userId: string) {
         const invite = await this.getInviteOrThrow(code);
+        this.validateInviteOwnership(invite, teamId);
 
-        this.validateInviteOwnership(invite, team.id);
+        const member = await this.teamsRepo.findMember(teamId, userId);
+        if (!member) {
+            throw new BaseException(
+                {
+                    code: 'TEAM_NOT_FOUND_OR_FORBIDDEN',
+                    message: `У вас нет прав или команда не найдена`,
+                },
+                HttpStatus.FORBIDDEN,
+            );
+        }
 
-        await this.validateAccess(team.id, userId, userEmail, invite.email);
+        this.validateAccess(member);
 
-        await this.cleanupInvite(code, team.id, invite.email);
+        await this.cleanupInvite(code, teamId, invite.email);
 
         return {
             success: true,
@@ -33,39 +46,19 @@ export class DeclineInvitationUseCase {
         };
     }
 
-    private async validateAccess(
-        teamId: string,
-        userId: string,
-        currentUserEmail: string,
-        inviteEmail: string,
-    ) {
-        if (currentUserEmail.toLowerCase() === inviteEmail.toLowerCase()) {
-            return;
-        }
+    private validateAccess(member: RawMemberRow) {
+        const ability = this.abilityFactory.createForTeamMember(member);
+        const isAllow = ability.can(Action.DELETE, Subject.INVITE);
 
-        const member = await this.teamsRepo.findMember(teamId, userId);
-        if (member && (member.role === 'owner' || member.role === 'admin')) {
-            return;
-        }
-
-        throw new BaseException(
-            {
-                code: 'INSUFFICIENT_PERMISSIONS',
-                message: 'У вас нет прав для отмены этого приглашения',
-            },
-            HttpStatus.FORBIDDEN,
-        );
-    }
-
-    private async getTeamOrThrow(teamId: string) {
-        const team = await this.teamsRepo.findById(teamId);
-        if (!team) {
+        if (!isAllow) {
             throw new BaseException(
-                { code: 'TEAM_NOT_FOUND', message: 'Команда не найдена' },
-                HttpStatus.NOT_FOUND,
+                {
+                    code: 'INSUFFICIENT_PERMISSIONS',
+                    message: 'У вас нет прав для удаления приглашений',
+                },
+                HttpStatus.FORBIDDEN,
             );
         }
-        return team;
     }
 
     private async getInviteOrThrow(code: string) {

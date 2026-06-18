@@ -1,14 +1,17 @@
-import { TeamMemberPolicy } from '@core/teams/domain/policy';
-import { ITeamsRepository } from '@core/teams/domain/repository';
+import { subject } from '@casl/ability';
+import { ITeamsRepository, RawMemberRow } from '@core/teams/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
+import { AbilityFactory } from '@shared/authorization/ability.factory';
+import { Action } from '@shared/authorization/types/action.enum';
+import { Subject } from '@shared/authorization/types/subject.enum';
+import { ROLE_PRIORITY } from '@shared/constants';
+import { TeamRole } from '@shared/entities';
 import { BaseException } from '@shared/error';
 
 import { UpdateInvitationDto } from '../../dtos';
 import { TeamInvite } from '../../dtos/invitation.dto';
-
-import type { TeamRole } from '../../../infrastructure/persistence/models';
 
 @Injectable()
 export class UpdateInvitationUseCase {
@@ -17,22 +20,31 @@ export class UpdateInvitationUseCase {
     constructor(
         @Inject('ITeamsRepository') private readonly teamsRepo: ITeamsRepository,
         @Inject(CACHE_SERVICE) private readonly cacheService: ICacheService,
-        private readonly policy: TeamMemberPolicy,
+        private readonly abilityFactory: AbilityFactory,
     ) {}
 
     async execute(teamId: string, code: string, userId: string, dto: UpdateInvitationDto) {
-        const team = await this.getTeamOrThrow(teamId);
-        const member = await this.getMemberOrThrow(team.id, userId);
-
         const key = this.INVITES_KEY(code);
-        const { invite, ttlSeconds } = await this.getInviteContextOrThrow(key);
 
-        this.validateInviteOwnership(invite, team.id);
-        this.validatePolicy(member.role as TeamRole, invite.role as TeamRole, dto.role as TeamRole);
+        const { invite, ttlSeconds } = await this.getInviteContextOrThrow(key);
+        this.validateInviteOwnership(invite, teamId);
+
+        const member = await this.teamsRepo.findMember(teamId, userId);
+        if (!member) {
+            throw new BaseException(
+                {
+                    code: 'TEAM_NOT_FOUND_OR_FORBIDDEN',
+                    message: `У вас нет прав или команда не найдена`,
+                },
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
+        this.validateAccess(member, dto.role);
 
         const updatedInvite = {
             ...invite,
-            role: dto.role as TeamRole,
+            role: dto.role,
         };
 
         await this.cacheService.setOne(key, JSON.stringify(updatedInvite), ttlSeconds);
@@ -43,26 +55,34 @@ export class UpdateInvitationUseCase {
         };
     }
 
-    private async getTeamOrThrow(teamId: string) {
-        const team = await this.teamsRepo.findById(teamId);
-        if (!team) {
-            throw new BaseException(
-                { code: 'TEAM_NOT_FOUND', message: 'Команда не найдена' },
-                HttpStatus.NOT_FOUND,
-            );
-        }
-        return team;
-    }
+    private validateAccess(member: RawMemberRow, targetRole: TeamRole) {
+        const ability = this.abilityFactory.createForTeamMember(member);
+        const canUpdateInvites = ability.can(Action.UPDATE, Subject.INVITE);
 
-    private async getMemberOrThrow(teamId: string, userId: string) {
-        const member = await this.teamsRepo.findMember(teamId, userId);
-        if (!member) {
+        if (!canUpdateInvites) {
             throw new BaseException(
-                { code: 'NOT_A_MEMBER', message: 'Вы не член команды' },
+                {
+                    code: 'INSUFFICIENT_PERMISSIONS',
+                    message: 'У вас недостаточно прав для обновления приглашений',
+                },
                 HttpStatus.FORBIDDEN,
             );
         }
-        return member;
+
+        const canAssignCurrentRole = ability.can(
+            Action.UPDATE,
+            subject(Subject.ROLE, { priority: ROLE_PRIORITY[targetRole] }),
+        );
+
+        if (!canAssignCurrentRole) {
+            throw new BaseException(
+                {
+                    code: 'INSUFFICIENT_PERMISSIONS',
+                    message: `У вас недостаточно прав чтобы назначить роль ${targetRole}`,
+                },
+                HttpStatus.FORBIDDEN,
+            );
+        }
     }
 
     private async getInviteContextOrThrow(key: string) {
@@ -86,20 +106,6 @@ export class UpdateInvitationUseCase {
             throw new BaseException(
                 { code: 'INVITE_TEAM_MISMATCH', message: 'Приглашение принадлежит другой команде' },
                 HttpStatus.BAD_REQUEST,
-            );
-        }
-    }
-
-    private validatePolicy(issuerRole: TeamRole, currentTargetRole: TeamRole, newRole: TeamRole) {
-        const canUpdate = this.policy.canAssignRole(issuerRole, currentTargetRole, newRole);
-
-        if (!canUpdate) {
-            throw new BaseException(
-                {
-                    code: 'INSUFFICIENT_PERMISSIONS',
-                    message: 'У вас недостаточно прав для назначения этой роли',
-                },
-                HttpStatus.FORBIDDEN,
             );
         }
     }

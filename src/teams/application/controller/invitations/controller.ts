@@ -69,6 +69,6 @@ export class TeamsInvitationsController {
         @Param('code') code: string,
         @GetUser() user: JwtPayload,
     ) {
-        return this.facade.declineInvitation(teamId, code, user.sub, user.email);
+        return this.facade.declineInvitation(teamId, code, user.sub);
     }
 }

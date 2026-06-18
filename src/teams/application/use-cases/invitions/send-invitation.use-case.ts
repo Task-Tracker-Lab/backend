@@ -1,12 +1,16 @@
+import { subject } from '@casl/ability';
 import { TeamMailJobs, TeamQueues } from '@core/teams/domain/enums';
 import { TeamInvitationEvent } from '@core/teams/domain/events';
-import { TeamMemberPolicy } from '@core/teams/domain/policy';
-import { ITeamsRepository } from '@core/teams/domain/repository';
+import { ITeamsRepository, RawMemberRow } from '@core/teams/domain/repository';
 import { InjectQueue } from '@nestjs/bullmq';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
+import { AbilityFactory } from '@shared/authorization/ability.factory';
+import { Action } from '@shared/authorization/types/action.enum';
+import { Subject } from '@shared/authorization/types/subject.enum';
+import { ROLE_PRIORITY } from '@shared/constants';
 import { BaseException } from '@shared/error';
 import { ImageHelper } from '@shared/utils';
 import { Queue } from 'bullmq';
@@ -28,16 +32,17 @@ export class SendInvitationUseCase {
         @Inject(CACHE_SERVICE) private readonly cacheService: ICacheService,
         @InjectQueue(TeamQueues.TEAM_MAIL) private readonly mailQueue: Queue,
         private readonly cfg: ConfigService,
-        private readonly policy: TeamMemberPolicy,
+        private readonly abilityFactory: AbilityFactory,
     ) {}
 
     async execute(teamId: string, inviterId: string, dto: InviteMemberDto) {
         const team = await this.getTeamOrThrow(teamId);
-        const inviter = await this.getInviterOrThrow(team.id, inviterId);
+        const inviter = await this.getInviterOrThrow(teamId, inviterId);
 
-        this.validatePermissions(inviter.role as TeamRole, dto.role as TeamRole);
-        await this.ensureNotAlreadyMember(team.id, dto.email);
-        await this.ensureNoPendingInvite(team.id, dto.email);
+        this.validateAccess(inviter, dto.role);
+
+        await this.ensureNotAlreadyMember(teamId, dto.email);
+        await this.ensureNoPendingInvite(teamId, dto.email);
 
         const code = generateSecret({ length: 8 });
         const inviteData = this.buildInviteData(team, inviter, dto);
@@ -71,10 +76,30 @@ export class SendInvitationUseCase {
         return inviter;
     }
 
-    private validatePermissions(inviterRole: TeamRole, targetRole: TeamRole) {
-        if (!this.policy.canInvite(inviterRole, targetRole || 'member')) {
+    private validateAccess(member: RawMemberRow, targetRole: TeamRole) {
+        const ability = this.abilityFactory.createForTeamMember(member);
+        const canInvite = ability.can(Action.CREATE, Subject.INVITE);
+        const canAssignRole = ability.can(
+            Action.CREATE,
+            subject(Subject.ROLE, { priority: ROLE_PRIORITY[targetRole] }),
+        );
+
+        if (!canInvite) {
             throw new BaseException(
-                { code: 'INSUFFICIENT_PERMISSIONS', message: 'Недостаточно прав' },
+                {
+                    code: 'INSUFFICIENT_PERMISSIONS',
+                    message: 'Недостаточно прав чтобы приглашать пользователей в команду',
+                },
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
+        if (!canAssignRole) {
+            throw new BaseException(
+                {
+                    code: 'INSUFFICIENT_PERMISSIONS',
+                    message: `Недостаточно прав чтобы пригласить пользователя в команду с ролью ${targetRole}`,
+                },
                 HttpStatus.FORBIDDEN,
             );
         }

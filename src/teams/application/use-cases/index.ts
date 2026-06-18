@@ -4,7 +4,7 @@ import { FindTeamQuery } from './base/find-team.query';
 import { GetMyTeamsUseCase } from './base/get-my-teams.use-case';
 import { UpdateTeamUseCase } from './base/update-team.use-case';
 import { AcceptInvitationUseCase } from './invitions/accept-invitation.use-case';
-import { DeclineInvitationUseCase } from './invitions/decline-invitation.use-case';
+import { DeleteInvitationUseCase } from './invitions/delete-invitation.use-case';
 import { GetInvitationQuery } from './invitions/get-invitation.query';
 import { GetInvitationsQuery } from './invitions/get-invitations.query';
 import { GetMyInvitesUseCase } from './invitions/get-my-invites.use-case';
@@ -34,7 +34,7 @@ export const TeamUseCases = [
     UpdateTeamUseCase,
     UpdateTeamMemberUseCase,
     UpdateInvitationUseCase,
-    DeclineInvitationUseCase,
+    DeleteInvitationUseCase,
 ];
 
 export const TEAM_EXTERNAL_QUERIES = [FindTeamQuery, FindTeamMemberQuery];
@@ -56,4 +56,4 @@ export { SendInvitationUseCase } from './invitions/send-invitation.use-case';
 export { UpdateTeamUseCase } from './base/update-team.use-case';
 export { UpdateTeamMemberUseCase } from './members/update-team-member.use-case';
 export { UpdateInvitationUseCase } from './invitions/update-invitation.use-case';
-export { DeclineInvitationUseCase } from './invitions/decline-invitation.use-case';
+export { DeleteInvitationUseCase } from './invitions/delete-invitation.use-case';

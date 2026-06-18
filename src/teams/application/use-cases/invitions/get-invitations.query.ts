@@ -1,7 +1,10 @@
-import { ITeamsRepository } from '@core/teams/domain/repository';
+import { ITeamsRepository, RawMemberRow } from '@core/teams/domain/repository';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
+import { AbilityFactory } from '@shared/authorization/ability.factory';
+import { Action } from '@shared/authorization/types/action.enum';
+import { Subject } from '@shared/authorization/types/subject.enum';
 import { BaseException } from '@shared/error';
 
 @Injectable()
@@ -12,14 +15,26 @@ export class GetInvitationsQuery {
     constructor(
         @Inject('ITeamsRepository') private readonly teamsRepo: ITeamsRepository,
         @Inject(CACHE_SERVICE) private readonly cacheService: ICacheService,
+        private readonly abilityFactory: AbilityFactory,
     ) {}
 
     async execute(teamId: string, userId: string) {
-        const team = await this.getTeamOrThrow(teamId);
-        await this.ensureAdminPermissions(team.id, userId);
+        const member = await this.teamsRepo.findMember(teamId, userId);
+        if (!member) {
+            throw new BaseException(
+                {
+                    code: 'TEAM_NOT_FOUND_OR_FORBIDDEN',
+                    message: `У вас нет прав или команда не найдена`,
+                },
+                HttpStatus.FORBIDDEN,
+            );
+        }
 
-        const teamKey = this.TEAM_INVITES_KEY(team.id);
+        this.validateAccess(member);
+
+        const teamKey = this.TEAM_INVITES_KEY(teamId);
         const codes = await this.cacheService.getCollection(teamKey);
+
         if (!codes.length) {
             return {
                 // TODO: реализовать полноценную пагинацию для инвайтов команды.
@@ -28,7 +43,7 @@ export class GetInvitationsQuery {
                     total: 0,
                     totalPages: 0,
                     page: 1,
-                    limit: 0,
+                    limit: 10,
                     hasPrevPage: false,
                     hasNextPage: false,
                 },
@@ -67,27 +82,18 @@ export class GetInvitationsQuery {
                 total: active.length,
                 totalPages: active.length ? 1 : 0,
                 page: 1,
-                limit: active.length,
+                limit: 10,
                 hasPrevPage: false,
                 hasNextPage: false,
             },
         };
     }
 
-    private async getTeamOrThrow(teamId: string) {
-        const team = await this.teamsRepo.findById(teamId);
-        if (!team) {
-            throw new BaseException(
-                { code: 'TEAM_NOT_FOUND', message: 'Команда не найдена' },
-                HttpStatus.NOT_FOUND,
-            );
-        }
-        return team;
-    }
+    private validateAccess(member: RawMemberRow) {
+        const ability = this.abilityFactory.createForTeamMember(member);
+        const isAllow = ability.can(Action.READ, Subject.INVITE);
 
-    private async ensureAdminPermissions(teamId: string, userId: string) {
-        const member = await this.teamsRepo.findMember(teamId, userId);
-        if (!member || (member.role !== 'owner' && member.role !== 'admin')) {
+        if (!isAllow) {
             throw new BaseException(
                 { code: 'INSUFFICIENT_PERMISSIONS', message: 'У вас нет прав' },
                 HttpStatus.FORBIDDEN,
