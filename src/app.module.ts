@@ -13,6 +13,7 @@ import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { CacheModule } from '@shared/adapters/cache/module';
 import { ICacheService } from '@shared/adapters/cache/ports';
 import { MailModule } from '@shared/adapters/mail';
+import { AuthorizationModule } from '@shared/authorization/authorization.module';
 import { GlobalExceptionFilter } from '@shared/error';
 import { ZodValidationInterceptor } from '@shared/interceptors';
 import { ZodValidationPipe } from 'nestjs-zod';
@@ -58,6 +59,7 @@ import { UserModule } from './user';
         AreaModule,
         IssueModule,
         MetricsModule,
+        AuthorizationModule,
         HealthModule.registerAsync({
             inject: [DatabaseHealthService, S3Service, CACHE_SERVICE],
             useFactory: (db: DatabaseHealthService, s3: S3Service, cache: ICacheService) => {

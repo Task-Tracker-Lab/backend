@@ -1,11 +1,12 @@
 import type { Team, NewTeam, NewTeamMember } from '../entities';
+import type { TeamRole, TeamMemberStatus } from '@core/teams/infrastructure/persistence/models';
 
 type TResponse = { readonly success: boolean; readonly teamId: string };
 
 export type RawMemberRow = {
     readonly userId: string;
-    readonly role: string;
-    readonly status: string;
+    readonly role: TeamRole;
+    readonly status: TeamMemberStatus;
     readonly joinedAt: string | null;
     readonly firstName: string | null;
     readonly lastName: string | null;

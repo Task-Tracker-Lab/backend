@@ -48,7 +48,9 @@
             "@libs/s3": ["./libs/s3/src"],
             "@libs/s3/*": ["./libs/s3/src/*"],
             "@shared/*": ["./src/shared/*"],
-            "@core/*": ["./src/*"]
+            "@core/*": ["./src/*"],
+            "@casl/ability": ["./node_modules/@casl/ability/dist/types"],
+            "@casl/ability/extra": ["./node_modules/@casl/extra/dist/types/extra"]
         }
     },
     "include": [
