@@ -19,6 +19,7 @@ import { ZodValidationPipe } from 'nestjs-zod';
 
 import { AreaModule } from './area';
 import { AuthModule } from './auth/auth.module';
+import { IssueModule } from './issue';
 import { ProjectModule } from './project';
 import * as schema from './shared/entities';
 import { TeamsModule } from './teams';
@@ -55,6 +56,7 @@ import { UserModule } from './user';
         TeamsModule,
         ProjectModule,
         AreaModule,
+        IssueModule,
         MetricsModule,
         HealthModule.registerAsync({
             inject: [DatabaseHealthService, S3Service, CACHE_SERVICE],

@@ -3,13 +3,13 @@ import { forwardRef, Module } from '@nestjs/common';
 
 import { AreaFacade } from './application/area.facade';
 import { CONTROLLERS } from './application/controllers';
-import { AreasUseCases, StatesUseCases } from './application/use-cases';
+import { GetAreaQuery, GetStateQuery, USE_CASES } from './application/use-cases';
 import { REPOSITORIES } from './infrastructure/persistence/repositories';
 
 @Module({
     imports: [forwardRef(() => ProjectModule)],
     controllers: [...CONTROLLERS],
-    providers: [...REPOSITORIES, ...StatesUseCases, ...AreasUseCases, AreaFacade],
-    exports: [],
+    providers: [...REPOSITORIES, ...USE_CASES, AreaFacade],
+    exports: [GetAreaQuery, GetStateQuery],
 })
 export class AreaModule {}

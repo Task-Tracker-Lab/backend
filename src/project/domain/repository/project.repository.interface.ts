@@ -17,4 +17,5 @@ export interface IProjectRepository {
     revokeAllShares(projectId: string): Promise<boolean>;
 
     countByTeam(teamId: string): Promise<number>;
+    checkVisibility(slug: string): Promise<Pick<Project, 'visibility'> | null>;
 }

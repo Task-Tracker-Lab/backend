@@ -174,4 +174,13 @@ export class ProjectRepository implements IProjectRepository {
 
         return result?.count ?? 0;
     };
+
+    public readonly checkVisibility = async (slug: string) => {
+        const [result] = await this.db
+            .select({ visibility: schema.projects.visibility })
+            .from(schema.projects)
+            .where(and(eq(schema.projects.slug, slug), isNull(schema.projects.deletedAt)));
+
+        return result ?? null;
+    };
 }
