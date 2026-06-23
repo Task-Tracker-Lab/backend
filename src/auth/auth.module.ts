@@ -1,5 +1,5 @@
 import { ProjectModule } from '@core/project';
-import { TeamsModule } from '@core/teams';
+import { TeamModule } from '@core/team';
 import { UserModule } from '@core/user';
 import { BullModule } from '@nestjs/bullmq';
 import { forwardRef, Module } from '@nestjs/common';
@@ -43,7 +43,7 @@ const WORKERS = [MailProcessor, UserProcessor];
         }),
         BullModule.registerQueue({ name: AuthQueues.AUTH_MAIL }, { name: AuthQueues.AUTH_USER }),
         forwardRef(() => UserModule),
-        TeamsModule,
+        TeamModule,
         ProjectModule,
     ],
     controllers: CONTROLLERS,

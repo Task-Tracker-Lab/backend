@@ -2,10 +2,10 @@ import { MemberErrorCodes, MemberErrorMessages } from '@core/project/domain/erro
 import { ProjectAccessPolicy } from '@core/project/domain/policy';
 import { IMemberRepository } from '@core/project/domain/repository';
 import { MAX_MEMBERS_PER_PROJECT } from '@core/project/infrastructure/constants';
-import { FindTeamMemberQuery } from '@core/teams';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { BaseException } from '@shared/error';
 
+import { FindTeamMemberQuery } from '../../../../team';
 import { AddProjectMemberDto } from '../../dtos';
 
 @Injectable()

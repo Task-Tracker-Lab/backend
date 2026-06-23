@@ -1,0 +1,17 @@
+import { baseSchema } from '@shared/entities';
+
+export const roleEnum = baseSchema.enum('team_role', [
+    'owner',
+    'admin', // управление юзерами, настройками
+    'member', // обычный работяга
+    'viewer', // просто смотрит
+]);
+export type TeamRole = (typeof roleEnum.enumValues)[number];
+
+export const statusEnum = baseSchema.enum('member_status', [
+    'active', // Полноценный участник
+    'banned', // Заблокирован не может вернуться по инвайту
+    'inactive', // Доступ закрыт, но запись сохранена
+]);
+
+export type TeamMemberStatus = (typeof statusEnum.enumValues)[number];
