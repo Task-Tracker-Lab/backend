@@ -19,7 +19,7 @@ export class DeleteAreaUseCase {
                 'owner',
             ]);
 
-            const area = await this.areaRepo.findBySlug(project.id, key);
+            const area = await this.areaRepo.findBySlug(key, project.id);
 
             if (!area) {
                 throw new BaseException(
