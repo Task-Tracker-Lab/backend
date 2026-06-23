@@ -28,7 +28,7 @@ export class GetInvitationsQuery {
                     total: 0,
                     totalPages: 0,
                     page: 1,
-                    limit: 0,
+                    limit: 10,
                     hasPrevPage: false,
                     hasNextPage: false,
                 },
