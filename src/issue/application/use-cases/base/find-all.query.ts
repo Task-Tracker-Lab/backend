@@ -3,7 +3,7 @@ import { CheckVisibilityOrThrowQuery } from '@core/project/application/use-cases
 import { ProjectAccessPolicy } from '@core/project/domain/policy';
 import { Inject, Injectable } from '@nestjs/common';
 
-import { IssueQueryDto } from '../../dtos';
+import { IssueFiltersQueryDto } from '../../dtos';
 import { IssueMapper } from '../../mappers';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class FindAllIssueQuery {
         private readonly projectPolicy: ProjectAccessPolicy,
     ) {}
 
-    async execute(query: IssueQueryDto, userId: string) {
+    async execute(query: IssueFiltersQueryDto, userId: string) {
         const visibility = await this.projectVisibility.execute(query.slug);
 
         if (visibility === 'private') {

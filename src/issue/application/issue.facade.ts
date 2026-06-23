@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import {
     AssignIssueDto,
     CreateIssueDto,
-    IssueQueryDto,
+    IssueFiltersQueryDto,
     MoveIssueDto,
     UpdateIssueDto,
 } from './dtos';
@@ -37,7 +37,7 @@ export class IssueFacade {
     public getOne = async (id: string, slug: string, userId: string) =>
         this.getOneIssueQ.execute(id, slug, userId);
 
-    public getAll = async (query: IssueQueryDto, userId: string) =>
+    public getAll = async (query: IssueFiltersQueryDto, userId: string) =>
         this.getAllIssueQ.execute(query, userId);
 
     public update = async (

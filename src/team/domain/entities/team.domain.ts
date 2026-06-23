@@ -8,5 +8,5 @@ export type TeamMember = InferSelectModel<typeof teamMembers>;
 export type NewTeamMember = InferInsertModel<typeof teamMembers>;
 
 export type TeamWithMembers = Team & {
-    readonly members: readonly TeamMember[];
+    members: TeamMember[];
 };

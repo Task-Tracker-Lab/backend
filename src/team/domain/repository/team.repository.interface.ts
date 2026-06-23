@@ -6,7 +6,7 @@ type TResponse = { success: boolean; teamId: string };
 
 export type RawMemberRow = {
     userId: string;
-    role: string;
+    role: 'owner' | 'admin' | 'member' | 'viewer';
     status: string;
     joinedAt: string | null;
     firstName: string;
