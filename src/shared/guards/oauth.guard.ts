@@ -1,14 +1,9 @@
 import { HttpStatus, Injectable, type CanActivate, type ExecutionContext } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { BaseException } from '@shared/error';
 
-import type { FastifyReply } from 'fastify';
-
 @Injectable()
 export class OAuthGuard implements CanActivate {
-    constructor(private readonly cfg: ConfigService) {}
-
     private readonly guardClasses: Record<'google' | 'github' | 'yandex' | 'vkontakte', any> = {
         google: AuthGuard('google-oauth'),
         github: AuthGuard('github-oauth'),
@@ -17,7 +12,6 @@ export class OAuthGuard implements CanActivate {
     };
 
     async canActivate(context: ExecutionContext) {
-        const response = context.switchToHttp().getResponse<FastifyReply>();
         const request = context.switchToHttp().getRequest();
         const provider = request.params.provider;
         const query = request.query.state;
@@ -51,16 +45,13 @@ export class OAuthGuard implements CanActivate {
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
 
-            const domain = this.cfg.get('DOMAIN');
-            const baseUrl = domain ? `https://${domain}` : '';
-
-            const query = new URLSearchParams({
-                success: 'false',
-                error: 'OAUTH_AUTHENTICATION_FAILED',
-                message: `Ошибка авторизации через ${provider}: ${message || 'Неизвестная ошибка'}`,
-            });
-
-            return response.redirect(`${baseUrl}/oauth?${query.toString()}`, 302);
+            throw new BaseException(
+                {
+                    code: 'OAUTH_AUTHENTICATION_FAILED',
+                    message: `Ошибка авторизации через ${provider}: ${message || 'Неизвестная ошибка'}`,
+                },
+                HttpStatus.UNAUTHORIZED,
+            );
         }
     }
 

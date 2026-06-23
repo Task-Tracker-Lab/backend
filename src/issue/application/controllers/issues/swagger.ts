@@ -1,0 +1,466 @@
+import { applyDecorators, SetMetadata } from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiListQuery } from '@shared/decorators';
+import {
+    ApiConflict,
+    ApiForbidden,
+    ApiNotFound,
+    ApiUnauthorized,
+    ApiValidationError,
+} from '@shared/error';
+import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
+import { ActionResponse } from '@shared/schemas';
+
+import {
+    AssignIssueDto,
+    CreateIssueDto,
+    CreateIssueResponse,
+    IssueResponse,
+    IssuesResponse,
+    MoveIssueDto,
+    UpdateIssueDto,
+} from '../../dtos';
+
+export const CreateIssueSwagger = () =>
+    applyDecorators(
+        ApiOperation({
+            summary: 'Создать новую задачу',
+            description: [
+                'Создаёт задачу на доске. По сути это карточка, которая появляется в одной из колонок.',
+                '',
+                '### Как работает',
+                '- Задача всегда создаётся в определённой колонке на доске (состоянии)',
+                '- Если колонка не указана — задача попадёт в крайнюю левую колонку (обычно «Бэклог»)',
+                '- Можно сразу назначить исполнителя, указать приоритет и тип задачи',
+                '',
+                '### Типы задач',
+                '- `TASK` — обычная задача',
+                '- `BUG` — баг (автоматически считается критичным)',
+                '- `EPIC` — эпик (крупная задача, может содержать подзадачи)',
+                '',
+                '### Приоритеты',
+                '- `LOW` — низкий (можно отложить)',
+                '- `MEDIUM` — средний (по умолчанию)',
+                '- `HIGH` — высокий (требует внимания)',
+                '- `CRITICAL` — критический (блокирует работу)',
+                '',
+                '### Иерархия',
+                '- Можно указать `parentId` — родительскую задачу',
+                '- Это позволяет строить деревья: Эпик → Задача → Подзадача',
+                '- Баг тоже может быть привязан к эпику или задаче',
+                '',
+                '### Метки',
+                '- Произвольный набор текстовых меток для категоризации',
+                '- Пример: `["backend", "auth", "high-priority"]`',
+                '- Метки создаются автоматически, если их ещё нет',
+            ].join('\n'),
+        }),
+        ApiBody({
+            type: CreateIssueDto.Output,
+            description: 'Данные для создания задачи',
+        }),
+        ApiResponse({
+            status: 201,
+            description: 'Задача успешно создана',
+            type: CreateIssueResponse.Output,
+        }),
+        ApiValidationError(),
+        ApiUnauthorized(),
+        ApiForbidden('Нет прав для создания задач на этой доске'),
+        ApiNotFound('Указанная колонка не найдена'),
+        ApiConflict('Задача с таким заголовком уже существует в этой колонке'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, CreateIssueResponse),
+    );
+
+export const GetAllIssuesSwagger = () =>
+    applyDecorators(
+        ApiOperation({
+            summary: 'Получить список задач с фильтрацией',
+            description: [
+                'Возвращает задачи с учётом фильтров, сортировки и пагинации.',
+                '',
+                '### Основной сценарий — отображение доски',
+                '- Передайте `areaId` чтобы получить все задачи конкретной области',
+                '- Задачи будут сгруппированы по колонкам и отсортированы по позиции',
+                '- Это позволяет отрисовать Kanban-доску одним запросом',
+                '',
+                '### Фильтры',
+                '- `areaId` — показать задачи только с этой области (доски)',
+                '- `stateId` — показать задачи конкретного состояния (колонки)',
+                '- `assigneeId` — задачи конкретного исполнителя',
+                '- `priority` — фильтр по приоритету (LOW, MEDIUM, HIGH, CRITICAL)',
+                '- `type` — фильтр по типу (TASK, BUG, EPIC)',
+                '- `labels` — фильтр по меткам (через запятую). Задача должна иметь ВСЕ указанные метки (AND)',
+                '- `search` — полнотекстовый поиск по заголовку и описанию',
+                '',
+                '### Сортировка',
+                '- `sortBy` — поле для сортировки: `positionInColumn`, `createdAt`, `updatedAt`, `priority`',
+                '- `sortOrder` — направление: `ASC` или `DESC`',
+                '- По умолчанию сортировка по `positionInColumn ASC` — как на доске',
+                '',
+                '### Пагинация',
+                '- `limit` — количество задач на страницу (по умолчанию 50, максимум 200)',
+                '- `offset` — смещение для пагинации (по умолчанию 0)',
+                '',
+                '### Примеры использования',
+                '- Все задачи на доске: `GET /v1/issues?areaId=xxx`',
+                '- Мои задачи: `GET /v1/issues?assigneeId=yyy`',
+                '- Критические баги: `GET /v1/issues?type=BUG&priority=CRITICAL`',
+                '- Поиск: `GET /v1/issues?search=oauth+error`',
+            ].join('\n'),
+        }),
+        ApiQuery({
+            name: 'areaId',
+            required: false,
+            type: 'string',
+            format: 'uuid',
+            description: 'ID доски — показать задачи только с этой доски',
+            example: 'd4e5f6a7-b8c9-0123-defa-234567890123',
+        }),
+        ApiQuery({
+            name: 'stateId',
+            required: false,
+            type: 'string',
+            format: 'uuid',
+            description: 'ID колонки — показать задачи в конкретной колонке',
+            example: 'b8c9d0e1-f2a3-4567-bcde-678901234567',
+        }),
+        ApiQuery({
+            name: 'assigneeId',
+            required: false,
+            type: 'string',
+            format: 'uuid',
+            description: 'ID исполнителя — только задачи этого пользователя',
+            example: 'b2c3d4e5-f6a7-8901-bcde-f12345678901',
+        }),
+        ApiQuery({
+            name: 'priority',
+            required: false,
+            enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'],
+            description: 'Фильтр по приоритету',
+            example: 'HIGH',
+        }),
+        ApiQuery({
+            name: 'type',
+            required: false,
+            enum: ['TASK', 'BUG', 'EPIC'],
+            description: 'Фильтр по типу задачи',
+            example: 'BUG',
+        }),
+        ApiQuery({
+            name: 'labels',
+            required: false,
+            type: 'string',
+            description: 'Метки через запятую (AND — задача должна иметь все)',
+            example: 'backend,auth',
+        }),
+        ApiListQuery({
+            sortableFields: ['position'],
+            withSearch: true,
+            defaultSortField: 'position',
+            defaultSortOrder: 'asc',
+        }),
+        ApiResponse({
+            status: 200,
+            description: 'Список задач получен',
+            type: IssuesResponse.Output,
+        }),
+        ApiUnauthorized(),
+        ApiNotFound('Доска не найдена'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, IssuesResponse),
+    );
+
+export const GetOneIssueSwagger = () =>
+    applyDecorators(
+        ApiOperation({
+            summary: 'Получить детали задачи',
+            description: [
+                'Возвращает полную информацию о задаче со всеми связями.',
+                '',
+                '### Что включает ответ',
+                '- Основные поля: заголовок, описание, приоритет, тип',
+                '- Позиционирование: на какой доске и в какой колонке находится, позиция в колонке',
+                '- Исполнитель: кто назначен (с именем и ID)',
+                '- Иерархия: ID родительской задачи, если есть',
+                '- Метки: список всех меток задачи',
+                '- Временные метки: когда создана и обновлена',
+                '',
+                '### Когда использовать',
+                '- Открытие карточки задачи в модальном окне',
+                '- Получение полных данных перед редактированием',
+                '- Просмотр деталей задачи из уведомления',
+            ].join('\n'),
+        }),
+        ApiParam({
+            name: 'id',
+            type: 'string',
+            format: 'uuid',
+            description: 'ID задачи',
+            example: '33333333-3333-3333-3333-333333333333',
+        }),
+        ApiResponse({
+            status: 200,
+            description: 'Информация о задаче получена',
+            type: IssueResponse.Output,
+        }),
+        ApiNotFound('Задача не найдена или удалена'),
+        ApiUnauthorized(),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, IssueResponse),
+    );
+
+export const UpdateIssueSwagger = () =>
+    applyDecorators(
+        ApiOperation({
+            summary: 'Обновить метаданные задачи',
+            description: [
+                'Частичное обновление полей задачи. Передаются только те поля, которые нужно изменить.',
+                '',
+                '### Что можно обновить',
+                '- `title` — заголовок задачи',
+                '- `description` — описание (поддерживает Markdown)',
+                '- `priority` — приоритет (LOW, MEDIUM, HIGH, CRITICAL)',
+                '- `type` — тип (TASK, BUG, EPIC)',
+                '- `parentId` — привязка к родительской задаче',
+                '- `labels` — полный список меток (перезаписывает существующие)',
+                '',
+                '### Важные моменты',
+                '- Это НЕ перемещение задачи по доске — используйте `POST /move`',
+                '- Это НЕ назначение исполнителя — используйте `PUT /assignee`',
+                '- Метки передаются полным списком — старые метки заменяются новыми',
+                '- Можно передать `parentId: null` чтобы отвязать от родителя',
+                '',
+                '### Примеры',
+                '- Повысить приоритет: `{ "priority": "CRITICAL" }`',
+                '- Обновить метки: `{ "labels": ["backend", "auth", "security"] }`',
+                '- Сделать подзадачей: `{ "parentId": "99999999-9999-..." }`',
+            ].join('\n'),
+        }),
+        ApiParam({
+            name: 'id',
+            type: 'string',
+            format: 'uuid',
+            description: 'ID задачи',
+            example: '33333333-3333-3333-3333-333333333333',
+        }),
+        ApiBody({
+            type: UpdateIssueDto.Output,
+            description: 'Обновляемые поля (только те, что нужно изменить)',
+        }),
+        ApiResponse({
+            status: 200,
+            description: 'Задача обновлена',
+            type: ActionResponse.Output,
+        }),
+        ApiValidationError(),
+        ApiNotFound('Задача не найдена или удалена'),
+        ApiUnauthorized(),
+        ApiForbidden('Нет прав для редактирования этой задачи'),
+        ApiConflict('Задача с таким заголовком уже существует'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
+    );
+
+export const MoveIssueSwagger = () =>
+    applyDecorators(
+        ApiOperation({
+            summary: 'Переместить задачу по доске',
+            description: [
+                'Перемещает задачу в другую колонку и/или меняет её позицию внутри колонки.',
+                'Это основная операция Kanban — перетаскивание карточек между колонками.',
+                '',
+                '### Как работает перемещение',
+                '- Задача переносится в целевую колонку (`targetColumnId`)',
+                '- Вставляется на указанную позицию (`position`, начиная с 0)',
+                '- Все остальные задачи в обеих колонках автоматически сдвигаются',
+                '',
+                '### Смена доски',
+                '- Если целевая колонка принадлежит другой доске — задача автоматически меняет доску',
+                '- Это происходит прозрачно, дополнительно указывать `boardId` не нужно',
+                '',
+                '### Позиционирование',
+                '- `position: 0` — задача становится первой в колонке (самая верхняя)',
+                '- `position: 3` — задача вставляется на 4-ю позицию',
+                '- Задачи ниже указанной позиции сдвигаются вниз (+1)',
+                '',
+                '### Типичные сценарии',
+                '- Взял в работу: переместить из «To Do» в «In Progress» на позицию 0',
+                '- Отправил на ревью: переместить из «In Progress» в «Code Review» в конец',
+                '- Drag-and-drop: перетащил карточку мышкой — фронтенд отправляет этот запрос',
+                '- Перемещение бага между досками: из «Bug Tracker» в «Development Board»',
+                '',
+                '### Ограничения',
+                '- Нельзя переместить удалённую задачу',
+                '- Целевая колонка должна существовать и быть активной (не архивной)',
+                '- В будущем: проверка WIP-лимитов колонки',
+            ].join('\n'),
+        }),
+        ApiParam({
+            name: 'id',
+            type: 'string',
+            format: 'uuid',
+            description: 'ID перемещаемой задачи',
+            example: '33333333-3333-3333-3333-333333333333',
+        }),
+        ApiBody({
+            type: MoveIssueDto.Output,
+            description: 'Целевая колонка и новая позиция',
+        }),
+        ApiResponse({
+            status: 200,
+            description:
+                'Задача успешно перемещена. Возвращает обновлённую задачу с новыми column и position',
+            type: ActionResponse.Output,
+        }),
+        ApiValidationError(),
+        ApiNotFound('Задача или целевая колонка не найдена'),
+        ApiUnauthorized(),
+        ApiForbidden('Нет прав для перемещения задач на этой доске'),
+        ApiConflict('Нарушен WIP-лимит целевой колонки'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
+    );
+
+export const AssignIssueSwagger = () =>
+    applyDecorators(
+        ApiOperation({
+            summary: 'Назначить или снять исполнителя',
+            description: [
+                'Операция назначения ответственного за задачу.',
+                '',
+                '### Как работает',
+                '- Передайте `assigneeId` — пользователь будет назначен исполнителем',
+                '- Передайте `assigneeId: null` — исполнитель будет снят (задача станет «ничьей»)',
+                '- Предыдущий исполнитель автоматически снимается',
+                '',
+                '### Бизнес-логика',
+                '- При назначении создаётся запись в истории изменений (audit log)',
+                '- В будущем: отправка уведомления новому исполнителю',
+                '- В будущем: проверка, не перегружен ли исполнитель',
+                '',
+                '### Сценарии',
+                '- Самоназначение: разработчик берёт задачу из бэклога',
+                '- Переназначение: техлид передаёт задачу другому разработчику',
+                '- Снятие: задача возвращается в бэклог без исполнителя',
+                '',
+                '### Отличие от PATCH',
+                '- Это отдельный эндпоинт, а не часть общего PATCH',
+                '- Назначение — это бизнес-операция со своими правилами и сайд-эффектами',
+                '- Позволяет явно логировать смену ответственного',
+            ].join('\n'),
+        }),
+        ApiParam({
+            name: 'id',
+            type: 'string',
+            format: 'uuid',
+            description: 'ID задачи',
+            example: '33333333-3333-3333-3333-333333333333',
+        }),
+        ApiBody({
+            type: AssignIssueDto.Output,
+            description: 'ID нового исполнителя (или null чтобы снять)',
+        }),
+        ApiResponse({
+            status: 200,
+            description: 'Исполнитель назначен или снят',
+            type: ActionResponse.Output,
+        }),
+        ApiValidationError(),
+        ApiNotFound('Задача не найдена или удалена'),
+        ApiUnauthorized(),
+        ApiForbidden('Нет прав для назначения исполнителей'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
+    );
+
+export const DeleteIssueSwagger = () =>
+    applyDecorators(
+        ApiOperation({
+            summary: 'Мягкое удаление задачи',
+            description: [
+                'Мягкое удаление задачи — она перестаёт отображаться на доске, но данные сохраняются.',
+                '',
+                '### Как работает мягкое удаление',
+                '- Задача помечается как удалённая (`deletedAt` устанавливается в текущее время)',
+                '- Задача исчезает с доски и из всех списков',
+                '- Данные задачи сохраняются в базе',
+                '- Связи с метками сохраняются',
+                '',
+                '### Ограничения',
+                '- Нельзя удалить задачу, если у неё есть активные подзадачи',
+                '- Нужно сначала удалить или переместить все подзадачи',
+                '- Это защита от случайного удаления родительской задачи',
+                '',
+                '### Восстановление',
+                '- Удалённую задачу можно восстановить через `POST /restore`',
+                '- При восстановлении задача вернётся в ту же колонку',
+                '- Позиция будет восстановлена в конец колонки',
+                '',
+                '### Отличие от полного удаления',
+                '- Полное удаление (hard delete) не предусмотрено в API',
+                '- Это обеспечивает сохранность данных и возможность аудита',
+            ].join('\n'),
+        }),
+        ApiParam({
+            name: 'id',
+            type: 'string',
+            format: 'uuid',
+            description: 'ID задачи',
+            example: '33333333-3333-3333-3333-333333333333',
+        }),
+        ApiResponse({
+            status: 204,
+            description: 'Задача успешно удалена (мягкое удаление)',
+        }),
+        ApiNotFound('Задача не найдена или уже удалена'),
+        ApiUnauthorized(),
+        ApiForbidden('Нет прав для удаления этой задачи'),
+        ApiConflict('Нельзя удалить задачу с активными подзадачами'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
+    );
+
+export const RestoreIssueSwagger = () =>
+    applyDecorators(
+        ApiOperation({
+            summary: 'Восстановить удалённую задачу',
+            description: [
+                'Восстанавливает мягко удалённую задачу.',
+                '',
+                '### Что восстанавливается',
+                '- Сама задача со всеми метаданными',
+                '- Связи с метками',
+                '- Привязка к исполнителю (если был)',
+                '- Родительская связь (если была)',
+                '',
+                '### Позиционирование',
+                '- Задача возвращается в ту же колонку, где была до удаления',
+                '- Позиция: в конец колонки (последней)',
+                '- Это позволяет быстро вернуть задачу без конфликтов позиционирования',
+                '',
+                '### Когда использовать',
+                '- Задачу удалили по ошибке',
+                '- Решили вернуть отложенную задачу в работу',
+                '- Восстановление архивных задач при пересмотре планов',
+            ].join('\n'),
+        }),
+        ApiParam({
+            name: 'id',
+            type: 'string',
+            format: 'uuid',
+            description: 'ID удалённой задачи',
+            example: '33333333-3333-3333-3333-333333333333',
+        }),
+        ApiResponse({
+            status: 200,
+            description: 'Задача восстановлена',
+            type: ActionResponse.Output,
+        }),
+        ApiNotFound('Удалённая задача не найдена'),
+        ApiUnauthorized(),
+        ApiForbidden('Нет прав для восстановления задач'),
+
+        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
+    );
