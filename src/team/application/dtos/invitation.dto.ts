@@ -1,4 +1,3 @@
-import { createPaginationSchema } from '@shared/schemas';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod/v4';
 
@@ -37,9 +36,7 @@ export const TeamInvitationSchema = z.object({
 
 export class TeamInvitationResponse extends createZodDto(TeamInvitationSchema) {}
 
-export class TeamInvitationsResponse extends createZodDto(
-    createPaginationSchema(TeamInvitationSchema),
-) {}
+export class TeamInvitationsResponse extends createZodDto(z.array(TeamInvitationSchema)) {}
 
 export interface TeamInvite {
     readonly teamId: string;

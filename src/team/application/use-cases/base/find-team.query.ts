@@ -1,4 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { BaseException } from '@shared/error';
+import { ImageHelper } from '@shared/utils';
 
 import { ITeamRepository } from '../../../domain/repository';
 
@@ -7,10 +10,31 @@ export class FindTeamQuery {
     constructor(
         @Inject('ITeamRepository')
         private readonly repository: ITeamRepository,
+        private readonly cfg: ConfigService,
     ) {}
 
     async execute(teamId: string) {
-        //TODO: add avatarURL handling
-        return this.repository.findById(teamId);
+        const team = await this.repository.findById(teamId);
+
+        if (!team) {
+            throw new BaseException(
+                {
+                    code: 'NOT_FOUND',
+                    message: 'Команда не найдена',
+                },
+                HttpStatus.NOT_FOUND,
+            );
+        }
+
+        const { avatarUrl, coverUrl, ...other } = team;
+
+        const avatar = ImageHelper.responsive(this.cfg, avatarUrl);
+        const cover = ImageHelper.responsive(this.cfg, coverUrl);
+
+        return {
+            ...other,
+            cover,
+            avatar,
+        };
     }
 }

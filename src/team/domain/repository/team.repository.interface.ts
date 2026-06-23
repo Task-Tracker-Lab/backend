@@ -1,27 +1,28 @@
-import type { TeamRole, TeamMemberStatus } from '../../infrastructure/persistence/models';
+import type { TeamMembersQuery } from '../../application/dtos';
 import type { Team, NewTeam, NewTeamMember } from '../entities';
+import type { CursorResult } from '@libs/database';
 
-type TResponse = { readonly success: boolean; readonly teamId: string };
+type TResponse = { success: boolean; teamId: string };
 
 export type RawMemberRow = {
-    readonly userId: string;
-    readonly role: TeamRole;
-    readonly status: TeamMemberStatus;
-    readonly joinedAt: string | null;
-    readonly firstName: string | null;
-    readonly lastName: string | null;
-    readonly middleName: string | null;
-    readonly avatarUrl: string | null;
-    readonly email?: string;
+    userId: string;
+    role: string;
+    status: string;
+    joinedAt: string | null;
+    firstName: string;
+    lastName: string | null;
+    middleName: string | null;
+    avatarUrl: string | null;
+    email?: string;
 };
 
 export type RawMemberTeams = {
-    readonly id: string;
-    readonly name: string;
-    readonly description: string | null;
-    readonly avatarUrl: string | null;
-    readonly role: string;
-    readonly joinedAt: string | null;
+    id: string;
+    name: string;
+    description: string | null;
+    avatarUrl: string | null;
+    role: string;
+    joinedAt: string | null;
 };
 
 export interface ITeamRepository {
@@ -30,7 +31,7 @@ export interface ITeamRepository {
     remove(id: string, userId: string): Promise<boolean>;
 
     findMember(teamId: string, userId: string): Promise<RawMemberRow | null>;
-    findMembers(teamId: string): Promise<RawMemberRow[]>;
+    findMembers(teamId: string, query?: TeamMembersQuery): Promise<CursorResult<RawMemberRow>>;
     findById(teamId: string): Promise<Team | null>;
     findByUser(userId: string): Promise<RawMemberTeams[]>;
 

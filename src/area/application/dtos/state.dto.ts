@@ -1,5 +1,5 @@
 import { STATE_CATEGORIES, STATE_TYPES } from '@core/area/domain/entities';
-import { createSortingSchema, PaginationBaseSchema, ActionResponseSchema } from '@shared/schemas';
+import { createSortingSchema, CursorQuerySchema, ActionResponseSchema } from '@shared/schemas';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod/v4';
 
@@ -147,16 +147,7 @@ export const QueryParamsSchema = z
         category: z.string().optional().describe('Фильтр по категории'),
         overdue: z.boolean().optional().default(false).describe('Только просроченные'),
     })
-    .extend(PaginationBaseSchema.shape)
-    .extend(createSortingSchema(['order', 'title', 'tasksCount', 'createdAt']).shape)
-    .transform((data) => {
-        if (data.page > 1 && data.offset === 0) {
-            return {
-                ...data,
-                offset: (data.page - 1) * (data.limit || 20),
-            };
-        }
-        return data;
-    });
+    .extend(CursorQuerySchema.shape)
+    .extend(createSortingSchema(['order', 'title', 'tasksCount', 'createdAt']).shape);
 
 export class QueryParamsDto extends createZodDto(QueryParamsSchema) {}

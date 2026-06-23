@@ -1,7 +1,7 @@
 import { Body, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBaseController, GetUserId, Public } from '@shared/decorators';
 
-import { CreateProjectDto, CreateShareTokenDto, UpdateProjectDto } from '../../dtos';
+import { CreateProjectDto, CreateShareTokenDto, ProjectQuery, UpdateProjectDto } from '../../dtos';
 import { ProjectFacade } from '../../project.facade';
 
 import {
@@ -21,8 +21,12 @@ export class ProjectsController {
 
     @Get()
     @FindAllProjectsSwagger()
-    async findAll(@Param('teamId') teamId: string, @GetUserId() userId: string) {
-        return this.facade.getTeamProjects(teamId, userId);
+    async findAll(
+        @Param('teamId') teamId: string,
+        @GetUserId() userId: string,
+        @Query() query: ProjectQuery,
+    ) {
+        return this.facade.getTeamProjects(teamId, userId, query);
     }
 
     @Get(':slug')

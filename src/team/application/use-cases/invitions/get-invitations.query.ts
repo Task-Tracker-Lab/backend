@@ -37,18 +37,7 @@ export class GetInvitationsQuery {
         const codes = await this.cacheService.getCollection(teamKey);
 
         if (!codes.length) {
-            return {
-                // TODO: реализовать полноценную пагинацию для инвайтов команды.
-                items: [],
-                meta: {
-                    total: 0,
-                    totalPages: 0,
-                    page: 1,
-                    limit: 10,
-                    hasPrevPage: false,
-                    hasNextPage: false,
-                },
-            };
+            return [];
         }
 
         const results = await this.cacheService.getMany(codes.map(this.INVITES_KEY));
@@ -76,18 +65,7 @@ export class GetInvitationsQuery {
                 .catch((e) => console.error('Cleanup error:', e));
         }
 
-        return {
-            // TODO: реализовать полноценную пагинацию для инвайтов команды.
-            items: active,
-            meta: {
-                total: active.length,
-                totalPages: active.length ? 1 : 0,
-                page: 1,
-                limit: 10,
-                hasPrevPage: false,
-                hasNextPage: false,
-            },
-        };
+        return active;
     }
 
     private validateAccess(member: RawMemberRow) {

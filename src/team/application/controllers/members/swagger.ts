@@ -6,6 +6,7 @@ import {
 } from '@core/team/application/dtos';
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiCursorPagination, ApiSearchFilter } from '@shared/decorators';
 import { ApiForbidden, ApiNotFound, ApiUnauthorized } from '@shared/error';
 import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
 import { ActionResponse } from '@shared/schemas';
@@ -48,6 +49,8 @@ export const GetMembersSwagger = () =>
     applyDecorators(
         ApiOperation({ summary: 'Получить список всех участников команды' }),
         ApiParam({ name: 'teamId', description: 'Уникальный идентификатор команды' }),
+        ApiCursorPagination(),
+        ApiSearchFilter(),
         ApiResponse({
             status: 200,
             description: 'Список участников получен',

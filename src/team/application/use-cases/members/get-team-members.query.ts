@@ -4,6 +4,7 @@ import { BaseException } from '@shared/error';
 
 import { TeamMemberMapper } from '../../../application/mappers';
 import { ITeamRepository } from '../../../domain/repository';
+import { TeamMembersQuery } from '../../dtos';
 
 @Injectable()
 export class GetTeamMembersQuery {
@@ -13,7 +14,7 @@ export class GetTeamMembersQuery {
         private readonly cfg: ConfigService,
     ) {}
 
-    async execute(teamId: string) {
+    async execute(teamId: string, query?: TeamMembersQuery) {
         const team = await this.teamRepo.findById(teamId);
 
         if (!team) {
@@ -22,29 +23,13 @@ export class GetTeamMembersQuery {
                 HttpStatus.NOT_FOUND,
             );
         }
-        const cdn = this.getCdnBaseUrl();
-        const members = await this.teamRepo.findMembers(team.id);
-        const data = TeamMemberMapper.toList(members, cdn);
+
+        const { items, meta } = await this.teamRepo.findMembers(team.id, query);
+        const data = TeamMemberMapper.toList(items, this.cfg);
 
         return {
-            // TODO: реализовать полноценную пагинацию для участников команды.
             items: data,
-            meta: {
-                total: data.length,
-                totalPages: data.length ? 1 : 0,
-                page: 1,
-                limit: data.length,
-                hasPrevPage: false,
-                hasNextPage: false,
-            },
+            meta,
         };
-    }
-
-    private getCdnBaseUrl(): string {
-        const domain = this.cfg.get<string>('DOMAIN');
-        const bucket = this.cfg.get<string>('S3_BUCKET_NAME');
-        const endpoint = this.cfg.get<string>('S3_ENDPOINT');
-
-        return domain ? `https://cdn.${domain}/${bucket}` : `${endpoint}/${bucket}`;
     }
 }

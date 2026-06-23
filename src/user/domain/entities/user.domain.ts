@@ -23,18 +23,18 @@ export type UserActivity = InferSelectModel<typeof userActivity>;
 export type NewUserActivity = InferInsertModel<typeof userActivity>;
 
 export type UserProfile = {
-    readonly user: User;
-    readonly security: {
-        readonly lastPasswordChange: string | null;
-        readonly is2faEnabled: boolean;
+    user: User;
+    security: {
+        lastPasswordChange: string | null;
+        is2faEnabled: boolean;
     };
-    readonly preferences: UserPreferences | null;
-    readonly notifications: NotificationSettings;
+    preferences: UserPreferences | null;
+    notifications: NotificationSettings;
 };
 
 export type UserWithSecurity = {
-    readonly user: User;
-    readonly security: {
-        readonly passwordHash: string | null;
+    user: User;
+    security: {
+        passwordHash: string | null;
     };
 };

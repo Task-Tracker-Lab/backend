@@ -8,22 +8,18 @@ import type {
     UserProfile,
     UserWithSecurity,
 } from '../entities';
+import type { CursorResult } from '@libs/database';
+import type { CursorQuery } from '@shared/schemas';
 
-type DeepPartial<T> = { readonly [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P] };
+type DeepPartial<T> = { [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P] };
 
 export interface IUserRepository {
     create(data: NewUser): Promise<User>;
     findById(id: string): Promise<UserWithSecurity | null>;
-    findByIds(ids: readonly string[]): Promise<readonly User[]>;
+    findByIds(ids: string[]): Promise<User[]>;
     findByEmail(email: string): Promise<UserWithSecurity | null>;
     findProfile(id: string): Promise<UserProfile>;
-    findActivityByUser(
-        userId: string,
-        options: { readonly limit: number; readonly offset: number },
-    ): Promise<{
-        readonly items: readonly UserActivity[];
-        readonly total: number;
-    }>;
+    findActivityByUser(userId: string, options: CursorQuery): Promise<CursorResult<UserActivity>>;
     updateAvatar(id: string, url: string): Promise<boolean>;
     updateProfile(
         id: string,

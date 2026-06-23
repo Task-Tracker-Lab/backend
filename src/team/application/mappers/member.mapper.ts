@@ -1,15 +1,16 @@
 import { ImageHelper } from '@shared/utils';
 
 import type { RawMemberRow, RawMemberTeams } from '../../domain/repository';
+import type { ConfigService } from '@nestjs/config';
 
 export class TeamMemberMapper {
-    public static toDetail(row: RawMemberRow, cdn: string) {
+    public static toDetail(row: RawMemberRow, cfg: ConfigService) {
         const { firstName, lastName, middleName, avatarUrl, userId, ...rest } = row;
 
         const fullName =
             [lastName, firstName, middleName].filter(Boolean).join(' ') || 'Unknown User';
 
-        const avatar = ImageHelper.buildResponsiveUrls(cdn, avatarUrl);
+        const avatar = ImageHelper.responsive(cfg, avatarUrl);
 
         return {
             id: userId,
@@ -23,14 +24,14 @@ export class TeamMemberMapper {
         };
     }
 
-    public static toList(rows: readonly RawMemberRow[], cdn: string) {
-        return rows.map((row) => this.toDetail(row, cdn));
+    public static toList(rows: readonly RawMemberRow[], cfg: ConfigService) {
+        return rows.map((row) => this.toDetail(row, cfg));
     }
 
-    public static toUserTeam(data: RawMemberTeams, cdn: string) {
+    public static toUserTeam(data: RawMemberTeams, cfg: ConfigService) {
         const { role, avatarUrl, ...row } = data;
 
-        const avatar = ImageHelper.buildResponsiveUrls(cdn, avatarUrl);
+        const avatar = ImageHelper.responsive(cfg, avatarUrl);
 
         return {
             id: row.id,

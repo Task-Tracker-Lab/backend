@@ -29,9 +29,8 @@ export class FindProfileQuery {
         const { notifications, preferences, security, user } = entity;
 
         const { id, email, avatarUrl, ...profile } = user;
-        const cdn = this.getCdnBaseUrl();
 
-        const avatar = ImageHelper.buildResponsiveUrls(cdn, avatarUrl);
+        const avatar = ImageHelper.responsive(this.cfg, avatarUrl);
 
         return {
             id,
@@ -48,13 +47,5 @@ export class FindProfileQuery {
             security,
             notifications,
         };
-    }
-
-    private getCdnBaseUrl(): string {
-        const domain = this.cfg.get<string>('DOMAIN');
-        const bucket = this.cfg.get<string>('S3_BUCKET_NAME');
-        const endpoint = this.cfg.get<string>('S3_ENDPOINT');
-
-        return domain ? `https://cdn.${domain}/${bucket}` : `${endpoint}/${bucket}`;
     }
 }
