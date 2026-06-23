@@ -22,7 +22,7 @@ describe('AuthorizationService - Permissions Matrix', () => {
             role,
             status: 'active',
             joinedAt: null,
-            firstName: null,
+            firstName: 'test',
             lastName: null,
             middleName: null,
             avatarUrl: null,

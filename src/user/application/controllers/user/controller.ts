@@ -1,6 +1,6 @@
 import { Body, Get, Patch, Query } from '@nestjs/common';
 import { ApiBaseController, GetUserId } from '@shared/decorators';
-import { PaginationQuery } from '@shared/schemas';
+import { CursorQuery } from '@shared/schemas';
 
 import { UpdateProfileDto } from '../../dtos';
 import { UserFacade } from '../../user.facade';
@@ -25,7 +25,7 @@ export class UserController {
 
     @Get('activity')
     @GetMeActivitySwagger()
-    async getActivity(@Query() query: PaginationQuery, @GetUserId() id: string) {
+    async getActivity(@Query() query: CursorQuery, @GetUserId() id: string) {
         return this.facade.getActivity(id, query);
     }
 }

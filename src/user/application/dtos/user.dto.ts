@@ -1,4 +1,4 @@
-import { AvatarResponseSchema, createPaginationSchema } from '@shared/schemas';
+import { AvatarResponseSchema, createCursorResponseSchema } from '@shared/schemas';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod/v4';
 
@@ -185,8 +185,8 @@ const UserActivityItemSchema = z
     })
     .describe('Элемент активности пользователя');
 
-export const UserActivityResponseSchema = createPaginationSchema(UserActivityItemSchema).describe(
-    'Ответ со списком активности пользователя',
-);
+export const UserActivityResponseSchema = createCursorResponseSchema(
+    UserActivityItemSchema,
+).describe('Ответ со списком активности пользователя');
 
 export class UserActivityResponse extends createZodDto(UserActivityResponseSchema) {}

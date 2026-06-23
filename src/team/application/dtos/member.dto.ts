@@ -1,4 +1,9 @@
-import { AvatarResponseSchema, createPaginationSchema } from '@shared/schemas';
+import {
+    AvatarResponseSchema,
+    createCursorResponseSchema,
+    CursorQuerySchema,
+    SearchFilterSchema,
+} from '@shared/schemas';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod/v4';
 
@@ -51,7 +56,7 @@ export const TeamMemberResponseSchema = z.object({
 export class TeamMemberResponse extends createZodDto(TeamMemberResponseSchema) {}
 
 export class TeamMembersResponse extends createZodDto(
-    createPaginationSchema(TeamMemberResponseSchema),
+    createCursorResponseSchema(TeamMemberResponseSchema),
 ) {}
 
 export const UserInviteSchema = z.object({
@@ -74,4 +79,11 @@ export const UserInviteSchema = z.object({
 
 export class UserInviteResponse extends createZodDto(UserInviteSchema) {}
 
-export class UserInvitesResponse extends createZodDto(createPaginationSchema(UserInviteSchema)) {}
+export class UserInvitesResponse extends createZodDto(UserInviteSchema) {}
+
+export const TeamMembersQuerySchema = z
+    .object({})
+    .extend(CursorQuerySchema.shape)
+    .extend(SearchFilterSchema.shape);
+
+export class TeamMembersQuery extends createZodDto(TeamMembersQuerySchema) {}

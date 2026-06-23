@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PaginationQuery } from '@shared/schemas';
+import { CursorQuery } from '@shared/schemas';
 
 import { UpdateProfileDto, UpdateNotificationsDto } from './dtos';
 import {
@@ -22,7 +22,7 @@ export class UserFacade {
         return this.findProfileQuery.execute(userId);
     }
 
-    public async getActivity(userId: string, query: PaginationQuery) {
+    public async getActivity(userId: string, query: CursorQuery) {
         return this.getActivityQuery.execute(userId, query);
     }
 

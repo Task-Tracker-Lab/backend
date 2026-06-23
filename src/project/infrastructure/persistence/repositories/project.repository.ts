@@ -1,7 +1,8 @@
-import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
+import { DATABASE_SERVICE, DatabaseService, paginateCursor } from '@libs/database';
 import { Injectable, Inject } from '@nestjs/common';
 import { and, count, eq, gt, isNull, or } from 'drizzle-orm';
 
+import { ProjectQuery } from '../../../application/dtos';
 import { IProjectRepository } from '../../../domain/repository';
 import * as schema from '../models';
 
@@ -14,7 +15,7 @@ export class ProjectRepository implements IProjectRepository {
         private readonly db: DatabaseService<typeof schema>,
     ) {}
 
-    public readonly create = async (userId: string, data: NewProject) => {
+    public create = async (userId: string, data: NewProject) => {
         const result = await this.db.transaction(async (tx) => {
             const project = await tx
                 .insert(schema.projects)
@@ -40,11 +41,7 @@ export class ProjectRepository implements IProjectRepository {
         return result;
     };
 
-    public readonly update = async (
-        teamId: string,
-        projectId: string,
-        data: Partial<NewProject>,
-    ) => {
+    public update = async (teamId: string, projectId: string, data: Partial<NewProject>) => {
         const result = await this.db
             .update(schema.projects)
             .set({ ...data, updatedAt: new Date().toISOString() })
@@ -60,7 +57,7 @@ export class ProjectRepository implements IProjectRepository {
         return result.length > 0;
     };
 
-    public readonly delete = async (teamId: string, projectId: string) => {
+    public delete = async (teamId: string, projectId: string) => {
         const result = await this.db
             .update(schema.projects)
             .set({
@@ -80,7 +77,7 @@ export class ProjectRepository implements IProjectRepository {
         return result.length > 0;
     };
 
-    public readonly findOne = async (id: string, teamId?: string) => {
+    public findOne = async (id: string, teamId?: string) => {
         const [project] = await this.db
             .select()
             .from(schema.projects)
@@ -95,7 +92,7 @@ export class ProjectRepository implements IProjectRepository {
         return project || null;
     };
 
-    public readonly findBySlug = async (slug: string, teamId?: string) => {
+    public findBySlug = async (slug: string, teamId?: string) => {
         const [project] = await this.db
             .select()
             .from(schema.projects)
@@ -110,13 +107,23 @@ export class ProjectRepository implements IProjectRepository {
         return project || null;
     };
 
-    public readonly findByTeam = async (teamId: string) =>
-        this.db
+    public findByTeam = async (teamId: string, query: ProjectQuery) => {
+        const q = this.db
             .select()
             .from(schema.projects)
-            .where(and(eq(schema.projects.teamId, teamId), isNull(schema.projects.deletedAt)));
+            .where(and(eq(schema.projects.teamId, teamId), isNull(schema.projects.deletedAt)))
+            .$dynamic();
 
-    public readonly createShare = async (data: NewProjectShare) => {
+        return paginateCursor<typeof schema.projects.$inferSelect>(q, {
+            column: schema.projects.id,
+            sort: { column: schema.projects.id, order: 'asc' },
+            limit: query.limit,
+            search: { columns: [schema.projects.name], value: query.search ?? '' },
+            cursor: query.cursor,
+        });
+    };
+
+    public createShare = async (data: NewProjectShare) => {
         const [result] = await this.db
             .insert(schema.projectShares)
             .values(data)
@@ -132,7 +139,7 @@ export class ProjectRepository implements IProjectRepository {
         return !!result;
     };
 
-    public readonly hasValidShareToken = async (id: string, token: string) => {
+    public hasValidShareToken = async (id: string, token: string) => {
         const [result] = await this.db
             .select()
             .from(schema.projectShares)
@@ -151,7 +158,7 @@ export class ProjectRepository implements IProjectRepository {
         return !!result;
     };
 
-    public readonly revokeAllShares = async (projectId: string) => {
+    public revokeAllShares = async (projectId: string) => {
         const result = await this.db
             .delete(schema.projectShares)
             .where(eq(schema.projectShares.projectId, projectId))
@@ -160,7 +167,7 @@ export class ProjectRepository implements IProjectRepository {
         return result.length > 0;
     };
 
-    public readonly countByTeam = async (teamId: string) => {
+    public countByTeam = async (teamId: string) => {
         const [result] = await this.db
             .select({ count: count() })
             .from(schema.projects)

@@ -4,6 +4,7 @@ import {
 } from '@core/project/application/dtos/project.dto';
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiOperation, ApiBody, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiCursorPagination, ApiSearchFilter } from '@shared/decorators';
 import {
     ApiValidationError,
     ApiUnauthorized,
@@ -69,18 +70,13 @@ export const FindAllProjectsSwagger = () =>
                 'Сортировка по полю sequence (по возрастанию).',
             ].join('\n\n'),
         }),
+        ApiCursorPagination(),
+        ApiSearchFilter(),
         ApiParam({
             name: 'teamId',
             description: 'ID команды',
             type: 'string',
             example: 'clv123456',
-        }),
-        ApiQuery({
-            name: 'search',
-            description: 'Поиск по названию проекта',
-            type: 'string',
-            required: false,
-            example: 'маркетинг',
         }),
         ApiQuery({
             name: 'status',
@@ -97,7 +93,6 @@ export const FindAllProjectsSwagger = () =>
         }),
         ApiForbidden('У вас нет доступа к этой команде'),
         ApiUnauthorized(),
-
         SetMetadata(ZOD_RESPONSE_TOKEN, ProjectListResponse),
     );
 

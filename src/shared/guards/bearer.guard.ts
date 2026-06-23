@@ -65,8 +65,14 @@ export class BearerAuthGuard extends AuthGuard('bearer') {
         return !!(isPublic || query.token);
     }
 
-    private getAuthDetails(err: unknown, info: any) {
-        const message = info?.message || (err instanceof Error ? err.message : null);
+    private getAuthDetails(err: unknown, info: unknown) {
+        const infoMessage =
+            info && typeof info === 'object' && 'message' in info
+                ? (info as { message: string }).message
+                : null;
+
+        const errMessage = err instanceof Error ? err.message : null;
+        const message = infoMessage || errMessage;
 
         return message ? [{ target: 'auth', reason: message }] : [];
     }

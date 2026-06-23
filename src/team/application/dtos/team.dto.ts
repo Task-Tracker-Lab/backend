@@ -58,12 +58,8 @@ export const TeamResponseSchema = z.object({
     id: z.string().describe('Уникальный ID команды'),
     name: z.string().describe('Название команды'),
     description: z.string().nullable().describe('Описание команды'),
-    avatarUrl: z
-        .string()
-        .url()
-        .nullable()
-        .describe('URL аватара команды или null, если аватар отсутствует'),
-    coverUrl: z.string().nullable().describe('URL обложки команды'),
+    avatar: AvatarResponseSchema,
+    cover: AvatarResponseSchema,
     ownerId: z.string().nullable().describe('ID владельца команды'),
     createdAt: z
         .string()

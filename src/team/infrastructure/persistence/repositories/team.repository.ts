@@ -1,9 +1,10 @@
 import * as scUsers from '@core/user/infrastructure/persistence/models';
-import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
+import { DATABASE_SERVICE, DatabaseService, paginateCursor } from '@libs/database';
 import { Inject } from '@nestjs/common';
 import { and, desc, eq, isNull } from 'drizzle-orm';
 
-import { ITeamRepository } from '../../../domain/repository';
+import { TeamMembersQuery } from '../../../application/dtos';
+import { ITeamRepository, type RawMemberRow } from '../../../domain/repository';
 import * as schema from '../models';
 
 import type { NewTeam, NewTeamMember, Team, TeamMember } from '../../../domain/entities';
@@ -87,10 +88,18 @@ export class TeamRepository implements ITeamRepository {
         return member || null;
     };
 
-    public findMembers = async (teamId: string) =>
-        this.membersQuery
+    public findMembers = async (teamId: string, query: TeamMembersQuery) => {
+        const q = this.membersQuery
             .where(eq(schema.teamMembers.teamId, teamId))
-            .orderBy(desc(schema.teamMembers.joinedAt));
+            .orderBy(desc(schema.teamMembers.joinedAt))
+            .$dynamic();
+
+        return paginateCursor<RawMemberRow>(q, {
+            column: schema.teamMembers.teamId,
+            cursor: query.cursor,
+            limit: query.limit,
+        });
+    };
 
     public findByUser = async (userId: string) => {
         const filters = [

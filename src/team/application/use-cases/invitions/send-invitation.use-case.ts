@@ -18,6 +18,7 @@ import { TeamInvitationEvent } from '../../../domain/events';
 import { ITeamRepository, RawMemberRow } from '../../../domain/repository';
 import { InviteMemberDto, type TeamInvite } from '../../dtos';
 
+import type { Team } from '../../../domain/entities';
 import type { TeamRole } from '@shared/entities';
 
 @Injectable()
@@ -135,11 +136,10 @@ export class SendInvitationUseCase {
         }
     }
 
-    private buildInviteData(team: any, inviter: any, dto: InviteMemberDto): TeamInvite {
+    private buildInviteData(team: Team, inviter: RawMemberRow, dto: InviteMemberDto): TeamInvite {
         const expiresAt = new Date(Date.now() + this.INVITE_TTL * 1000);
 
-        const cdn = this.getCdnBaseUrl();
-        const images = ImageHelper.buildResponsiveUrls(cdn, team.avatarUrl);
+        const images = ImageHelper.responsive(this.cfg, team.avatarUrl);
 
         return {
             teamId: team.id,
@@ -173,13 +173,5 @@ export class SendInvitationUseCase {
             backoff: { type: 'exponential', delay: 5000 },
             removeOnComplete: true,
         });
-    }
-
-    private getCdnBaseUrl(): string {
-        const domain = this.cfg.get<string>('DOMAIN');
-        const bucket = this.cfg.get<string>('S3_BUCKET_NAME');
-        const endpoint = this.cfg.get<string>('S3_ENDPOINT');
-
-        return domain ? `https://cdn.${domain}/${bucket}` : `${endpoint}/${bucket}`;
     }
 }

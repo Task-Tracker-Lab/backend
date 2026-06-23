@@ -40,6 +40,25 @@ export const ApiPagination = () =>
         }),
     );
 
+export const ApiCursorPagination = () =>
+    applyDecorators(
+        ApiQuery({
+            name: 'cursor',
+            required: false,
+            type: String,
+            description:
+                'Курсор последнего элемента предыдущей страницы (base64url). Если не указан — первая страница.',
+            example: 'eyJpZCI6NDJ9',
+        }),
+        ApiQuery({
+            name: 'limit',
+            required: false,
+            type: Number,
+            description: 'Количество записей на странице (макс. 100)',
+            example: 20,
+        }),
+    );
+
 export const ApiSorting = (options: SortableFields) =>
     applyDecorators(
         ApiQuery({

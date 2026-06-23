@@ -1,5 +1,10 @@
 import { PROJECT_STATUSES, PROJECT_VISIBILITIES } from '@core/project/domain/entities';
-import { createPaginationSchema, ActionResponseSchema } from '@shared/schemas';
+import {
+    createCursorResponseSchema,
+    ActionResponseSchema,
+    SearchFilterSchema,
+    CursorQuerySchema,
+} from '@shared/schemas';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod/v4';
 
@@ -163,7 +168,7 @@ export const ProjectListItemSchema = z.object({
     role: ProjectMemberRoleSchema.describe('Роль текущего пользователя в проекте'),
 });
 
-export const ProjectListResponseSchema = createPaginationSchema(ProjectListItemSchema);
+export const ProjectListResponseSchema = createCursorResponseSchema(ProjectListItemSchema);
 
 export const ProjectDetailResponseSchema = z.object({
     id: z.string().describe('ID проекта'),
@@ -214,6 +219,12 @@ export const ProjectDetailResponseSchema = z.object({
     }).describe('Настройки проекта'),
 });
 
+export const ProjectQuerySearch = z
+    .object({ status: ProjectStatusSchema.optional() })
+    .extend(CursorQuerySchema.shape)
+    .extend(SearchFilterSchema.shape);
+
+export class ProjectQuery extends createZodDto(ProjectQuerySearch) {}
 export class CreateProjectDto extends createZodDto(CreateProjectSchema) {}
 export class UpdateProjectDto extends createZodDto(UpdateProjectSchema) {}
 export class CreateProjectResponse extends createZodDto(CreateProjectsResponseSchema) {}

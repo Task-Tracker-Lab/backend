@@ -4,6 +4,7 @@ import {
     AddProjectMemberDto,
     CreateProjectDto,
     CreateShareTokenDto,
+    ProjectQuery,
     UpdateProjectDto,
     UpdateProjectMemberDto,
 } from './dtos';
@@ -75,8 +76,8 @@ export class ProjectFacade {
         return this.getDetailQ.execute(slug, teamId, userId, token);
     }
 
-    public async getTeamProjects(teamId: string, userId: string) {
-        return this.findByTeamQ.execute(teamId, userId);
+    public async getTeamProjects(teamId: string, userId: string, query: ProjectQuery) {
+        return this.findByTeamQ.execute(teamId, userId, query);
     }
 
     public async getMembers(teamId: string, userId: string) {

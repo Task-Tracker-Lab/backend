@@ -1,11 +1,13 @@
 import { IUserRepository } from '@core/user/domain/repository';
-import { DATABASE_SERVICE, DatabaseService } from '@libs/database';
+import { DATABASE_SERVICE, DatabaseService, paginateCursor } from '@libs/database';
 import { Inject, Injectable } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
-import { desc, eq, count, inArray } from 'drizzle-orm';
+import { CursorQuery } from '@shared/schemas';
+import { eq, inArray } from 'drizzle-orm';
 
 import * as sc from '../models';
 
+import type { UserActivity } from '../../../domain/entities/user.domain';
 import type {
     NewUser,
     NewUserActivity,
@@ -181,23 +183,23 @@ export class UserRepository implements IUserRepository {
         }
     }
 
-    async updateNotifications(id: string, settings: UserNotifications['settings']) {
+    public updateNotifications = async (id: string, settings: UserNotifications['settings']) => {
         const result = await this.db
             .update(sc.userNotifications)
             .set({ settings })
             .where(eq(sc.userNotifications.userId, id));
         return (result?.count ?? 0) > 0;
-    }
+    };
 
-    async updateAvatar(id: string, url: string) {
+    public updateAvatar = async (id: string, url: string) => {
         const result = await this.db
             .update(sc.users)
             .set({ avatarUrl: url, updatedAt: new Date().toISOString() })
             .where(eq(sc.users.id, id));
         return (result?.count ?? 0) > 0;
-    }
+    };
 
-    async updatePasswordHash(id: string, hash: string) {
+    public updatePasswordHash = async (id: string, hash: string) => {
         const result = await this.db
             .insert(sc.userSecurity)
             .values({ userId: id, passwordHash: hash })
@@ -206,34 +208,27 @@ export class UserRepository implements IUserRepository {
                 set: { passwordHash: hash, lastPasswordChange: new Date().toISOString() },
             });
         return (result?.count ?? 0) > 0;
-    }
+    };
 
-    async logActivity(data: NewUserActivity) {
+    public logActivity = async (data: NewUserActivity) => {
         const result = await this.db.insert(sc.userActivity).values({
             ...data,
             id: data.id ?? createId(),
         });
         return (result?.count ?? 0) > 0;
-    }
+    };
 
-    async findActivityByUser(userId: string, options: { limit: number; offset: number }) {
-        const [totalResult, items] = await Promise.all([
-            this.db
-                .select({ value: count() })
-                .from(sc.userActivity)
-                .where(eq(sc.userActivity.userId, userId)),
-            this.db
-                .select()
-                .from(sc.userActivity)
-                .where(eq(sc.userActivity.userId, userId))
-                .limit(options.limit)
-                .offset(options.offset)
-                .orderBy(desc(sc.userActivity.createdAt)),
-        ]);
+    public findActivityByUser = async (userId: string, query: CursorQuery) => {
+        const q = this.db
+            .select()
+            .from(sc.userActivity)
+            .where(eq(sc.userActivity.userId, userId))
+            .$dynamic();
 
-        return {
-            items,
-            total: Number(totalResult[0]?.value ?? 0),
-        };
-    }
+        return paginateCursor<UserActivity>(q, {
+            column: sc.userActivity.id,
+            ...query,
+            sort: { column: sc.userActivity.id, order: 'desc' },
+        });
+    };
 }

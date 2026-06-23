@@ -1,6 +1,6 @@
-import { UpdateMemberDto } from '@core/team/application/dtos';
+import { TeamMembersQuery, UpdateMemberDto } from '@core/team/application/dtos';
 import { TeamFacade } from '@core/team/application/team.facade';
-import { Body, Delete, Get, Param, Patch } from '@nestjs/common';
+import { Body, Delete, Get, Param, Patch, Query } from '@nestjs/common';
 import { ApiBaseController, GetUserId } from '@shared/decorators';
 
 import { GetMembersSwagger, RemoveMemberSwagger, UpdateMemberSwagger } from './swagger';
@@ -11,8 +11,8 @@ export class TeamMembersController {
 
     @Get('members')
     @GetMembersSwagger()
-    async getMembers(@Param('teamId') teamId: string) {
-        return this.facade.getMembers(teamId);
+    async getMembers(@Param('teamId') teamId: string, @Query() query: TeamMembersQuery) {
+        return this.facade.getMembers(teamId, query);
     }
 
     @Patch('members/:userId')

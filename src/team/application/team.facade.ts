@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import {
     CreateTeamDto,
     InviteMemberDto,
+    TeamMembersQuery,
     UpdateInvitationDto,
     UpdateMemberDto,
     UpdateTeamDto,
@@ -46,7 +47,8 @@ export class TeamFacade {
     public deleteTeam = (teamId: string, userId: string) =>
         this.deleteTeamUc.execute(teamId, userId);
 
-    public getMembers = (teamId: string) => this.getTeamMembersQ.execute(teamId);
+    public getMembers = (teamId: string, query?: TeamMembersQuery) =>
+        this.getTeamMembersQ.execute(teamId, query);
 
     public updateMember = (teamId: string, curr: string, target: string, dto: UpdateMemberDto) =>
         this.updateMemberUc.execute(teamId, curr, target, dto);

@@ -2,6 +2,7 @@ import { BearerStrategy } from './bearer.strategy';
 import { CookieStrategy } from './cookie.strategy';
 import { GithubStrategy } from './github.strategy';
 import { GoogleStrategy } from './google.strategy';
+import { VkontakteStrategy } from './vkontakte.strategy';
 import { YandexStrategy } from './yandex.strategy';
 
 export const STRATEGIES = [
@@ -10,4 +11,5 @@ export const STRATEGIES = [
     GoogleStrategy,
     GithubStrategy,
     YandexStrategy,
+    VkontakteStrategy,
 ];

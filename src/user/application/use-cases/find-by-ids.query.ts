@@ -5,7 +5,7 @@ import { Inject, Injectable } from '@nestjs/common';
 export class FindByIdsQuery {
     constructor(@Inject('IUserRepository') private readonly userRepo: IUserRepository) {}
 
-    async execute(ids: readonly string[]) {
+    async execute(ids: string[]) {
         return this.userRepo.findByIds(ids);
     }
 }

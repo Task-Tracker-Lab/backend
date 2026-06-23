@@ -1,4 +1,4 @@
-import { createPaginationSchema } from '@shared/schemas';
+import { createCursorResponseSchema } from '@shared/schemas';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod/v4';
 
@@ -41,7 +41,7 @@ const MemberResponseSchema = ProjectMemberSchema.omit({
     user: MemberUserSchema,
 });
 
-export const ProjectMemberListResponseSchema = createPaginationSchema(MemberResponseSchema);
+export const ProjectMemberListResponseSchema = createCursorResponseSchema(MemberResponseSchema);
 
 export const AddProjectMemberSchema = z
     .object({

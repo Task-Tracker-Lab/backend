@@ -4,7 +4,7 @@ import { z } from 'zod/v4';
 import {
     ActionResponseSchema,
     createSortingSchema,
-    PaginationBaseSchema,
+    CursorQuerySchema,
 } from '../../../shared/schemas';
 import { ISSUE_TYPE_LIST, PRIORITY_LIST } from '../../domain/entities';
 
@@ -221,7 +221,7 @@ export const IssueFiltersQuerySchema = IssueQuerySchema.extend({
         .optional()
         .describe('Метки через запятую (AND — задача должна иметь все указанные)'),
 })
-    .extend(PaginationBaseSchema.shape)
+    .extend(CursorQuerySchema.shape)
     .extend(createSortingSchema(['position', 'createdAt', 'priority']).shape)
     .describe('Query параметры для получения списка задач с фильтрацией');
 

@@ -16,18 +16,7 @@ export class GetMyInvitesUseCase {
         const codes = await this.cacheService.getCollection(userKey);
 
         if (!codes.length) {
-            return {
-                // TODO: реализовать полноценную пагинацию для инвайтов пользователя.
-                items: [],
-                meta: {
-                    total: 0,
-                    totalPages: 0,
-                    page: 1,
-                    limit: 10,
-                    hasPrevPage: false,
-                    hasNextPage: false,
-                },
-            };
+            return [];
         }
 
         const inviteKeys = codes.map((c) => `inv:code:${c}`);
@@ -55,16 +44,6 @@ export class GetMyInvitesUseCase {
             });
         }
 
-        return {
-            items: active,
-            meta: {
-                total: active.length,
-                totalPages: active.length ? 1 : 0,
-                page: 1,
-                limit: active.length,
-                hasPrevPage: false,
-                hasNextPage: false,
-            },
-        };
+        return active;
     }
 }
