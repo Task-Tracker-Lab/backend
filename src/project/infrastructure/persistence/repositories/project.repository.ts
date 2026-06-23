@@ -116,7 +116,8 @@ export class ProjectRepository implements IProjectRepository {
 
         return paginateCursor<typeof schema.projects.$inferSelect>(q, {
             column: schema.projects.id,
-            limit: query.limit ?? 20,
+            sort: { column: schema.projects.id, order: 'asc' },
+            limit: query.limit,
             search: { columns: [schema.projects.name], value: query.search ?? '' },
             cursor: query.cursor,
         });
