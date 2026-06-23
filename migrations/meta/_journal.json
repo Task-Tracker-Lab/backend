@@ -50,6 +50,13 @@
       "when": 1781645047048,
       "tag": "0006_add_issue",
       "breakpoints": false
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1782216398515,
+      "tag": "0007_add_team_members_roles",
+      "breakpoints": false
     }
   ]
 }
