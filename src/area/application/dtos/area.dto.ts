@@ -1,4 +1,5 @@
 import { DEFAULT_VIEWS } from '@core/area/domain/entities';
+import { ActionResponseSchema } from '@shared/schemas';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod/v4';
 
@@ -65,6 +66,7 @@ export const AreaSchema = z.object({
     maxTasksLimit: z
         .number()
         .int('Лимит задач должен быть целым числом')
+        .max(100000, 'Лимит задач не может превышать 100 000')
         .positive('Лимит задач должен быть положительным числом')
         .nullable()
         .optional()
@@ -117,6 +119,12 @@ export const CreateAreaSchema = AreaSchema.omit({
     })
     .describe('Схема для создания новой области');
 
+export const CreateAreaResponseSchema = ActionResponseSchema.extend({
+    slug: z.string(
+        'URL-дружественный идентификатор (например: "development", "contract-approval")',
+    ),
+});
+
 export const UpdateAreaSchema = CreateAreaSchema.partial()
     .refine((data) => Object.keys(data).length > 0, {
         error: 'Необходимо передать хотя бы одно поле для обновления',
@@ -126,6 +134,7 @@ export const UpdateAreaSchema = CreateAreaSchema.partial()
 
 export const AreasSchema = z.array(AreaSchema);
 
+export class CreateAreaResponse extends createZodDto(CreateAreaResponseSchema) {}
 export class AreaResponse extends createZodDto(AreaSchema) {}
 export class AreasResponse extends createZodDto(AreasSchema) {}
 export class CreateAreaDto extends createZodDto(CreateAreaSchema) {}

@@ -10,7 +10,13 @@ import {
 import { ZOD_RESPONSE_TOKEN } from '@shared/interceptors';
 import { ActionResponse } from '@shared/schemas';
 
-import { CreateAreaDto, UpdateAreaDto, AreaResponse, AreasResponse } from '../../dtos';
+import {
+    CreateAreaDto,
+    UpdateAreaDto,
+    AreaResponse,
+    AreasResponse,
+    CreateAreaResponse,
+} from '../../dtos';
 
 export const CreateAreaSwagger = () =>
     applyDecorators(
@@ -42,14 +48,14 @@ export const CreateAreaSwagger = () =>
         ApiResponse({
             status: 201,
             description: 'Область успешно создана',
-            type: ActionResponse.Output,
+            type: CreateAreaResponse.Output,
         }),
         ApiValidationError(),
         ApiUnauthorized(),
         ApiForbidden('Нет прав для создания области в этом проекте'),
         ApiConflict('Область с таким названием или slug уже существует'),
 
-        SetMetadata(ZOD_RESPONSE_TOKEN, ActionResponse),
+        SetMetadata(ZOD_RESPONSE_TOKEN, CreateAreaResponse),
     );
 
 export const FindAllAreasSwagger = () =>

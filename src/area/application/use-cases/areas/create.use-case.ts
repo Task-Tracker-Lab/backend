@@ -40,7 +40,7 @@ export class CreateAreaUseCase {
                 );
             }
 
-            const existingArea = await this.areaRepo.findBySlug(project.id, currentSlug);
+            const existingArea = await this.areaRepo.findBySlug(currentSlug, project.id);
 
             if (existingArea) {
                 throw new BaseException(
