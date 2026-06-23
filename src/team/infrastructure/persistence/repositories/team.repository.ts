@@ -28,9 +28,9 @@ export class TeamRepository implements ITeamRepository {
     public create = async (ownerId: string, dto: NewTeam) =>
         this.db.transaction(async (tx) => {
             const [team] = await tx
-                .insert(schema.team)
+                .insert(schema.teams)
                 .values({ ...dto, ownerId })
-                .returning({ teamId: schema.team.id });
+                .returning({ teamId: schema.teams.id });
 
             if (!team?.teamId) {
                 throw new Error('Failed to create team: no team returned');
@@ -53,10 +53,10 @@ export class TeamRepository implements ITeamRepository {
     public update = async (id: string, dto: Partial<Team>) =>
         this.db.transaction(async (tx) => {
             const [team] = await tx
-                .update(schema.team)
+                .update(schema.teams)
                 .set(dto)
-                .where(eq(schema.team.id, id))
-                .returning({ teamId: schema.team.id });
+                .where(eq(schema.teams.id, id))
+                .returning({ teamId: schema.teams.id });
 
             if (!team?.teamId) {
                 throw new Error('Failed to create team: no team returned');
@@ -70,11 +70,11 @@ export class TeamRepository implements ITeamRepository {
 
     public remove = async (teamId: string, userId: string) => {
         const result = await this.db
-            .update(schema.team)
+            .update(schema.teams)
             .set({
                 deletedAt: new Date().toISOString(),
             })
-            .where(and(eq(schema.team.id, teamId), eq(schema.team.ownerId, userId)));
+            .where(and(eq(schema.teams.id, teamId), eq(schema.teams.ownerId, userId)));
 
         return (result?.count ?? 0) > 0;
     };
@@ -96,20 +96,20 @@ export class TeamRepository implements ITeamRepository {
         const filters = [
             eq(schema.teamMembers.userId, userId),
             eq(schema.teamMembers.status, 'active'),
-            isNull(schema.team.deletedAt),
+            isNull(schema.teams.deletedAt),
         ];
 
         const query = this.db
             .select({
-                id: schema.team.id,
-                name: schema.team.name,
-                description: schema.team.description,
-                avatarUrl: schema.team.avatarUrl,
+                id: schema.teams.id,
+                name: schema.teams.name,
+                description: schema.teams.description,
+                avatarUrl: schema.teams.avatarUrl,
                 role: schema.teamMembers.role,
                 joinedAt: schema.teamMembers.joinedAt,
             })
             .from(schema.teamMembers)
-            .innerJoin(schema.team, eq(schema.team.id, schema.teamMembers.teamId))
+            .innerJoin(schema.teams, eq(schema.teams.id, schema.teamMembers.teamId))
             .where(and(...filters))
             .orderBy(desc(schema.teamMembers.joinedAt));
 
@@ -117,7 +117,7 @@ export class TeamRepository implements ITeamRepository {
     };
 
     public findById = async (teamId: string) => {
-        const [team] = await this.db.select().from(schema.team).where(eq(schema.team.id, teamId));
+        const [team] = await this.db.select().from(schema.teams).where(eq(schema.teams.id, teamId));
         if (!team) {
             return null;
         }
@@ -154,17 +154,17 @@ export class TeamRepository implements ITeamRepository {
 
     public async updateTeamAvatar(teamId: string, url: string): Promise<boolean> {
         const result = await this.db
-            .update(schema.team)
+            .update(schema.teams)
             .set({ avatarUrl: url, updatedAt: new Date().toISOString() })
-            .where(eq(schema.team.id, teamId));
+            .where(eq(schema.teams.id, teamId));
         return (result?.count ?? 0) > 0;
     }
 
     public async updateTeamBanner(teamId: string, url: string): Promise<boolean> {
         const result = await this.db
-            .update(schema.team)
+            .update(schema.teams)
             .set({ coverUrl: url, updatedAt: new Date().toISOString() })
-            .where(eq(schema.team.id, teamId));
+            .where(eq(schema.teams.id, teamId));
         return (result?.count ?? 0) > 0;
     }
 

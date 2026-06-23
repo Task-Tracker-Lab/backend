@@ -4,7 +4,7 @@ import { primaryKey, timestamp, text, varchar, index } from 'drizzle-orm/pg-core
 
 import { roleEnum, statusEnum } from './enums';
 
-export const team = baseSchema.table(
+export const teams = baseSchema.table(
     'teams',
     {
         id: text('id')
@@ -33,7 +33,7 @@ export const teamMembers = baseSchema.table(
     'team_members',
     {
         teamId: text('team_id')
-            .references(() => team.id, { onDelete: 'cascade' })
+            .references(() => teams.id, { onDelete: 'cascade' })
             .notNull(),
         userId: text('user_id')
             .references(() => users.id, { onDelete: 'cascade' })

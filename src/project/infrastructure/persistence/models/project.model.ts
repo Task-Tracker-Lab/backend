@@ -1,5 +1,5 @@
 import { createId } from '@paralleldrive/cuid2';
-import { baseSchema, team, users } from '@shared/entities';
+import { baseSchema, teams, users } from '@shared/entities';
 import { isNull } from 'drizzle-orm';
 import {
     text,
@@ -20,7 +20,7 @@ export const projects = baseSchema.table(
             .primaryKey()
             .$defaultFn(() => createId()),
         teamId: text('team_id')
-            .references(() => team.id, { onDelete: 'cascade' })
+            .references(() => teams.id, { onDelete: 'cascade' })
             .notNull(),
         slug: varchar('slug', { length: 100 }).notNull().unique(),
         name: varchar('name', { length: 100 }).notNull(),
