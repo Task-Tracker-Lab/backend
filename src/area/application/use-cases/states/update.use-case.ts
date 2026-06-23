@@ -16,6 +16,7 @@ export class UpdateStateUseCase {
 
     async execute(slug: string, stateId: string, dto: UpdateStateDto, userId: string) {
         try {
+            //TODO: 500 for unique constraint
             const area = await this.getAreaQ.execute({ key: slug }, userId);
 
             const state = await this.stateRepo.findOne(area.id, stateId);

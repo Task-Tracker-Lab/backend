@@ -47,7 +47,7 @@ export const StateSchema = z.object({
         .nullable()
         .optional()
         .describe('Emoji или иконка для визуального обозначения (например: "📋", "🚀", "✅")'),
-    orderIndex: z
+    position: z
         .number()
         .int('Порядковый номер должен быть целым числом')
         .min(0, 'Порядковый номер не может быть отрицательным')
@@ -60,6 +60,7 @@ export const StateSchema = z.object({
     maxTasksLimit: z
         .number()
         .int('Лимит задач должен быть целым числом')
+        .max(100000, 'Лимит задач должен быть целым числом')
         .positive('Лимит задач должен быть положительным числом')
         .nullable()
         .optional()

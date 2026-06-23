@@ -15,6 +15,14 @@ export class ReorderStateUseCase {
     ) {}
 
     async execute(slug: string, _dto: ReordersStatesDto, userId: string) {
+        throw new BaseException(
+            {
+                code: 'NOT_IMPLEMENTED',
+                message: 'Функция в разработке',
+            },
+            HttpStatus.NOT_IMPLEMENTED,
+        );
+
         try {
             const area = await this.getAreaQ.execute({ key: slug }, userId);
 
