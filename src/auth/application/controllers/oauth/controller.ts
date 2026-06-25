@@ -152,6 +152,7 @@ export class OAuthController {
 
     private setRefreshCookie(res: FastifyReply, refreshToken: string, expires: Date) {
         res.setCookie('refresh', refreshToken, {
+            signed: false,
             expires,
         });
     }
