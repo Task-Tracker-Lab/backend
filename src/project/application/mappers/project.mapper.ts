@@ -42,12 +42,13 @@ export class ProjectMapper {
     }
 
     public static toListResponse(project: Project, member: RawMemberRow) {
-        const { id, slug, name, status, color, icon, createdAt } = project;
+        const { id, slug, name, description, status, color, icon, createdAt } = project;
 
         return {
             id,
             slug,
             name,
+            description,
             status,
             color: color || '#3b82f6',
             icon,
