@@ -20,7 +20,9 @@ export const states = baseSchema.table(
         id: text('id')
             .primaryKey()
             .$defaultFn(() => createId()),
-        areaId: text('area_id').references(() => areas.id, { onDelete: 'cascade' }),
+        areaId: text('area_id')
+            .notNull()
+            .references(() => areas.id, { onDelete: 'cascade' }),
         title: text('title').notNull(),
         description: text('description'),
         stateType: stateTypeEnum('state_type').notNull().default('custom'),

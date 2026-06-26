@@ -125,6 +125,7 @@ export const IssueSchema = z.object({
 
 export const CreateIssueSchema = IssueSchema.omit({
     id: true,
+    areaId: true,
     assignee: true,
     reporter: true,
     parent: true,

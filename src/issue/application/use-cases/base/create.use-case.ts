@@ -28,10 +28,21 @@ export class CreateIssueUseCase {
                 'admin',
             ]);
 
-            await this.validateContext(dto, userId, project.id, key);
+            let areaId;
 
-            const data: CreateIssueDto = {
+            if (dto.stateId) {
+                const state = await this.getState.execute(key, dto.stateId, userId);
+                areaId = state.areaId;
+            } else {
+                const area = await this.getArea.execute({ key }, userId);
+                areaId = area.id;
+            }
+
+            await this.validateContext(dto, userId, project.id);
+
+            const data = {
                 ...dto,
+                areaId,
                 type: dto.type ?? ISSUE_TYPE.TASK,
                 priority: dto.priority ?? PRIORITY.MEDIUM,
             };
@@ -58,18 +69,7 @@ export class CreateIssueUseCase {
         }
     }
 
-    private async validateContext(
-        dto: CreateIssueDto,
-        userId: string,
-        projectId: string,
-        key: string,
-    ) {
-        if (dto.stateId) {
-            await this.getState.execute(key, dto.stateId, userId);
-        } else {
-            await this.getArea.execute({ key }, userId);
-        }
-
+    private async validateContext(dto: CreateIssueDto, userId: string, projectId: string) {
         if (dto.assigneeId) {
             const projectMember = await this.getProjectMember.execute(projectId, dto.assigneeId);
 
