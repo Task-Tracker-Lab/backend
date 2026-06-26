@@ -1,7 +1,12 @@
-import { CreateTeamDto, UpdateTeamDto } from '@core/team/application/dtos';
-import { TeamFacade } from '@core/team/application/team.facade';
+import { ProjectQueues, ProjectWorkspaceJobs } from '@core/project/domain/enums';
+import { ProjectCreateEvent } from '@core/project/domain/events';
+import { InjectQueue } from '@nestjs/bullmq';
 import { Body, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { ApiBaseController, GetUserId } from '@shared/decorators';
+import { Queue } from 'bullmq';
+
+import { CreateTeamDto, UpdateTeamDto } from '../../dtos';
+import { TeamFacade } from '../../team.facade';
 
 import {
     CreateTeamSwagger,
@@ -12,12 +17,21 @@ import {
 
 @ApiBaseController('teams', 'Teams', true)
 export class TeamController {
-    constructor(private readonly facade: TeamFacade) {}
+    constructor(
+        private readonly facade: TeamFacade,
+        @InjectQueue(ProjectQueues.PROJECT_WORKSPACE)
+        private readonly projectQueue: Queue,
+    ) {}
 
     @Post()
     @CreateTeamSwagger()
     async create(@GetUserId() userId: string, @Body() dto: CreateTeamDto) {
-        return this.facade.createTeam(userId, dto);
+        const result = await this.facade.createTeam(userId, dto);
+
+        const event = new ProjectCreateEvent(userId, result.teamId);
+        await this.projectQueue.add(ProjectWorkspaceJobs.CREATE_PROJECT, event);
+
+        return result;
     }
 
     @Get(':id')

@@ -40,7 +40,7 @@ export class ExchangeUseCase {
         const tokens = await this.createSession(user.id, user.email, meta);
 
         if (isNewUser) {
-            const event = new CreateUserWorkspaceEvent(user.id, user.firstName);
+            const event = new CreateUserWorkspaceEvent(user.id);
             await this.queue.add(AuthUserJobs.CREATE_WORKSPACE, event);
         }
 

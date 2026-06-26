@@ -1,8 +1,7 @@
-import { ProjectModule } from '@core/project';
-import { TeamModule } from '@core/team';
+import { TeamQueues } from '@core/team/domain/enums';
 import { UserModule } from '@core/user';
 import { BullModule } from '@nestjs/bullmq';
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MailAdapter } from '@shared/adapters/mail';
@@ -41,10 +40,12 @@ const WORKERS = [MailProcessor, UserProcessor];
                 },
             }),
         }),
-        BullModule.registerQueue({ name: AuthQueues.AUTH_MAIL }, { name: AuthQueues.AUTH_USER }),
-        forwardRef(() => UserModule),
-        TeamModule,
-        ProjectModule,
+        BullModule.registerQueue(
+            { name: AuthQueues.AUTH_MAIL },
+            { name: AuthQueues.AUTH_USER },
+            { name: TeamQueues.TEAM_WORKSPACE },
+        ),
+        UserModule,
     ],
     controllers: CONTROLLERS,
     providers: [
