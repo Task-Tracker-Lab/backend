@@ -57,6 +57,13 @@
       "when": 1782216398515,
       "tag": "0007_add_team_members_roles",
       "breakpoints": false
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1782575945926,
+      "tag": "0008_illegal_vapor",
+      "breakpoints": false
     }
   ]
 }
