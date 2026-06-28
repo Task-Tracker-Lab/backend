@@ -41,7 +41,7 @@ export class UpdateProfileUseCase {
             const result = await this.userRepo.updateProfile(
                 entity.user.id,
                 removeUndefined(profile),
-                preferences,
+                removeUndefined(preferences),
             );
 
             await this.userRepo.logActivity({

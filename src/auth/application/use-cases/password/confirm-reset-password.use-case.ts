@@ -1,3 +1,4 @@
+import { RESET_PASSWORD_CACHE_KEY } from '@core/auth/infrastructure/constants';
 import { UpdatePasswordUseCase } from '@core/user';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
@@ -17,7 +18,7 @@ export class ConfirmResetPasswordUseCase {
     ) {}
 
     async execute(dto: PasswordResetConfirmDto) {
-        const redisKey = `pass:reset:${dto.email}`;
+        const redisKey = RESET_PASSWORD_CACHE_KEY(dto.email);
         const cachedData = await this.cacheService.getOne(redisKey);
 
         if (!cachedData) {

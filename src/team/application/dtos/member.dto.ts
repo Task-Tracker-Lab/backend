@@ -77,9 +77,7 @@ export const UserInviteSchema = z.object({
         .describe('Дата истечения'),
 });
 
-export class UserInviteResponse extends createZodDto(UserInviteSchema) {}
-
-export class UserInvitesResponse extends createZodDto(UserInviteSchema) {}
+export class UserInvitesResponse extends createZodDto(z.array(UserInviteSchema)) {}
 
 export const TeamMembersQuerySchema = z
     .object({})
