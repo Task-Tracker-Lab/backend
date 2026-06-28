@@ -38,7 +38,6 @@ export const TeamUseCases = [
 ];
 
 export const TEAM_EXTERNAL_QUERIES = [FindTeamQuery, FindTeamMemberQuery];
-export const TEAM_EXTERNAL_COMMANDS = [CreateTeamUseCase];
 
 export { FindTeamQuery } from './base/find-team.query';
 export { FindTeamMemberQuery } from './members/find-team-member.query';

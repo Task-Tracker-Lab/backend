@@ -113,7 +113,7 @@ export class SignUpVerifyUseCase {
 
             await this.cacheService.removeOne(SIGNUP_CACHE_KEY(dto.email));
 
-            const event = new CreateUserWorkspaceEvent(user.id, user.firstName);
+            const event = new CreateUserWorkspaceEvent(user.id);
             await this.queue.add(AuthUserJobs.CREATE_WORKSPACE, event);
 
             return {

@@ -1,1 +1,1 @@
-export { TeamMailJobs, TeamQueues } from './mail-jobs.enum';
+export { TeamQueues, TeamMailJobs, TeamWorkspaceJobs } from './team-jobs.enum';

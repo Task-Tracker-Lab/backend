@@ -1,5 +1,9 @@
+import { AreaQueues, AreaWorkspaceJobs } from '@core/area/domain/enums';
+import { AreaCreateEvent } from '@core/area/domain/events';
+import { InjectQueue } from '@nestjs/bullmq';
 import { Body, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBaseController, GetUserId, Public } from '@shared/decorators';
+import { Queue } from 'bullmq';
 
 import { CreateProjectDto, CreateShareTokenDto, ProjectQuery, UpdateProjectDto } from '../../dtos';
 import { ProjectFacade } from '../../project.facade';
@@ -17,7 +21,11 @@ import {
 
 @ApiBaseController('teams/:teamId/projects', 'Projects', true)
 export class ProjectsController {
-    constructor(private readonly facade: ProjectFacade) {}
+    constructor(
+        private readonly facade: ProjectFacade,
+        @InjectQueue(AreaQueues.AREA_WORKSPACE)
+        private readonly areaQueue: Queue,
+    ) {}
 
     @Get()
     @FindAllProjectsSwagger()
@@ -75,7 +83,12 @@ export class ProjectsController {
         @GetUserId() userId: string,
         @Body() dto: CreateProjectDto,
     ) {
-        return this.facade.create(userId, teamId, dto);
+        const result = await this.facade.create(userId, teamId, dto);
+
+        const event = new AreaCreateEvent(userId, result.slug);
+        await this.areaQueue.add(AreaWorkspaceJobs.CREATE_AREA, event);
+
+        return result;
     }
 
     @Patch(':slug')
