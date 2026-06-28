@@ -1,3 +1,4 @@
+import { RESET_PASSWORD_CACHE_KEY } from '@core/auth/infrastructure/constants';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CACHE_SERVICE } from '@shared/adapters/cache/constants';
 import { ICacheService } from '@shared/adapters/cache/ports';
@@ -15,7 +16,7 @@ export class VerifyResetPasswordUseCase {
     ) {}
 
     async execute(dto: VerifyResetCodeDto) {
-        const redisKey = `pass:reset:${dto.email}`;
+        const redisKey = RESET_PASSWORD_CACHE_KEY(dto.email);
         const cachedData = await this.cacheService.getOne(redisKey);
 
         if (!cachedData) {
@@ -43,14 +44,14 @@ export class VerifyResetPasswordUseCase {
             );
         }
 
-        if (!resetSession.isVerified) {
+        if (resetSession.isVerified) {
             throw new BaseException(
                 {
-                    code: AuthErrorCodes.CODE_NOT_VERIFIED,
-                    message: AuthErrorMessages[AuthErrorCodes.CODE_NOT_VERIFIED],
-                    details: [{ target: 'code', message: 'Код подтверждения не верифицирован' }],
+                    code: AuthErrorCodes.CODE_ALREADY_VERIFIED,
+                    message: AuthErrorMessages[AuthErrorCodes.CODE_ALREADY_VERIFIED],
+                    details: [{ target: 'code', message: 'Код подтверждения уже верифицирован' }],
                 },
-                HttpStatus.FORBIDDEN,
+                HttpStatus.BAD_REQUEST,
             );
         }
 
