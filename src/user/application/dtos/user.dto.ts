@@ -127,7 +127,6 @@ export const UpdateProfileSchema = z
         phone: z.string().describe('Номер телефона (для связи)').nullish(),
         gender: z
             .enum(['none', 'male', 'female', 'non_binary', 'other', 'prefer_not_to_say'])
-            .default('none')
             .optional()
             .describe(
                 'Пол пользователя: none - не указан, male - мужской, female - женский, non_binary - небинарный, other - другой, prefer_not_to_say - предпочитаю не указывать',
@@ -137,7 +136,6 @@ export const UpdateProfileSchema = z
         vacationMessage: z.string().nullish().describe('Сообщение автоответчика на время отпуска'),
         pronouns: z
             .enum(['he_him', 'she_her', 'they_them', 'other', 'none'])
-            .default('none')
             .optional()
             .describe(
                 'Предпочитаемые местоимения: he_him - он/его, she_her - она/ее, they_them - они/их, other - другие, none - не указаны',
