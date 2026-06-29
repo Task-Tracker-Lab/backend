@@ -32,9 +32,16 @@ export class MoveIssueUseCase {
                     HttpStatus.NOT_FOUND,
                 );
             }
+
             await this.validateContext(dto, key, userId);
 
-            const result = await this.issueRepo.update(id, dto, userId);
+            const data = {
+                position: dto.position,
+                areaId: dto.targetAreaId ?? issue.areaId,
+                stateId: dto.targetStateId ?? issue.stateId,
+            };
+
+            const result = await this.issueRepo.update(id, data, userId);
 
             return {
                 success: result,
